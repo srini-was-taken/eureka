@@ -575,12 +575,13 @@ export default function LandingPage() {
             style={{
               display: "grid",
               gridTemplateColumns: "1.5fr 1fr 1fr",
-              gridTemplateRows: "auto auto",
+              gridTemplateRows: "minmax(200px, auto) minmax(200px, auto)",
               gap: 14,
+              alignItems: "stretch",
             }}
           >
             {/* Hero card — Socratic Solver */}
-            <BentoCard className="sc bento-hover" style={{ gridColumn: "1", gridRow: "1 / 3", gap: 22 }}>
+            <BentoCard className="sc bento-hover" style={{ gridColumn: "1", gridRow: "1 / 3", gap: 22, height: "100%" }}>
               <CardTag color="#E8610A">Socratic Solver</CardTag>
               <div>
                 <div style={{ fontSize: 21, fontWeight: 800, color: T.dkText, fontFamily: INTER, lineHeight: 1.2, marginBottom: 8 }}>
@@ -591,7 +592,7 @@ export default function LandingPage() {
                 </p>
               </div>
               {/* GIF placeholder — tall */}
-              <GifPlaceholder label="Socratic Solver · GIF" aspect="3/4" style={{ flex: 1, minHeight: 220 }} />
+              <GifPlaceholder label="Socratic Solver · GIF" aspect="3/4" style={{ width: "100%", minHeight: 240 }} />
             </BentoCard>
 
             {/* Feynman Explainer — wide top right */}
