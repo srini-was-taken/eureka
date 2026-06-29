@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { TEAL, BG, CARD, CARD2, BORDER, TEXT, MUTED } from "@/lib/theme";
+import { T_ACCENT as TEAL, T_BG as BG, T_SURFACE as CARD, T_SURFACE as CARD2, T_BORDER as BORDER, T_TEXT as TEXT, T_MUTED as MUTED } from "@/lib/theme";
 import Badge from "@/components/ui/Badge";
 import Btn from "@/components/ui/Btn";
 import Card from "@/components/ui/Card";
@@ -242,38 +242,74 @@ function FeynmanInner() {
   const pageRangeLabel = pageStart && pageEnd ? `Pages ${pageStart}–${pageEnd}` : (pdfTotalPages ? `All ${pdfTotalPages} pages` : null);
 
   const inputStyle = {
-    background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 12,
-    padding: "16px 20px", color: TEXT, fontSize: 15, outline: "none",
-    width: "100%", boxSizing: "border-box",
+    background: "rgba(255,255,255,0.06)",
+    backdropFilter: "blur(12px)",
+    WebkitBackdropFilter: "blur(12px)",
+    border: `1px solid rgba(255,255,255,0.11)`,
+    borderRadius: 12,
+    padding: "16px 20px",
+    color: TEXT,
+    fontSize: 15,
+    outline: "none",
+    width: "100%",
+    boxSizing: "border-box",
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: BG, color: TEXT }}>
+    <div className="test-mode" style={{ minHeight: "100vh", background: BG, color: TEXT, position: "relative", overflow: "hidden" }}>
       <input ref={fileInputRef} type="file" accept="image/*,application/pdf" style={{ display: "none" }} onChange={handleFileSelect} />
 
-      {/* Header */}
-      <div style={{ padding: "16px 28px", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", gap: 14, background: CARD }}>
-        <Btn variant="ghost" small onClick={() => router.push("/dashboard")} style={{ padding: "7px 12px" }}>← Back</Btn>
-        <div style={{ width: 1, height: 24, background: BORDER }} />
-        <div style={{ width: 36, height: 36, background: "#818cf820", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <Icon name="feynman" color="#818cf8" size={18} />
-        </div>
-        <div>
-          <div style={{ fontWeight: 700, fontSize: 15 }}>Feynman Explainer</div>
-          <div style={{ fontSize: 11, color: MUTED }}>Explain it. We'll find the gaps.</div>
-        </div>
-        <div style={{ marginLeft: "auto" }}><Badge color="#818cf8">{examLabel}</Badge></div>
+      {/* Ambient orbs */}
+      <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0 }}>
+        <div style={{ position: "absolute", top: "-15%", right: "10%", width: 480, height: 480, background: "radial-gradient(ellipse, rgba(232,201,138,0.06) 0%, transparent 60%)", borderRadius: "50%" }} />
+        <div style={{ position: "absolute", bottom: "10%", left: "-5%", width: 320, height: 320, background: "radial-gradient(ellipse, rgba(255,255,255,0.025) 0%, transparent 65%)", borderRadius: "50%" }} />
       </div>
 
-      <div style={{ maxWidth: 820, margin: "0 auto", padding: "48px 28px" }}>
+      {/* Header — serious, restrained, glass */}
+      <div style={{ padding: "14px 28px", borderBottom: `1px solid rgba(255,255,255,0.10)`, display: "flex", alignItems: "center", gap: 14, background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", position: "sticky", top: 0, zIndex: 10 }}>
+        <Btn context="test" variant="ghost" small onClick={() => router.push("/dashboard")} style={{ padding: "7px 12px" }}>← Back</Btn>
+        <div style={{ width: 1, height: 24, background: "rgba(255,255,255,0.12)" }} />
+        <div style={{ width: 34, height: 34, background: "rgba(255,255,255,0.08)", borderRadius: 9, display: "flex", alignItems: "center", justifyContent: "center", border: `1px solid rgba(255,255,255,0.12)` }}>
+          <Icon name="feynman" color={TEXT} size={16} />
+        </div>
+        <div>
+          <div style={{ fontWeight: 700, fontSize: 14.5, fontFamily: "var(--font-syne, inherit)", color: TEXT }}>Feynman Explainer</div>
+          <div style={{ fontSize: 11, color: MUTED, fontStyle: "italic", fontFamily: "var(--font-playfair, inherit)" }}>Explain it. We'll find the gaps.</div>
+        </div>
+        <div style={{ marginLeft: "auto" }}><Badge context="test">{examLabel}</Badge></div>
+      </div>
+
+      <div style={{ maxWidth: 820, margin: "0 auto", padding: "48px 28px", position: "relative", zIndex: 1 }}>
+
+        {/* Stage indicator */}
+        {stage !== "pick" && (
+          <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 32 }}>
+            {["pick", "explain", "feedback"].map((s, i) => (
+              <div key={s} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{
+                  width: 24, height: 24, borderRadius: "50%",
+                  background: stage === s ? TEXT : (i < ["pick","explain","feedback"].indexOf(stage) ? TEXT + "60" : BORDER),
+                  color: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 10, fontWeight: 800,
+                }}>{i + 1}</div>
+                <span style={{ fontSize: 11, color: stage === s ? TEXT : MUTED, fontWeight: stage === s ? 700 : 400 }}>
+                  {s === "pick" ? "Choose topic" : s === "explain" ? "Explain" : "Review"}
+                </span>
+                {i < 2 && <div style={{ width: 24, height: 1, background: BORDER }} />}
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* ── Stage: Pick topic + attach source ── */}
         {stage === "pick" && (
           <>
             <div style={{ textAlign: "center", marginBottom: 44 }}>
-              <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}><Icon name="feynman" color="#818cf8" size={36} /></div>
-              <h2 style={{ fontSize: 30, fontWeight: 800, letterSpacing: -1, marginBottom: 10 }}>What concept do you want to test?</h2>
-              <p style={{ color: MUTED, fontSize: 15, lineHeight: 1.6 }}>Pick a topic. Upload your notes or textbook. Then explain it like you're teaching it.</p>
+              <div style={{ width: 60, height: 60, background: TEXT + "0C", borderRadius: 15, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 18px", border: `1px solid ${BORDER}` }}>
+                <Icon name="feynman" color={TEXT} size={26} />
+              </div>
+              <h2 style={{ fontSize: 28, fontWeight: 800, letterSpacing: -0.8, marginBottom: 10, fontFamily: "var(--font-syne, inherit)" }}>What are you being tested on?</h2>
+              <p style={{ color: MUTED, fontSize: 15, lineHeight: 1.65, fontFamily: "var(--font-playfair, inherit)", fontStyle: "italic" }}>Pick a concept. Upload your notes. Explain from memory — no looking.</p>
             </div>
 
             <input value={topic} onChange={e => setTopic(e.target.value)} placeholder="Type a concept or topic..." style={{ ...inputStyle, marginBottom: 16, border: `1px solid ${topic ? TEAL + "60" : BORDER}` }} />
@@ -421,19 +457,29 @@ function FeynmanInner() {
         {/* ── Stage: Feedback (PDF shown again for verification) ── */}
         {stage === "feedback" && feedback && (
           <>
-            {/* Score header */}
-            <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 32 }}>
-              <div style={{ width: 80, height: 80, borderRadius: "50%", background: `conic-gradient(${TEAL} ${feedback.score * 3.6}deg, ${CARD2} 0)`, display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
-                <div style={{ width: 60, height: 60, borderRadius: "50%", background: BG, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column" }}>
-                  <span style={{ fontSize: 20, fontWeight: 800, color: TEAL, lineHeight: 1 }}>{feedback.score}</span>
-                  <span style={{ fontSize: 10, color: MUTED }}>/ 100</span>
+            {/* Score header — cool serious aesthetic */}
+            <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 36 }}>
+              <div style={{ position: "relative", width: 90, height: 90, flexShrink: 0 }}>
+                <svg width="90" height="90" viewBox="0 0 90 90">
+                  <circle cx="45" cy="45" r="38" fill="none" stroke={BORDER} strokeWidth="6" />
+                  <circle cx="45" cy="45" r="38" fill="none"
+                    stroke={feedback.score >= 80 ? "#3D7A5C" : feedback.score >= 60 ? "#E8610A" : "#f87171"}
+                    strokeWidth="6" strokeDasharray={`${2 * Math.PI * 38}`}
+                    strokeDashoffset={`${2 * Math.PI * 38 * (1 - feedback.score / 100)}`}
+                    strokeLinecap="round" transform="rotate(-90 45 45)"
+                    style={{ transition: "stroke-dashoffset 1.2s cubic-bezier(.16,1,.3,1)" }}
+                  />
+                </svg>
+                <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column" }}>
+                  <span style={{ fontSize: 24, fontWeight: 800, color: TEXT, lineHeight: 1, fontFamily: "var(--font-syne, inherit)" }}>{feedback.score}</span>
+                  <span style={{ fontSize: 10, color: MUTED, fontWeight: 600 }}>/ 100</span>
                 </div>
               </div>
               <div>
-                <h2 style={{ fontWeight: 800, fontSize: 22, margin: "0 0 4px", letterSpacing: -0.5 }}>
-                  {feedback.score >= 80 ? "Strong understanding." : feedback.score >= 60 ? "Pretty solid — but there are gaps." : "Good start — let's dig deeper."}
+                <h2 style={{ fontWeight: 800, fontSize: 22, margin: "0 0 6px", letterSpacing: -0.5, fontFamily: "var(--font-syne, inherit)" }}>
+                  {feedback.score >= 80 ? "Strong understanding." : feedback.score >= 60 ? "Solid — but there are gaps." : "Good start. Let\'s dig deeper."}
                 </h2>
-                <p style={{ color: MUTED, fontSize: 14, margin: 0 }}>Here's what your explanation revealed.</p>
+                <p style={{ color: MUTED, fontSize: 14, margin: 0, fontFamily: "var(--font-playfair, inherit)", fontStyle: "italic" }}>Here's what your explanation revealed.</p>
               </div>
             </div>
 
