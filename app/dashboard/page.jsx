@@ -1,34 +1,53 @@
 "use client";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { TEAL, BG, CARD, CARD2, BORDER, TEXT, MUTED } from "@/lib/theme";
 import Sidebar from "@/components/layout/Sidebar";
 import Badge from "@/components/ui/Badge";
 import Btn from "@/components/ui/Btn";
 import Card from "@/components/ui/Card";
 import Icon from "@/components/ui/Icon";
+import { createClient } from "@/lib/supabase/client";
 
 const weakTopics = [
-  { name: "Rotational Dynamics",  score: 28, subject: "Physics" },
-  { name: "Electrochemistry",     score: 34, subject: "Chemistry" },
+  { name: "Rotational Dynamics", score: 28, subject: "Physics" },
+  { name: "Electrochemistry", score: 34, subject: "Chemistry" },
   { name: "Integration by Parts", score: 41, subject: "Maths" },
-  { name: "Thermodynamics",       score: 45, subject: "Physics" },
+  { name: "Thermodynamics", score: 45, subject: "Physics" },
 ];
 
 const stats = [
-  { label: "Study Streak",    val: "12",  unit: "days",       icon: "streak", color: "#fb923c" },
-  { label: "Problems Solved", val: "247", unit: "total",      icon: "check",  color: TEAL },
-  { label: "Focus Hours",     val: "38",  unit: "this week",  icon: "clock",  color: "#818cf8" },
-  { label: "Avg Hint Rate",   val: "1.4", unit: "hints/prob", icon: "hint",   color: "#f472b6" },
+  { label: "Study Streak", val: "12", unit: "days", icon: "streak", color: "#fb923c" },
+  { label: "Problems Solved", val: "247", unit: "total", icon: "check", color: TEAL },
+  { label: "Focus Hours", val: "38", unit: "this week", icon: "clock", color: "#818cf8" },
+  { label: "Avg Hint Rate", val: "1.4", unit: "hints/prob", icon: "hint", color: "#f472b6" },
 ];
 
 const quickActions = [
-  { label: "Start Focus Session", sub: "Upload a PDF and dive in",    icon: "eye",     color: TEAL,      href: "/focus" },
-  { label: "Feynman a Concept",   sub: "Test your understanding",     icon: "feynman", color: "#818cf8", href: "/feynman" },
-  { label: "Review Mistakes",     sub: "7 unresolved · 3 due today", icon: "mistake", color: "#f472b6", href: "/mistakes" },
+  { label: "Start Focus Session", sub: "Upload a PDF and dive in", icon: "eye", color: TEAL, href: "/focus" },
+  { label: "Feynman a Concept", sub: "Test your understanding", icon: "feynman", color: "#818cf8", href: "/feynman" },
+  { label: "Review Mistakes", sub: "7 unresolved · 3 due today", icon: "mistake", color: "#f472b6", href: "/mistakes" },
 ];
+
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 17) return "Good afternoon";
+  return "Good evening";
+}
 
 export default function DashboardPage() {
   const router = useRouter();
+  const supabase = createClient();
+  const [firstName, setFirstName] = useState("Arjun");
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return;
+      const fullName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Arjun";
+      setFirstName(fullName.split(" ")[0]);
+    });
+  }, []);
 
   return (
     <div style={{ minHeight: "100vh", background: BG, color: TEXT, display: "flex" }}>
@@ -38,8 +57,12 @@ export default function DashboardPage() {
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
           <div>
-            <h1 style={{ fontSize: 26, fontWeight: 800, margin: 0, letterSpacing: -0.5 }}>Good morning, Arjun ☀️</h1>
-            <p style={{ color: MUTED, margin: "4px 0 0", fontSize: 14 }}>Your JEE Advanced target: <span style={{ color: TEAL }}>218 days away</span></p>
+            <h1 style={{ fontSize: 26, fontWeight: 800, margin: 0, letterSpacing: -0.5 }}>
+              {getGreeting()}, {firstName} ☀️
+            </h1>
+            <p style={{ color: MUTED, margin: "4px 0 0", fontSize: 14 }}>
+              Your JEE Advanced target: <span style={{ color: TEAL }}>218 days away</span>
+            </p>
           </div>
           <Btn small onClick={() => router.push("/solver")}>Today's Problem ✦</Btn>
         </div>
