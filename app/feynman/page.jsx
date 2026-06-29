@@ -8,6 +8,7 @@ import Card from "@/components/ui/Card";
 import Icon from "@/components/ui/Icon";
 import Md from "@/components/ui/Md";
 import { createClient } from "@/lib/supabase/client";
+import { EXAM_CONFIG, DEFAULT_EXAM_KEY } from "@/lib/examConfig";
 
 
 
@@ -21,6 +22,7 @@ export default function FeynmanPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [userId, setUserId] = useState(null);
+  const [examLabel, setExamLabel] = useState(EXAM_CONFIG[DEFAULT_EXAM_KEY].label);
 
   // Source material state
   const [sourceMaterial, setSourceMaterial] = useState("");  // text (PDF / OCR)
@@ -30,8 +32,13 @@ export default function FeynmanPage() {
   const fileInputRef = useRef();
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) setUserId(user.id);
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return;
+      setUserId(user.id);
+      const { data: profile } = await supabase.from("profiles").select("exam").eq("id", user.id).single();
+      if (profile?.exam && EXAM_CONFIG[profile.exam]) {
+        setExamLabel(EXAM_CONFIG[profile.exam].label);
+      }
     });
   }, []);
 
@@ -78,7 +85,7 @@ export default function FeynmanPage() {
   }
 
   async function evaluate() {
-    if (explanation.length < 20 || loading) return;
+    if (explanation.length < 100 || loading) return;
     setLoading(true);
     setError("");
 
@@ -141,6 +148,7 @@ export default function FeynmanPage() {
           <div style={{ fontWeight: 700, fontSize: 15 }}>Feynman Explainer</div>
           <div style={{ fontSize: 11, color: MUTED }}>Explain it. We'll find the gaps.</div>
         </div>
+        <div style={{ marginLeft: "auto" }}><Badge color="#818cf8">{examLabel}</Badge></div>
       </div>
 
       <div style={{ maxWidth: 780, margin: "0 auto", padding: "48px 28px" }}>
@@ -203,8 +211,8 @@ export default function FeynmanPage() {
 
             {error && <p style={{ color: "#f87171", fontSize: 13, marginBottom: 12 }}>{error}</p>}
             <Btn
-              style={{ width: "100%", justifyContent: "center", padding: 15, fontSize: 15, opacity: (topic && attachedFile) ? 1 : 0.45 }}
-              onClick={() => topic && attachedFile && setStage("explain")}
+              style={{ width: "100%", justifyContent: "center", padding: 15, fontSize: 15, opacity: topic ? 1 : 0.45 }}
+              onClick={() => topic && setStage("explain")}
             >
               Start Explaining →
             </Btn>
@@ -238,9 +246,13 @@ export default function FeynmanPage() {
               style={{ width: "100%", height: 240, background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "18px 20px", color: TEXT, fontSize: 14, lineHeight: 1.8, resize: "vertical", outline: "none", boxSizing: "border-box" }}
             />
             {error && <p style={{ color: "#f87171", fontSize: 13, marginTop: 8 }}>{error}</p>}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 16 }}>
-              <span style={{ color: MUTED, fontSize: 13 }}>{explanation.length} characters</span>
-              <Btn onClick={evaluate} style={{ padding: "13px 28px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 14 }}>
+              <span style={{ fontSize: 13, color: explanation.length < 100 ? "#fb923c" : MUTED }}>
+                {explanation.length < 100
+                  ? `${explanation.length}/100 — write at least 100 characters for a meaningful evaluation`
+                  : `${explanation.length} characters`}
+              </span>
+              <Btn onClick={evaluate} disabled={explanation.length < 100} style={{ padding: "13px 28px", opacity: explanation.length < 100 ? 0.45 : 1 }}>
                 {loading ? "Evaluating..." : "Submit for Evaluation"}
               </Btn>
             </div>
