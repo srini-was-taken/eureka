@@ -1,26 +1,45 @@
 import { createClient } from "@/lib/supabase/server";
 import { getExamConfig, DEFAULT_EXAM_KEY } from "@/lib/examConfig";
+import { checkRateLimit, trackUsage } from "@/lib/rateLimit";
 
 export async function POST(req) {
     try {
         const { text, topic, pageStart, pageEnd } = await req.json();
+
+        // Input validation
         if (!text || text.trim().length < 50) {
             return Response.json({ error: "Not enough text to generate questions" }, { status: 400 });
+        }
+        if (text.length > 15000) {
+            return Response.json({ error: "Text too long — please select fewer pages." }, { status: 400 });
+        }
+
+        // ── Auth guard ────────────────────────────────────────────
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return Response.json({ error: "Sign in to generate questions." }, { status: 401 });
+
+        // ── Rate limit: 10 per day ────────────────────────────────
+        const rl = await checkRateLimit(supabase, user.id, "questions");
+        if (!rl.allowed) {
+            return Response.json(
+                { error: `Daily limit reached (${rl.used}/${rl.limit} generations). Come back tomorrow!` },
+                { status: 429 }
+            );
         }
 
         // Get user's exam for context
         let examKey = DEFAULT_EXAM_KEY;
         try {
-            const supabase = await createClient();
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                const { data: profile } = await supabase.from("profiles").select("exam").eq("id", user.id).single();
-                if (profile?.exam) examKey = profile.exam;
-            }
+            const { data: profile } = await supabase.from("profiles").select("exam").eq("id", user.id).single();
+            if (profile?.exam) examKey = profile.exam;
         } catch (_) { }
 
         const examCfg = getExamConfig(examKey);
         const pageRange = (pageStart && pageEnd) ? ` (pages ${pageStart}–${pageEnd})` : "";
+
+        // Track usage asynchronously
+        trackUsage(supabase, user.id, "questions");
 
         const prompt = `You are an expert ${examCfg.label} tutor. Generate EXACTLY 4 multiple-choice questions based ONLY on the following study material${pageRange}.
 
