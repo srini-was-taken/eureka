@@ -469,7 +469,7 @@ export default function LandingPage() {
               </div>
               <p style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#818CF8", marginBottom: 10, fontFamily: MONO }}><Icon name="brain" size={10} color="#818CF8" /> Feynman Explainer</p>
               <div style={{ background: "#F0EFFF", borderRadius: 8, padding: "10px 12px", marginBottom: 10, border: "1px solid #C7D2FE" }}>
-                <p style={{ fontSize: 11, color: "#3730A3", lineHeight: 1.7, fontStyle: "italic", margin: 0, fontFamily: INTER }}>"Explain Gauss's Law like I'm 15, using only everyday objects."</p>
+                <p style={{ fontSize: 11, color: "#3730A3", lineHeight: 1.7, fontStyle: "italic", margin: 0, fontFamily: INTER }}>"Gauss's law means the flux out of a closed surface equals the enclosed charge over ε₀. We ignore outside charges."</p>
               </div>
               <p style={{ fontSize: 11, color: T.muted, lineHeight: 1.65, fontFamily: INTER }}>Good attempt. You described the surface correctly — but you haven't explained <em>why</em> charge outside doesn't contribute. Gap found ↓</p>
             </div>
