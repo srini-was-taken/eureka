@@ -70,7 +70,7 @@ export default function LoginPage() {
       }
     } else {
       if (!name) { setError("Please enter your name."); setLoading(false); return; }
-      const { error: signUpError } = await supabase.auth.signUp({
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -81,7 +81,13 @@ export default function LoginPage() {
       if (signUpError) {
         setError(signUpError.message);
         setLoading(false);
+      } else if (signUpData.session) {
+        // Email confirmation is OFF — session returned immediately, go straight in
+        if (signUpData.user) await upsertProfile(signUpData.user, name, targetExam);
+        router.push("/dashboard");
+        router.refresh();
       } else {
+        // Email confirmation is ON — ask them to check email
         setMessage("✓ Check your email to confirm your account, then log in.");
         setLoading(false);
       }
@@ -178,20 +184,7 @@ export default function LoginPage() {
               </Btn>
             </div>
 
-            <div style={{ textAlign: "center", marginTop: 24 }}>
-              <div style={{ color: MUTED, fontSize: 12, marginBottom: 16 }}>or continue with</div>
-              <div style={{ display: "flex", gap: 10 }}>
-                {[
-                  { label: "Google", provider: "google", emoji: "🌐" },
-                  { label: "GitHub", provider: "github", emoji: "🐙" },
-                ].map(p => (
-                  <div key={p.label} onClick={() => !loading && handleOAuth(p.provider)}
-                    style={{ flex: 1, background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 10, padding: 11, textAlign: "center", fontSize: 13, fontWeight: 600, cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1, transition: "all .15s" }}>
-                    {p.emoji} {p.label}
-                  </div>
-                ))}
-              </div>
-            </div>
+
           </div>
 
           <p style={{ textAlign: "center", color: MUTED, fontSize: 12, marginTop: 20 }}>
