@@ -1,0 +1,452 @@
+[
+  {
+    "id": "TC001",
+    "title": "Log in and reach dashboard",
+    "description": "Verifies a returning user can log in with valid credentials and is redirected to the dashboard.",
+    "category": "User Login",
+    "steps": [
+      { "type": "action", "description": "Navigate to /login" },
+      { "type": "action", "description": "Fill in the email field with {{LOGIN_USER}}" },
+      { "type": "action", "description": "Fill in the password field with {{LOGIN_PASSWORD}}" },
+      { "type": "action", "description": "Submit the login form" },
+      { "type": "assertion", "description": "Verify the user lands on the dashboard page and the URL contains /dashboard" }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC002",
+    "title": "Create account with target exam and reach dashboard",
+    "description": "Verifies a new user can sign up with name, email, password, and target exam and is immediately redirected to the dashboard without requiring email confirmation.",
+    "category": "User Signup",
+    "steps": [
+      { "type": "action", "description": "Navigate to /login" },
+      { "type": "action", "description": "Switch to Sign Up mode" },
+      { "type": "action", "description": "Fill New User Name into the name field" },
+      { "type": "action", "description": "Fill newuser+signup1@example.com into the email field" },
+      { "type": "action", "description": "Fill ValidPassword123! into the password field" },
+      { "type": "action", "description": "Select JEE Advanced from the target exam dropdown" },
+      { "type": "action", "description": "Submit the signup form" },
+      { "type": "assertion", "description": "Verify the user lands on /dashboard and no email confirmation message is shown" }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC003",
+    "title": "Sign out from the sidebar",
+    "description": "Verifies a signed-in user can sign out from the sidebar and is returned to the login page.",
+    "category": "Sidebar Navigation",
+    "steps": [
+      { "type": "action", "description": "Navigate to /login" },
+      { "type": "action", "description": "Fill in the email field with {{LOGIN_USER}}" },
+      { "type": "action", "description": "Fill in the password field with {{LOGIN_PASSWORD}}" },
+      { "type": "action", "description": "Submit the login form" },
+      { "type": "action", "description": "Click the sign out control in the sidebar" },
+      { "type": "assertion", "description": "Verify the user is redirected to /login and can no longer access protected routes" }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC004",
+    "title": "View dashboard overview metrics and quick actions",
+    "description": "Verifies the dashboard loads with stat cards showing solver sessions, Feynman avg, open mistakes, and the three quick action buttons.",
+    "category": "Dashboard Overview",
+    "steps": [
+      { "type": "action", "description": "Navigate to /login" },
+      { "type": "action", "description": "Fill in the email field with {{LOGIN_USER}}" },
+      { "type": "action", "description": "Fill in the password field with {{LOGIN_PASSWORD}}" },
+      { "type": "action", "description": "Submit the login form" },
+      { "type": "assertion", "description": "Verify the four stat cards (Solver Sessions, Feynman Avg, Open Mistakes, Focus Hours) are visible" },
+      { "type": "assertion", "description": "Verify the three quick action buttons — Start Focus Session, Feynman a Concept, Review Mistakes — are all visible and clickable" }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC005",
+    "title": "Start a focus session from the dashboard quick action",
+    "description": "Verifies the Start Focus Session quick action navigates to /focus and shows the PDF upload screen.",
+    "category": "Focus Session",
+    "steps": [
+      { "type": "action", "description": "Navigate to /login" },
+      { "type": "action", "description": "Fill in the email field with {{LOGIN_USER}}" },
+      { "type": "action", "description": "Fill in the password field with {{LOGIN_PASSWORD}}" },
+      { "type": "action", "description": "Submit the login form" },
+      { "type": "action", "description": "Click the Start Focus Session quick action button" },
+      { "type": "assertion", "description": "Verify the URL is /focus and a PDF upload area or drag-and-drop zone is displayed" }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC006",
+    "title": "Submit a physics problem to Socratic Solver and receive Socratic guidance",
+    "description": "Verifies the solver returns a Socratic (question-based) hint response, not a direct answer or error, and the hint progress bar increments.",
+    "category": "Socratic Solver",
+    "steps": [
+      { "type": "action", "description": "Navigate to /login" },
+      { "type": "action", "description": "Fill in the email field with {{LOGIN_USER}}" },
+      { "type": "action", "description": "Fill in the password field with {{LOGIN_PASSWORD}}" },
+      { "type": "action", "description": "Submit the login form" },
+      { "type": "action", "description": "Navigate to /solver" },
+      { "type": "action", "description": "Fill 'A ball is thrown vertically upward with velocity 20 m/s. What is the maximum height reached? (g=10 m/s²)' into the problem input area" },
+      { "type": "action", "description": "Send the problem to the solver" },
+      { "type": "assertion", "description": "Verify the AI response is visible, is phrased as a guiding question or hint (Socratic style), does not directly give the numeric answer, and the hint progress bar shows at least 1 of 5 filled" }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC007",
+    "title": "Navigate across all main sections from the sidebar",
+    "description": "Verifies a signed-in user can navigate via the sidebar to every main section — focus, feynman, solver, mistakes, problems, profile, dashboard — and each page loads.",
+    "category": "Sidebar Navigation",
+    "steps": [
+      { "type": "action", "description": "Navigate to /login" },
+      { "type": "action", "description": "Fill in the email field with {{LOGIN_USER}}" },
+      { "type": "action", "description": "Fill in the password field with {{LOGIN_PASSWORD}}" },
+      { "type": "action", "description": "Submit the login form" },
+      { "type": "action", "description": "Click the Focus link in the sidebar" },
+      { "type": "action", "description": "Click the Feynman link in the sidebar" },
+      { "type": "action", "description": "Click the Solver link in the sidebar" },
+      { "type": "action", "description": "Click the Mistakes link in the sidebar" },
+      { "type": "action", "description": "Click the Problems link in the sidebar" },
+      { "type": "action", "description": "Click the Profile link in the sidebar" },
+      { "type": "action", "description": "Click the Dashboard link in the sidebar" },
+      { "type": "assertion", "description": "Verify the dashboard page is displayed with stat cards and quick actions visible" }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC008",
+    "title": "Complete Feynman evaluation from topic to scored results",
+    "description": "Verifies a user can enter a topic, write an explanation, submit for AI evaluation, and receive a numeric score plus strengths and knowledge gaps.",
+    "category": "Feynman Explainer",
+    "steps": [
+      { "type": "action", "description": "Navigate to /login" },
+      { "type": "action", "description": "Fill in the email field with {{LOGIN_USER}}" },
+      { "type": "action", "description": "Fill in the password field with {{LOGIN_PASSWORD}}" },
+      { "type": "action", "description": "Submit the login form" },
+      { "type": "action", "description": "Navigate to /feynman" },
+      { "type": "action", "description": "Fill 'Newton's Laws of Motion' into the topic field" },
+      { "type": "action", "description": "Click the Next or Proceed button to advance to the explain stage" },
+      { "type": "action", "description": "Fill a 3-sentence explanation: 'Newton's first law states objects stay at rest or in uniform motion unless acted upon by a force. The second law says force equals mass times acceleration. The third law states every action has an equal and opposite reaction.' into the explanation textarea" },
+      { "type": "action", "description": "Click Submit for Evaluation" },
+      { "type": "assertion", "description": "Verify a numeric score (0-100) is displayed" },
+      { "type": "assertion", "description": "Verify at least one strength point and at least one knowledge gap or suggestion is listed in the evaluation result" }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC009",
+    "title": "Submit answer in focus session and receive AI feedback",
+    "description": "Verifies that after uploading a PDF and starting a session, submitting an answer to a flashcard prompt returns substantive AI feedback.",
+    "category": "Focus Session",
+    "steps": [
+      { "type": "action", "description": "Navigate to /login" },
+      { "type": "action", "description": "Fill in the email field with {{LOGIN_USER}}" },
+      { "type": "action", "description": "Fill in the password field with {{LOGIN_PASSWORD}}" },
+      { "type": "action", "description": "Submit the login form" },
+      { "type": "action", "description": "Navigate to /focus" },
+      { "type": "action", "description": "Upload the file at c:\\Users\\Sriniketh\\OneDrive\\Documents\\EurekaAI\\testsprite_tests\\sample_notes.pdf using the PDF file input" },
+      { "type": "action", "description": "Click Start Session" },
+      { "type": "action", "description": "Wait for at least one flashcard or question to appear" },
+      { "type": "action", "description": "Fill 'This concept relates to the conservation of energy, where the total mechanical energy in a system remains constant if no external non-conservative forces act on it.' into the response textarea" },
+      { "type": "action", "description": "Submit the answer" },
+      { "type": "assertion", "description": "Verify AI feedback is displayed that is more than one sentence and references the content of the answer or the topic" }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC010",
+    "title": "Start focus session after selecting a custom page range",
+    "description": "Verifies the user can upload a PDF, specify a page range, start the session, and see flashcards generated from that range.",
+    "category": "Focus Session",
+    "steps": [
+      { "type": "action", "description": "Navigate to /login" },
+      { "type": "action", "description": "Fill in the email field with {{LOGIN_USER}}" },
+      { "type": "action", "description": "Fill in the password field with {{LOGIN_PASSWORD}}" },
+      { "type": "action", "description": "Submit the login form" },
+      { "type": "action", "description": "Navigate to /focus" },
+      { "type": "action", "description": "Upload the file at c:\\Users\\Sriniketh\\OneDrive\\Documents\\EurekaAI\\testsprite_tests\\sample_notes.pdf using the PDF file input" },
+      { "type": "action", "description": "Set the page range to pages 1 to 2" },
+      { "type": "action", "description": "Click Start Session" },
+      { "type": "assertion", "description": "Verify flashcard content or questions appear on screen, indicating the PDF was processed and content was generated" }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC011",
+    "title": "Navigate to Solver from sidebar",
+    "description": "Verifies a signed-in user can click the Solver sidebar link and the solver page loads.",
+    "category": "Sidebar Navigation",
+    "steps": [
+      { "type": "action", "description": "Navigate to /login" },
+      { "type": "action", "description": "Fill in the email field with {{LOGIN_USER}}" },
+      { "type": "action", "description": "Fill in the password field with {{LOGIN_PASSWORD}}" },
+      { "type": "action", "description": "Submit the login form" },
+      { "type": "action", "description": "Click the Solver link in the sidebar" },
+      { "type": "assertion", "description": "Verify the solver page is displayed with a problem input area" }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC012",
+    "title": "Reject signup when name is missing",
+    "description": "Verifies the signup form shows a validation error when the name field is left empty.",
+    "category": "User Signup",
+    "steps": [
+      { "type": "action", "description": "Navigate to /login" },
+      { "type": "action", "description": "Switch to Sign Up mode" },
+      { "type": "action", "description": "Fill newuser+missingname@example.com into the email field" },
+      { "type": "action", "description": "Fill ValidPassword123! into the password field" },
+      { "type": "action", "description": "Leave the name field empty" },
+      { "type": "action", "description": "Submit the signup form" },
+      { "type": "assertion", "description": "Verify a validation error message is shown and the user stays on the login page" }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC013",
+    "title": "Start a Feynman exercise from dashboard quick action",
+    "description": "Verifies a user can click the Feynman quick action on the dashboard and land on the Feynman topic entry screen.",
+    "category": "Dashboard Overview",
+    "steps": [
+      { "type": "action", "description": "Navigate to /login" },
+      { "type": "action", "description": "Fill in the email field with {{LOGIN_USER}}" },
+      { "type": "action", "description": "Fill in the password field with {{LOGIN_PASSWORD}}" },
+      { "type": "action", "description": "Submit the login form" },
+      { "type": "action", "description": "Click the Feynman a Concept quick action button" },
+      { "type": "assertion", "description": "Verify the Feynman page is loaded and a topic input field is visible" }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC014",
+    "title": "Use hint chips to advance Socratic guidance",
+    "description": "Verifies clicking a hint chip in the solver sends a follow-up request and the solver responds with a deeper nudge while the hint progress bar increments.",
+    "category": "Socratic Solver",
+    "steps": [
+      { "type": "action", "description": "Navigate to /login" },
+      { "type": "action", "description": "Fill in the email field with {{LOGIN_USER}}" },
+      { "type": "action", "description": "Fill in the password field with {{LOGIN_PASSWORD}}" },
+      { "type": "action", "description": "Submit the login form" },
+      { "type": "action", "description": "Navigate to /solver" },
+      { "type": "action", "description": "Fill 'Explain how a capacitor charges in an RC circuit' into the problem input area" },
+      { "type": "action", "description": "Send the problem to the solver and wait for the AI response" },
+      { "type": "action", "description": "Click the first available hint suggestion chip" },
+      { "type": "assertion", "description": "Verify a new AI response appears in the chat that is different from the first response, and the hint progress bar shows more than 0 filled segments" }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC015",
+    "title": "Create a problem, search for it, launch solver, then delete it",
+    "description": "Verifies the full problem bank CRUD flow — add a problem, find it via search, open the solver from it, return, and delete it.",
+    "category": "Problem Bank",
+    "steps": [
+      { "type": "action", "description": "Navigate to /login" },
+      { "type": "action", "description": "Fill in the email field with {{LOGIN_USER}}" },
+      { "type": "action", "description": "Fill in the password field with {{LOGIN_PASSWORD}}" },
+      { "type": "action", "description": "Submit the login form" },
+      { "type": "action", "description": "Navigate to /problems" },
+      { "type": "action", "description": "Click the Add Problem button" },
+      { "type": "action", "description": "Fill 'TC Work Energy Theorem' into the title field" },
+      { "type": "action", "description": "Fill 'Physics' into the subject field" },
+      { "type": "action", "description": "Select Hard as the difficulty" },
+      { "type": "action", "description": "Fill 'NCERT' into the source field" },
+      { "type": "action", "description": "Fill 'A block of mass 5kg is pushed along a frictionless surface. Find the work done by the applied force over 10 meters.' into the statement field" },
+      { "type": "action", "description": "Save the problem" },
+      { "type": "action", "description": "Search for 'TC Work Energy' in the search input" },
+      { "type": "action", "description": "Click on the problem to open its detail panel" },
+      { "type": "action", "description": "Click Solve with AI to launch the solver" },
+      { "type": "action", "description": "Click the Back button to return" },
+      { "type": "action", "description": "Delete the problem from the detail panel or list" },
+      { "type": "assertion", "description": "Verify 'TC Work Energy Theorem' no longer appears in the problems list" }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC016",
+    "title": "Navigate between flashcards in an active focus session",
+    "description": "Verifies the user can use Next and Previous controls to cycle through flashcards generated from a PDF.",
+    "category": "Focus Session",
+    "steps": [
+      { "type": "action", "description": "Navigate to /login" },
+      { "type": "action", "description": "Fill in the email field with {{LOGIN_USER}}" },
+      { "type": "action", "description": "Fill in the password field with {{LOGIN_PASSWORD}}" },
+      { "type": "action", "description": "Submit the login form" },
+      { "type": "action", "description": "Navigate to /focus" },
+      { "type": "action", "description": "Upload the file at c:\\Users\\Sriniketh\\OneDrive\\Documents\\EurekaAI\\testsprite_tests\\sample_notes.pdf using the PDF file input" },
+      { "type": "action", "description": "Click Start Session and wait for flashcards to load" },
+      { "type": "action", "description": "Click the Next flashcard button" },
+      { "type": "action", "description": "Click the Previous flashcard button" },
+      { "type": "assertion", "description": "Verify the flashcard content changes when navigating and the Previous button returns to the first card content" }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC017",
+    "title": "Create, review detail, and delete a mistake entry",
+    "description": "Verifies the full mistake journal CRUD — create a mistake with all fields, view its detail, delete it, and confirm it's gone.",
+    "category": "Mistake Journal",
+    "steps": [
+      { "type": "action", "description": "Navigate to /login" },
+      { "type": "action", "description": "Fill in the email field with {{LOGIN_USER}}" },
+      { "type": "action", "description": "Fill in the password field with {{LOGIN_PASSWORD}}" },
+      { "type": "action", "description": "Submit the login form" },
+      { "type": "action", "description": "Navigate to /mistakes" },
+      { "type": "action", "description": "Click the Add Mistake button" },
+      { "type": "action", "description": "Fill 'Math' into the subject field" },
+      { "type": "action", "description": "Fill 'Integration by parts' into the topic field" },
+      { "type": "action", "description": "Fill 'Forgot to apply the formula in the correct order — chose u and dv incorrectly' into the what-went-wrong field" },
+      { "type": "action", "description": "Fill 'Use LIATE rule to choose u: Logarithm, Inverse trig, Algebraic, Trig, Exponential' into the correct-approach field" },
+      { "type": "action", "description": "Save the mistake" },
+      { "type": "action", "description": "Click on the newly created mistake to open its detail view" },
+      { "type": "action", "description": "Delete the mistake" },
+      { "type": "assertion", "description": "Verify the 'Integration by parts' mistake entry is no longer visible in the mistakes list" }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC018",
+    "title": "Sidebar remains functional after visiting multiple sections in one session",
+    "description": "Verifies the sidebar stays present and all links remain clickable after navigating through problems, solver, profile, and back.",
+    "category": "Sidebar Navigation",
+    "steps": [
+      { "type": "action", "description": "Navigate to /login" },
+      { "type": "action", "description": "Fill in the email field with {{LOGIN_USER}}" },
+      { "type": "action", "description": "Fill in the password field with {{LOGIN_PASSWORD}}" },
+      { "type": "action", "description": "Submit the login form" },
+      { "type": "action", "description": "Click the Problems link in the sidebar" },
+      { "type": "action", "description": "Click the Solver link in the sidebar" },
+      { "type": "action", "description": "Click the Profile link in the sidebar" },
+      { "type": "action", "description": "Click the Mistakes link in the sidebar" },
+      { "type": "assertion", "description": "Verify the mistakes page is rendered and the sidebar is still visible with all navigation links present" }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC019",
+    "title": "Return to dashboard from solver via back button",
+    "description": "Verifies the Back button in the solver header navigates the user to the dashboard without losing session context.",
+    "category": "Socratic Solver",
+    "steps": [
+      { "type": "action", "description": "Navigate to /login" },
+      { "type": "action", "description": "Fill in the email field with {{LOGIN_USER}}" },
+      { "type": "action", "description": "Fill in the password field with {{LOGIN_PASSWORD}}" },
+      { "type": "action", "description": "Submit the login form" },
+      { "type": "action", "description": "Navigate to /solver" },
+      { "type": "action", "description": "Fill 'What is the principle of superposition in waves?' into the problem input" },
+      { "type": "action", "description": "Send the problem and wait for AI response" },
+      { "type": "action", "description": "Click the Back button in the solver header" },
+      { "type": "assertion", "description": "Verify the user is on /dashboard and the dashboard renders correctly with stat cards visible" }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC020",
+    "title": "Update target exam from profile and verify it persists after reload",
+    "description": "Verifies that changing the target exam in profile settings, saving, and reloading the page shows the updated exam selection.",
+    "category": "User Profile",
+    "steps": [
+      { "type": "action", "description": "Navigate to /login" },
+      { "type": "action", "description": "Fill in the email field with {{LOGIN_USER}}" },
+      { "type": "action", "description": "Fill in the password field with {{LOGIN_PASSWORD}}" },
+      { "type": "action", "description": "Submit the login form" },
+      { "type": "action", "description": "Navigate to /profile" },
+      { "type": "action", "description": "Change the target exam dropdown to NEET" },
+      { "type": "action", "description": "Click Save to persist the profile changes" },
+      { "type": "action", "description": "Reload the page" },
+      { "type": "assertion", "description": "Verify the target exam shown in the profile dropdown is NEET after reload" }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC021",
+    "title": "Answer state persists across flashcard navigation in focus session",
+    "description": "Verifies that a typed (unsent) answer is preserved in the response area when navigating to the next card and back.",
+    "category": "Focus Session",
+    "steps": [
+      { "type": "action", "description": "Navigate to /login" },
+      { "type": "action", "description": "Fill in the email field with {{LOGIN_USER}}" },
+      { "type": "action", "description": "Fill in the password field with {{LOGIN_PASSWORD}}" },
+      { "type": "action", "description": "Submit the login form" },
+      { "type": "action", "description": "Navigate to /focus" },
+      { "type": "action", "description": "Upload the file at c:\\Users\\Sriniketh\\OneDrive\\Documents\\EurekaAI\\testsprite_tests\\sample_notes.pdf using the PDF file input" },
+      { "type": "action", "description": "Click Start Session and wait for flashcards to load" },
+      { "type": "action", "description": "Type 'AnswerDraft-Persistence-Test' into the response textarea without submitting" },
+      { "type": "action", "description": "Click Next flashcard" },
+      { "type": "action", "description": "Click Previous flashcard to return to the first card" },
+      { "type": "assertion", "description": "Verify the response textarea still contains 'AnswerDraft-Persistence-Test'" }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC022",
+    "title": "Problem bank stats update after adding and deleting a problem",
+    "description": "Verifies the Total Problems stat card increments on add and decrements on delete.",
+    "category": "Problem Bank",
+    "steps": [
+      { "type": "action", "description": "Navigate to /login" },
+      { "type": "action", "description": "Fill in the email field with {{LOGIN_USER}}" },
+      { "type": "action", "description": "Fill in the password field with {{LOGIN_PASSWORD}}" },
+      { "type": "action", "description": "Submit the login form" },
+      { "type": "action", "description": "Navigate to /problems and note the current Total Problems count" },
+      { "type": "action", "description": "Click Add Problem and fill: title='TC Stats Test', subject='Chemistry', difficulty=Easy, source='Test', statement='Test problem for stat validation.'" },
+      { "type": "action", "description": "Save the problem" },
+      { "type": "assertion", "description": "Verify the Total Problems count has increased by 1" },
+      { "type": "action", "description": "Open the TC Stats Test problem and delete it" },
+      { "type": "assertion", "description": "Verify the Total Problems count returns to the original value" }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC023",
+    "title": "Feynman follow-up questions are interactive after evaluation",
+    "description": "Verifies that follow-up questions appear after a Feynman evaluation and the user can interact with them to see additional AI guidance.",
+    "category": "Feynman Explainer",
+    "steps": [
+      { "type": "action", "description": "Navigate to /login" },
+      { "type": "action", "description": "Fill in the email field with {{LOGIN_USER}}" },
+      { "type": "action", "description": "Fill in the password field with {{LOGIN_PASSWORD}}" },
+      { "type": "action", "description": "Submit the login form" },
+      { "type": "action", "description": "Navigate to /feynman" },
+      { "type": "action", "description": "Fill 'Ohm's Law' into the topic field and proceed to explain stage" },
+      { "type": "action", "description": "Fill 'Ohm's law states that the current through a conductor is directly proportional to the voltage across it, given constant temperature. Mathematically, V equals IR.' into the explanation textarea" },
+      { "type": "action", "description": "Submit for evaluation and wait for results" },
+      { "type": "action", "description": "Click on a follow-up question or probe if one is listed" },
+      { "type": "assertion", "description": "Verify new content appears — either an expanded answer or an AI-generated follow-up explanation — that is different from the initial evaluation result" }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC024",
+    "title": "Focus session blocks start without PDF upload",
+    "description": "Verifies the Focus Session cannot be started without uploading a PDF and shows an appropriate validation or disabled state.",
+    "category": "Focus Session",
+    "steps": [
+      { "type": "action", "description": "Navigate to /login" },
+      { "type": "action", "description": "Fill in the email field with {{LOGIN_USER}}" },
+      { "type": "action", "description": "Fill in the password field with {{LOGIN_PASSWORD}}" },
+      { "type": "action", "description": "Submit the login form" },
+      { "type": "action", "description": "Navigate to /focus" },
+      { "type": "action", "description": "Attempt to click the Start Session button without uploading any PDF" },
+      { "type": "assertion", "description": "Verify either the Start Session button is disabled, or a validation message is shown indicating a PDF is required" }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC025",
+    "title": "Create a mistake and verify all fields are displayed in detail view",
+    "description": "Verifies all four mistake fields (subject, topic, what went wrong, correct approach) are visible in the detail view after creation.",
+    "category": "Mistake Journal",
+    "steps": [
+      { "type": "action", "description": "Navigate to /login" },
+      { "type": "action", "description": "Fill in the email field with {{LOGIN_USER}}" },
+      { "type": "action", "description": "Fill in the password field with {{LOGIN_PASSWORD}}" },
+      { "type": "action", "description": "Submit the login form" },
+      { "type": "action", "description": "Navigate to /mistakes" },
+      { "type": "action", "description": "Add a new mistake with subject='Physics', topic='Kinematics', what-went-wrong='Mixed up average and instantaneous velocity', correct-approach='Use v=dx/dt for instantaneous velocity'" },
+      { "type": "action", "description": "Save the mistake and open it from the list" },
+      { "type": "assertion", "description": "Verify the detail view shows all four fields: subject (Physics), topic (Kinematics), what went wrong, and correct approach with their saved content" }
+    ],
+    "priority": "Medium"
+  }
+]

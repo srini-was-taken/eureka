@@ -1,0 +1,37 @@
+{
+  "status": "commited",
+  "type": "frontend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:3000",
+  "executionArgs": {
+    "projectName": "EurekaAI",
+    "projectPath": "c:\\Users\\Sriniketh\\OneDrive\\Documents\\EurekaAI",
+    "testIds": [
+      "TC001",
+      "TC002",
+      "TC003",
+      "TC004",
+      "TC005",
+      "TC006",
+      "TC007",
+      "TC008",
+      "TC011",
+      "TC012",
+      "TC013",
+      "TC014",
+      "TC015",
+      "TC017",
+      "TC018",
+      "TC019",
+      "TC020",
+      "TC022"
+    ],
+    "additionalInstruction": "This is Round 1 of a two-round hackathon submission. Test credentials: LOGIN_USER=testsprite@eurekaai.com, LOGIN_PASSWORD=TestSprite@2026. Skip tests requiring physical PDF file uploads (TC009, TC010, TC016, TC021) - mark as known limitation. Budget: 18 tests max.",
+    "serverMode": "production",
+    "envs": {
+      "API_KEY": "sk-user-Okhh1FcJxU2t65TSknzMMfAQcOSU7TQfm5kwVyo1pmXS2K1kjmR6Ap-3-1A-HlugYFOFLTK9YcSjC6lfvegJe95pIDFnVIYQEGNmFUS2N6ccO35RVQz-FptLJ1lJLNJWu9A"
+    }
+  },
+  "serverPort": 51618,
+  "proxy": "http://fd8887c4-7f8d-4d53-ac1a-fd6505f82dd3:4w9T3UadWLCacYUwhCbO9WBeW8av3ryz@tun.testsprite.com:8080"
+}
