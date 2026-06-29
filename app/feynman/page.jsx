@@ -1,10 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { TEAL, BG, CARD, CARD2, BORDER, TEXT, MUTED } from "@/lib/theme";
 import Badge from "@/components/ui/Badge";
 import Btn from "@/components/ui/Btn";
 import Card from "@/components/ui/Card";
+import { createClient } from "@/lib/supabase/client";
 
 const TOPICS = [
   "Conservation of Angular Momentum",
@@ -16,12 +17,20 @@ const TOPICS = [
 
 export default function FeynmanPage() {
   const router = useRouter();
-  const [stage, setStage] = useState("pick"); // pick | explain | feedback
+  const supabase = createClient();
+  const [stage, setStage] = useState("pick");
   const [topic, setTopic] = useState("");
   const [explanation, setExplanation] = useState("");
   const [feedback, setFeedback] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) setUserId(user.id);
+    });
+  }, []);
 
   async function evaluate() {
     if (explanation.length < 20 || loading) return;
@@ -40,6 +49,19 @@ export default function FeynmanPage() {
       const data = await res.json();
       setFeedback(data);
       setStage("feedback");
+
+      // Save attempt to Supabase
+      if (userId) {
+        await supabase.from("feynman_attempts").insert({
+          user_id: userId,
+          topic,
+          explanation,
+          score: data.score,
+          strong: data.strong,
+          gaps: data.gaps,
+          follow_up: data.followUp,
+        });
+      }
     } catch (err) {
       console.error(err);
       setError("Something went wrong — check your API key and try again.");

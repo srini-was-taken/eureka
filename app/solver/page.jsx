@@ -5,6 +5,7 @@ import { TEAL, TEAL_DIM, BG, CARD, CARD2, BORDER, TEXT, MUTED } from "@/lib/them
 import Badge from "@/components/ui/Badge";
 import Btn from "@/components/ui/Btn";
 import Card from "@/components/ui/Card";
+import { createClient } from "@/lib/supabase/client";
 
 const INITIAL_MESSAGES = [
   {
@@ -17,11 +18,43 @@ const QUICK_PROMPTS = ["I'm stuck", "Give me a small hint", "What concept is thi
 
 export default function SolverPage() {
   const router = useRouter();
+  const supabase = createClient();
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [input, setInput] = useState("");
   const [imageUploaded, setImageUploaded] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [userId, setUserId] = useState(null);
   const chatRef = useRef();
+  const messagesRef = useRef(messages);
+
+  useEffect(() => { messagesRef.current = messages; }, [messages]);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) setUserId(user.id);
+    });
+  }, []);
+
+  // Save the session (any messages beyond the greeting)
+  async function saveSession(msgs) {
+    const userMessages = msgs.slice(1); // skip the greeting
+    if (!userId || userMessages.length === 0) return;
+    // Extract topic from first user message (first ~60 chars)
+    const firstUser = userMessages.find(m => m.role === "user");
+    const topic = firstUser ? firstUser.content.slice(0, 80) : "General";
+    await supabase.from("solver_sessions").insert({
+      user_id: userId,
+      messages: userMessages,
+      topic,
+    });
+  }
+
+  // Save on browser close / tab close
+  useEffect(() => {
+    const handler = () => saveSession(messagesRef.current);
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [userId]);
 
   async function send() {
     if ((!input.trim() && !imageUploaded) || loading) return;
@@ -36,7 +69,6 @@ export default function SolverPage() {
     setLoading(true);
 
     try {
-      // Skip the initial greeting when sending to API
       const apiMessages = updatedMessages
         .slice(1)
         .map(m => ({ role: m.role, content: m.content }));
@@ -53,7 +85,6 @@ export default function SolverPage() {
       const decoder = new TextDecoder();
       let aiText = "";
 
-      // Add placeholder for streaming message
       setMessages(m => [...m, { role: "assistant", content: "" }]);
 
       while (true) {
@@ -80,11 +111,16 @@ export default function SolverPage() {
 
   const hintsGiven = messages.filter(m => m.role === "assistant").length - 1;
 
+  async function handleBack() {
+    await saveSession(messagesRef.current);
+    router.push("/dashboard");
+  }
+
   return (
     <div style={{ height: "100vh", background: BG, color: TEXT, display: "flex", flexDirection: "column" }}>
       {/* Header */}
       <div style={{ padding: "16px 28px", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", gap: 14, background: CARD }}>
-        <Btn variant="ghost" small onClick={() => router.push("/dashboard")} style={{ padding: "7px 12px" }}>← Back</Btn>
+        <Btn variant="ghost" small onClick={handleBack} style={{ padding: "7px 12px" }}>← Back</Btn>
         <div style={{ width: 1, height: 24, background: BORDER }} />
         <div style={{ width: 36, height: 36, background: TEAL + "20", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>🧠</div>
         <div>

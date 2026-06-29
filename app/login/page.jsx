@@ -5,6 +5,13 @@ import { TEAL, TEAL_DIM, BG, CARD, CARD2, BORDER, TEXT, MUTED } from "@/lib/them
 import Btn from "@/components/ui/Btn";
 import { createClient } from "@/lib/supabase/client";
 
+const EXAM_OPTIONS = [
+  "None / General Use",
+  "JEE Advanced",
+  "JEE Mains",
+  "NEET",
+];
+
 export default function LoginPage() {
   const router = useRouter();
   const supabase = createClient();
@@ -13,12 +20,11 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [targetExam, setTargetExam] = useState("JEE Advanced 2026");
+  const [targetExam, setTargetExam] = useState("None / General Use");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
-  // Check for auth callback errors in URL
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("error")) setError("Authentication failed. Please try again.");
@@ -37,6 +43,14 @@ export default function LoginPage() {
     marginBottom: 7, letterSpacing: 0.4, display: "block",
   };
 
+  async function upsertProfile(user, nameVal, examVal) {
+    await supabase.from("profiles").upsert({
+      id: user.id,
+      name: nameVal || user.user_metadata?.full_name || null,
+      exam: examVal || user.user_metadata?.target_exam || null,
+    }, { onConflict: "id" });
+  }
+
   const handleSubmit = async () => {
     setError("");
     setMessage("");
@@ -44,16 +58,17 @@ export default function LoginPage() {
     setLoading(true);
 
     if (mode === "login") {
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
       if (signInError) {
         setError(signInError.message);
         setLoading(false);
       } else {
+        // Upsert profile on login (idempotent — handles first login after email confirm)
+        if (data.user) await upsertProfile(data.user, null, null);
         router.push("/dashboard");
         router.refresh();
       }
     } else {
-      // Sign up
       if (!name) { setError("Please enter your name."); setLoading(false); return; }
       const { error: signUpError } = await supabase.auth.signUp({
         email,
@@ -78,15 +93,12 @@ export default function LoginPage() {
     setLoading(true);
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider,
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
     });
     if (oauthError) {
       setError(oauthError.message);
       setLoading(false);
     }
-    // If no error, browser will redirect to provider — nothing further to do
   };
 
   const handleKeyDown = (e) => {
@@ -113,7 +125,7 @@ export default function LoginPage() {
                 {mode === "login" ? "Welcome back" : "Create your account"}
               </h2>
               <p style={{ color: MUTED, fontSize: 14, margin: 0 }}>
-                {mode === "login" ? "Your weak areas missed you." : "Start your JEE journey the right way."}
+                {mode === "login" ? "Your weak areas missed you." : "Start your study journey the right way."}
               </p>
             </div>
 
@@ -127,7 +139,6 @@ export default function LoginPage() {
               ))}
             </div>
 
-            {/* Error / Message */}
             {error && (
               <div style={{ background: "#f871711a", border: "1px solid #f8717140", color: "#f87171", borderRadius: 10, padding: "10px 14px", fontSize: 13, marginBottom: 16 }}>
                 {error}
@@ -143,56 +154,26 @@ export default function LoginPage() {
               {mode === "signup" && (
                 <div>
                   <label style={labelStyle}>YOUR NAME</label>
-                  <input
-                    value={name}
-                    onChange={e => setName(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder="Arjun Sharma"
-                    style={inputStyle}
-                  />
+                  <input value={name} onChange={e => setName(e.target.value)} onKeyDown={handleKeyDown} placeholder="Arjun Sharma" style={inputStyle} />
                 </div>
               )}
               <div>
                 <label style={labelStyle}>EMAIL</label>
-                <input
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="you@example.com"
-                  type="email"
-                  style={inputStyle}
-                />
+                <input value={email} onChange={e => setEmail(e.target.value)} onKeyDown={handleKeyDown} placeholder="you@example.com" type="email" style={inputStyle} />
               </div>
               <div>
                 <label style={labelStyle}>PASSWORD</label>
-                <input
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="••••••••"
-                  type="password"
-                  style={inputStyle}
-                />
+                <input value={password} onChange={e => setPassword(e.target.value)} onKeyDown={handleKeyDown} placeholder="••••••••" type="password" style={inputStyle} />
               </div>
               {mode === "signup" && (
                 <div>
                   <label style={labelStyle}>TARGET EXAM</label>
-                  <select
-                    value={targetExam}
-                    onChange={e => setTargetExam(e.target.value)}
-                    style={{ ...inputStyle, cursor: "pointer" }}
-                  >
-                    <option>JEE Advanced 2026</option>
-                    <option>JEE Mains 2026</option>
-                    <option>NEET 2026</option>
-                    <option>JEE Advanced 2027</option>
+                  <select value={targetExam} onChange={e => setTargetExam(e.target.value)} style={{ ...inputStyle, cursor: "pointer" }}>
+                    {EXAM_OPTIONS.map(o => <option key={o}>{o}</option>)}
                   </select>
                 </div>
               )}
-              <Btn
-                onClick={handleSubmit}
-                style={{ width: "100%", justifyContent: "center", padding: 14, fontSize: 15, marginTop: 4, opacity: loading ? 0.7 : 1 }}
-              >
+              <Btn onClick={handleSubmit} style={{ width: "100%", justifyContent: "center", padding: 14, fontSize: 15, marginTop: 4, opacity: loading ? 0.7 : 1 }}>
                 {loading ? "Please wait…" : mode === "login" ? "Log In ✦" : "Create Account ✦"}
               </Btn>
             </div>
@@ -204,16 +185,8 @@ export default function LoginPage() {
                   { label: "Google", provider: "google", emoji: "🌐" },
                   { label: "GitHub", provider: "github", emoji: "🐙" },
                 ].map(p => (
-                  <div
-                    key={p.label}
-                    onClick={() => !loading && handleOAuth(p.provider)}
-                    style={{
-                      flex: 1, background: CARD2, border: `1px solid ${BORDER}`,
-                      borderRadius: 10, padding: 11, textAlign: "center",
-                      fontSize: 13, fontWeight: 600, cursor: loading ? "not-allowed" : "pointer",
-                      opacity: loading ? 0.7 : 1, transition: "all .15s",
-                    }}
-                  >
+                  <div key={p.label} onClick={() => !loading && handleOAuth(p.provider)}
+                    style={{ flex: 1, background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 10, padding: 11, textAlign: "center", fontSize: 13, fontWeight: 600, cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1, transition: "all .15s" }}>
                     {p.emoji} {p.label}
                   </div>
                 ))}
@@ -223,10 +196,7 @@ export default function LoginPage() {
 
           <p style={{ textAlign: "center", color: MUTED, fontSize: 12, marginTop: 20 }}>
             {mode === "login" ? "New here? " : "Already have an account? "}
-            <span
-              onClick={() => { setMode(mode === "login" ? "signup" : "login"); setError(""); setMessage(""); }}
-              style={{ color: TEAL, cursor: "pointer", fontWeight: 600 }}
-            >
+            <span onClick={() => { setMode(mode === "login" ? "signup" : "login"); setError(""); setMessage(""); }} style={{ color: TEAL, cursor: "pointer", fontWeight: 600 }}>
               {mode === "login" ? "Sign up free" : "Log in"}
             </span>
           </p>
