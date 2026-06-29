@@ -199,19 +199,20 @@ function CardTag({ children, color = T.accent }) {
 // Hero bento card — Socratic Solver
 function SocraticBentoCard() {
   return (
-    <BentoCard className="sc" style={{ gridColumn: "1", gridRow: "1" }}>
+    <BentoCard className="sc" style={{ gridColumn: "1", gridRow: "1 / 3" }}>
       <div>
         <CardTag color="#1A4D2E">Socratic Solver</CardTag>
       </div>
       <div>
-        <div style={{ fontSize: 17, fontWeight: 700, color: T.dkText, fontFamily: INTER, lineHeight: 1.25, marginBottom: 8 }}>
+        <div style={{ fontSize: 20, fontWeight: 700, color: T.dkText, fontFamily: INTER, lineHeight: 1.25, marginBottom: 8 }}>
           Questions that force you to think.
         </div>
         <p style={{ fontSize: 13, color: T.dkMuted, lineHeight: 1.7, fontFamily: INTER }}>
-          Upload any complex problem. EurekaAI drills your reasoning — not your answer.
+          Upload any JEE Advanced problem. EurekaAI drills your reasoning — not your answer.
         </p>
       </div>
-      <GifPlaceholder label="Socratic Demo" aspect="16/9" style={{ width: "100%", marginTop: "auto" }} />
+      {/* GIF placeholder — tall format for hero card */}
+      <GifPlaceholder label="Socratic Solver Demo" aspect="16/9" style={{ width: "100%", marginTop: "auto" }} />
     </BentoCard>
   );
 }
@@ -219,11 +220,11 @@ function SocraticBentoCard() {
 // Feynman bento card
 function FeynmanBentoCard() {
   return (
-    <BentoCard className="sc" style={{ gridColumn: "2 / 4", gridRow: "2" }}>
+    <BentoCard className="sc" style={{ gridColumn: "2 / 4", gridRow: "1" }}>
       <div>
         <CardTag color="#818cf8">Feynman Explainer</CardTag>
       </div>
-      <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
+      <div style={{ display: "flex", gap: 24, alignItems: "flex-start" }}>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 17, fontWeight: 700, color: T.dkText, fontFamily: INTER, lineHeight: 1.25, marginBottom: 8 }}>
             If you can't explain it simply, you don't know it.
@@ -232,7 +233,7 @@ function FeynmanBentoCard() {
             You become the teacher. Explain a concept in your own words, and the AI will test your mastery to pinpoint any blind spots.
           </p>
         </div>
-        <GifPlaceholder label="Feynman Demo" aspect="16/9" style={{ width: "50%", flexShrink: 0 }} />
+        <GifPlaceholder label="Feynman Demo" aspect="16/9" style={{ width: "48%", flexShrink: 0 }} />
       </div>
     </BentoCard>
   );
@@ -240,20 +241,22 @@ function FeynmanBentoCard() {
 
 // Mistake Journal bento card
 function MistakeBentoCard() {
+  const concepts = [
+    { label: "Work-Energy Theorem", w: 3 },
+    { label: "Gauss's Law", w: 2 },
+    { label: "Electrochemistry", w: 3 },
+    { label: "Integral Calculus", w: 2 },
+    { label: "SHM", w: 1 },
+    { label: "Organic Reactions", w: 3 },
+    { label: "Ray Optics", w: 2 },
+  ];
   return (
-    <BentoCard className="sc" style={{ gridColumn: "1", gridRow: "2" }}>
-      <div>
-        <CardTag color="#4ade80">Mistake Journal</CardTag>
+    <BentoCard className="sc" style={{ gridColumn: "2", gridRow: "2" }}>
+      <CardTag color="#4ade80">Mistake Journal</CardTag>
+      <div style={{ fontSize: 15, fontWeight: 700, color: T.dkText, fontFamily: INTER, lineHeight: 1.3 }}>
+        Every error, tracked.
       </div>
-      <div>
-        <div style={{ fontSize: 17, fontWeight: 700, color: T.dkText, fontFamily: INTER, lineHeight: 1.25, marginBottom: 8 }}>
-          Every error, tracked.
-        </div>
-        <p style={{ fontSize: 13, color: T.dkMuted, lineHeight: 1.7, fontFamily: INTER }}>
-          Log your mistakes and let the AI resurface them so you never make them twice.
-        </p>
-      </div>
-      <GifPlaceholder label="Mistake Demo" aspect="16/9" style={{ width: "100%", marginTop: "auto" }} />
+      <GifPlaceholder label="Mistake Journal Demo" aspect="16/9" />
     </BentoCard>
   );
 }
@@ -261,21 +264,12 @@ function MistakeBentoCard() {
 // Focus Mode bento card
 function FocusBentoCard() {
   return (
-    <BentoCard className="sc" style={{ gridColumn: "2 / 4", gridRow: "1" }}>
-      <div>
-        <CardTag color="#fb923c">Focus Mode</CardTag>
+    <BentoCard className="sc" style={{ gridColumn: "3", gridRow: "2" }}>
+      <CardTag color="#fb923c">Focus Mode</CardTag>
+      <div style={{ fontSize: 15, fontWeight: 700, color: T.dkText, fontFamily: INTER, lineHeight: 1.3 }}>
+        Timed. Locked. No shortcuts.
       </div>
-      <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 17, fontWeight: 700, color: T.dkText, fontFamily: INTER, lineHeight: 1.25, marginBottom: 8 }}>
-            Timed. Locked. No shortcuts.
-          </div>
-          <p style={{ fontSize: 13, color: T.dkMuted, lineHeight: 1.7, fontFamily: INTER }}>
-            A distraction-free environment to study deeply.
-          </p>
-        </div>
-        <GifPlaceholder label="Focus Demo" aspect="16/9" style={{ width: "50%", flexShrink: 0 }} />
-      </div>
+      <GifPlaceholder label="Focus Mode Demo" aspect="16/9" />
     </BentoCard>
   );
 }

@@ -15,3 +15,6 @@
 *.pem
 /coverage
 /.vercel
+
+context.md
+PROMPT_HISTORY.md
