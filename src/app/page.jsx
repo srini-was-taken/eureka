@@ -212,7 +212,7 @@ function SocraticBentoCard() {
         </p>
       </div>
       {/* GIF placeholder — tall format for hero card */}
-      <GifPlaceholder label="Socratic Solver Demo" aspect="16/9" style={{ width: "100%", marginTop: "auto" }} />
+      <GifPlaceholder label="Socratic Solver Demo" aspect="4/5" style={{ flex: 1, minHeight: 200 }} />
     </BentoCard>
   );
 }
@@ -233,7 +233,7 @@ function FeynmanBentoCard() {
             You become the teacher. Explain a concept in your own words, and the AI will test your mastery to pinpoint any blind spots.
           </p>
         </div>
-        <GifPlaceholder label="Feynman Demo" aspect="16/9" style={{ width: "48%", flexShrink: 0 }} />
+        <GifPlaceholder label="Feynman Demo" aspect="4/3" style={{ width: "48%", flexShrink: 0 }} />
       </div>
     </BentoCard>
   );
