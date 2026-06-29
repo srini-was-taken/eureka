@@ -19,19 +19,35 @@ RULES:
 - "strong": specific things they got right, not generic praise
 - "gaps": precise and actionable, name exactly what's missing
 - "followUp": one sharp question targeting their biggest gap
+- If an image of source material is provided, analyse it carefully and use it as the reference when evaluating the explanation.
 - Be honest. Return ONLY the JSON object.`;
 
 export async function POST(req) {
   try {
-    const { topic, explanation, sourceMaterial = "" } = await req.json();
+    const { topic, explanation, sourceMaterial = "", imageBase64 = null } = await req.json();
 
-    const userMessage = `TOPIC: ${topic}
+    const userText = `TOPIC: ${topic}
 
 SOURCE MATERIAL:
-${sourceMaterial || "None — evaluate based on general knowledge of this topic."}
+${sourceMaterial || (imageBase64 ? "See attached image." : "None — evaluate based on general knowledge of this topic.")}
 
 STUDENT EXPLANATION:
 ${explanation}`;
+
+    // Build message content — include image if provided
+    let userContent;
+    if (imageBase64) {
+      userContent = [
+        { type: "text", text: userText },
+        { type: "image_url", image_url: { url: imageBase64 } },
+      ];
+    } else {
+      userContent = userText;
+    }
+
+    const model = imageBase64
+      ? "meta-llama/llama-4-scout-17b-16e-instruct"
+      : "llama-3.3-70b-versatile";
 
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
@@ -40,10 +56,10 @@ ${explanation}`;
         "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
+        model,
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: userMessage },
+          { role: "user", content: userContent },
         ],
         max_tokens: 1024,
         temperature: 0.3,

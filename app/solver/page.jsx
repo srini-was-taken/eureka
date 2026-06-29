@@ -5,6 +5,8 @@ import { TEAL, TEAL_DIM, BG, CARD, CARD2, BORDER, TEXT, MUTED } from "@/lib/them
 import Badge from "@/components/ui/Badge";
 import Btn from "@/components/ui/Btn";
 import Card from "@/components/ui/Card";
+import Icon from "@/components/ui/Icon";
+import Md from "@/components/ui/Md";
 import { createClient } from "@/lib/supabase/client";
 
 const INITIAL_MESSAGES = [
@@ -21,11 +23,12 @@ export default function SolverPage() {
   const supabase = createClient();
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [input, setInput] = useState("");
-  const [imageUploaded, setImageUploaded] = useState(false);
+  const [pendingImage, setPendingImage] = useState(null); // { url: string, name: string }
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState(null);
   const chatRef = useRef();
   const messagesRef = useRef(messages);
+  const fileInputRef = useRef();
 
   useEffect(() => { messagesRef.current = messages; }, [messages]);
 
@@ -39,14 +42,17 @@ export default function SolverPage() {
   async function saveSession(msgs) {
     const userMessages = msgs.slice(1); // skip the greeting
     if (!userId || userMessages.length === 0) return;
-    // Extract topic from first user message (first ~60 chars)
     const firstUser = userMessages.find(m => m.role === "user");
-    const topic = firstUser ? firstUser.content.slice(0, 80) : "General";
-    await supabase.from("solver_sessions").insert({
-      user_id: userId,
-      messages: userMessages,
-      topic,
-    });
+    // content may be an array (vision) or string; extract text safely
+    const topicText = firstUser
+      ? (typeof firstUser.content === "string"
+        ? firstUser.content
+        : firstUser.content?.find?.(p => p.type === "text")?.text || "")
+      : "General";
+    const topic = topicText.slice(0, 80);
+    // Strip imageUrl before saving to avoid storing large base64 blobs
+    const cleanMsgs = userMessages.map(({ imageUrl: _img, ...rest }) => rest);
+    await supabase.from("solver_sessions").insert({ user_id: userId, messages: cleanMsgs, topic });
   }
 
   // Save on browser close / tab close
@@ -56,19 +62,41 @@ export default function SolverPage() {
     return () => window.removeEventListener("beforeunload", handler);
   }, [userId]);
 
+  function handleImageSelect(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setPendingImage({ url: reader.result, name: file.name });
+    reader.readAsDataURL(file);
+    // Reset input so same file can be re-selected
+    e.target.value = "";
+  }
+
   async function send() {
-    if ((!input.trim() && !imageUploaded) || loading) return;
+    if ((!input.trim() && !pendingImage) || loading) return;
 
-    const userText = imageUploaded ? (input || "[Problem image uploaded]") : input;
-    const userMsg = { role: "user", content: userText };
+    // Build the user message
+    const textContent = input.trim() || (pendingImage ? "What can you tell me about this problem?" : "");
+    const userMsg = pendingImage
+      ? {
+        role: "user",
+        // Keep imageUrl for display; content becomes array for the API
+        imageUrl: pendingImage.url,
+        content: [
+          { type: "text", text: textContent },
+          { type: "image_url", image_url: { url: pendingImage.url } },
+        ],
+      }
+      : { role: "user", content: textContent };
+
     const updatedMessages = [...messages, userMsg];
-
     setMessages(updatedMessages);
     setInput("");
-    setImageUploaded(false);
+    setPendingImage(null);
     setLoading(true);
 
     try {
+      // Send only role + content to the API (no imageUrl field needed by backend)
       const apiMessages = updatedMessages
         .slice(1)
         .map(m => ({ role: m.role, content: m.content }));
@@ -118,11 +146,22 @@ export default function SolverPage() {
 
   return (
     <div style={{ height: "100vh", background: BG, color: TEXT, display: "flex", flexDirection: "column" }}>
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        style={{ display: "none" }}
+        onChange={handleImageSelect}
+      />
+
       {/* Header */}
       <div style={{ padding: "16px 28px", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", gap: 14, background: CARD }}>
         <Btn variant="ghost" small onClick={handleBack} style={{ padding: "7px 12px" }}>← Back</Btn>
         <div style={{ width: 1, height: 24, background: BORDER }} />
-        <div style={{ width: 36, height: 36, background: TEAL + "20", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>🧠</div>
+        <div style={{ width: 36, height: 36, background: TEAL + "20", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Icon name="brain" color={TEAL} size={18} />
+        </div>
         <div>
           <div style={{ fontWeight: 700, fontSize: 15 }}>Socratic Solver</div>
           <div style={{ fontSize: 11, color: MUTED }}>Guided problem-solving · JEE Advanced mode</div>
@@ -142,15 +181,29 @@ export default function SolverPage() {
                   <div style={{ width: 34, height: 34, background: TEAL + "20", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17, flexShrink: 0 }}>✦</div>
                 )}
                 <div style={{
-                  maxWidth: "65%", padding: "14px 18px",
+                  maxWidth: "65%",
                   borderRadius: m.role === "assistant" ? "16px 16px 16px 4px" : "16px 16px 4px 16px",
                   background: m.role === "assistant" ? CARD2 : `linear-gradient(135deg,${TEAL},${TEAL_DIM})`,
                   color: m.role === "user" ? "#000" : TEXT,
                   fontSize: 14, lineHeight: 1.7,
                   border: m.role === "assistant" ? `1px solid ${BORDER}` : "none",
-                  whiteSpace: "pre-wrap",
+                  overflow: "hidden",
                 }}>
-                  {m.content || <span style={{ opacity: 0.4 }}>thinking...</span>}
+                  {/* Image thumbnail inside bubble */}
+                  {m.imageUrl && (
+                    <img
+                      src={m.imageUrl}
+                      alt="attached"
+                      style={{ width: "100%", maxHeight: 220, objectFit: "cover", display: "block", borderRadius: "16px 16px 0 0" }}
+                    />
+                  )}
+                  <div style={{ padding: "14px 18px" }}>
+                    {m.role === "assistant"
+                      ? <Md>{typeof m.content === "string" ? m.content : m.content?.find?.(p => p.type === "text")?.text || ""}</Md>
+                      : <span style={{ whiteSpace: "pre-wrap" }}>{typeof m.content === "string" ? m.content : m.content?.find?.(p => p.type === "text")?.text}</span>
+                    }
+                    {(!m.content || m.content === "") && m.role === "assistant" && <span style={{ opacity: 0.4 }}>thinking...</span>}
+                  </div>
                 </div>
               </div>
             ))}
@@ -158,24 +211,39 @@ export default function SolverPage() {
 
           {/* Input area */}
           <div style={{ padding: "16px 28px 24px", borderTop: `1px solid ${BORDER}`, background: CARD }}>
-            {imageUploaded && (
-              <div style={{ background: TEAL + "15", border: `1px solid ${TEAL}30`, borderRadius: 10, padding: "8px 14px", marginBottom: 10, display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>
-                <span>🖼</span>
-                <span style={{ color: TEAL }}>problem_image.jpg attached</span>
-                <span onClick={() => setImageUploaded(false)} style={{ marginLeft: "auto", cursor: "pointer", color: MUTED }}>✕</span>
+            {/* Image preview strip */}
+            {pendingImage && (
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "8px 12px" }}>
+                <img src={pendingImage.url} alt="preview" style={{ width: 44, height: 44, objectFit: "cover", borderRadius: 7, flexShrink: 0 }} />
+                <span style={{ fontSize: 13, color: TEXT, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{pendingImage.name}</span>
+                <span onClick={() => setPendingImage(null)} style={{ cursor: "pointer", color: MUTED, fontSize: 18, lineHeight: 1 }}>✕</span>
               </div>
             )}
             <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
-              <div style={{ flex: 1, background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "12px 16px", display: "flex", gap: 10, alignItems: "center" }}>
-                <input
+              <div style={{ flex: 1, background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "12px 16px", display: "flex", gap: 10, alignItems: "flex-end" }}>
+                <textarea
                   value={input}
                   onChange={e => setInput(e.target.value)}
-                  onKeyDown={e => e.key === "Enter" && !e.shiftKey && send()}
-                  placeholder="Type your thinking, or upload an image of the problem..."
+                  onKeyDown={e => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      send();
+                    }
+                  }}
+                  placeholder="Type your thinking, or upload an image... (Shift+Enter for new line)"
                   disabled={loading}
-                  style={{ flex: 1, background: "transparent", border: "none", outline: "none", color: TEXT, fontSize: 14 }}
+                  rows={1}
+                  style={{
+                    flex: 1, background: "transparent", border: "none", outline: "none",
+                    color: TEXT, fontSize: 14, resize: "none", fontFamily: "inherit",
+                    lineHeight: 1.6, maxHeight: "8em", overflowY: "auto",
+                  }}
                 />
-                <div onClick={() => setImageUploaded(true)} style={{ cursor: "pointer", opacity: 0.6, fontSize: 18 }}>🖼</div>
+                <div
+                  onClick={() => !loading && fileInputRef.current?.click()}
+                  title="Attach image"
+                  style={{ cursor: loading ? "default" : "pointer", opacity: pendingImage ? 1 : 0.45, transition: "opacity .15s", display: "flex" }}
+                ><Icon name="image" color={TEXT} size={18} /></div>
               </div>
               <Btn onClick={send} style={{ padding: "14px 20px" }}>
                 {loading ? "..." : "➤"}

@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase-server";
 
-const GROQ_DIAGNOSIS_PROMPT = `You are an expert JEE tutor diagnosing a student's mistake. Given a problem and the student's note about what went wrong, provide a clear, precise diagnosis (2-4 sentences) identifying the exact conceptual or procedural error and what they should know instead. Be honest, specific, and actionable. Return ONLY the diagnosis text — no JSON, no markdown.`;
+const GROQ_DIAGNOSIS_PROMPT = `You are a JEE tutor. In exactly 1-2 sentences: identify the specific conceptual or procedural error the student made and state the correct understanding. Be blunt and precise — no preamble, no encouragement, no markdown. Return only the diagnosis.`;
 
 export async function GET(req) {
     const supabase = await createClient();
@@ -23,14 +23,27 @@ export async function POST(req) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { topic, subject, problem, user_note } = await req.json();
-    if (!topic || !subject || !problem) {
-        return Response.json({ error: "topic, subject, and problem are required" }, { status: 400 });
+    const { topic, subject, problem, user_note, imageBase64 = null } = await req.json();
+    if (!topic || !subject || (!problem && !imageBase64)) {
+        return Response.json({ error: "topic, subject, and either problem or an image are required" }, { status: 400 });
     }
 
-    // Generate AI diagnosis via Groq
+    // Generate AI diagnosis via Groq (vision-capable if image provided)
     let ai_diagnosis = "";
     try {
+        const userText = `PROBLEM: ${problem || "(see attached image)"}\n\nSTUDENT'S NOTE: ${user_note || "No note provided."}`;
+
+        const userContent = imageBase64
+            ? [
+                { type: "text", text: userText },
+                { type: "image_url", image_url: { url: imageBase64 } },
+            ]
+            : userText;
+
+        const model = imageBase64
+            ? "meta-llama/llama-4-scout-17b-16e-instruct"
+            : "llama-3.3-70b-versatile";
+
         const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
             headers: {
@@ -38,12 +51,12 @@ export async function POST(req) {
                 "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
             },
             body: JSON.stringify({
-                model: "llama-3.3-70b-versatile",
+                model,
                 messages: [
                     { role: "system", content: GROQ_DIAGNOSIS_PROMPT },
-                    { role: "user", content: `PROBLEM: ${problem}\n\nSTUDENT'S NOTE: ${user_note || "No note provided."}` },
+                    { role: "user", content: userContent },
                 ],
-                max_tokens: 300,
+                max_tokens: 120,
                 temperature: 0.4,
             }),
         });
@@ -61,7 +74,7 @@ export async function POST(req) {
         user_id: user.id,
         topic,
         subject,
-        problem,
+        problem: problem || "",
         user_note: user_note || "",
         ai_diagnosis,
         status: "unresolved",

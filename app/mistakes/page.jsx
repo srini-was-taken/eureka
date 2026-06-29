@@ -1,4 +1,5 @@
 "use client";
+import { useRef } from "react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { TEAL, BG, CARD, CARD2, BORDER, TEXT, MUTED, SUBJECT_COLORS } from "@/lib/theme";
@@ -6,6 +7,8 @@ import Sidebar from "@/components/layout/Sidebar";
 import Badge from "@/components/ui/Badge";
 import Btn from "@/components/ui/Btn";
 import Card from "@/components/ui/Card";
+import Icon from "@/components/ui/Icon";
+import Md from "@/components/ui/Md";
 
 const FILTERS = ["all", "unresolved", "resolved", "Physics", "Chemistry", "Maths"];
 const SUBJECTS = ["Physics", "Chemistry", "Maths", "Other"];
@@ -18,6 +21,9 @@ function LogMistakeModal({ onSave, onClose }) {
   const [userNote, setUserNote] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [imageBase64, setImageBase64] = useState(null);
+  const [imageName, setImageName] = useState("");
+  const imgInputRef = useRef();
 
   const inputStyle = {
     width: "100%", background: CARD2, border: `1px solid ${BORDER}`,
@@ -27,53 +33,87 @@ function LogMistakeModal({ onSave, onClose }) {
   };
   const labelStyle = { fontSize: 12, color: MUTED, fontWeight: 600, marginBottom: 7, letterSpacing: 0.4, display: "block" };
 
+  function handleImageSelect(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => { setImageBase64(reader.result); setImageName(file.name); };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  }
+
   async function handleSave() {
-    if (!topic.trim() || !problem.trim()) { setError("Topic and problem are required."); return; }
+    if (!topic.trim() || (!problem.trim() && !imageBase64)) {
+      setError("Topic and either problem text or an image are required."); return;
+    }
     setSaving(true); setError("");
-    const res = await onSave({ topic: topic.trim(), subject, problem: problem.trim(), user_note: userNote.trim() });
+    const res = await onSave({
+      topic: topic.trim(), subject,
+      problem: problem.trim(),
+      user_note: userNote.trim(),
+      imageBase64: imageBase64 || null,
+    });
     if (res?.error) setError(res.error);
     setSaving(false);
   }
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "#00000080", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, padding: 36, width: 520, boxShadow: "0 0 60px #00000080" }}>
-        <h3 style={{ fontWeight: 800, fontSize: 20, marginBottom: 24, letterSpacing: -0.5 }}>📝 Log a Mistake</h3>
+    <>
+      {/* Hidden image input */}
+      <input ref={imgInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleImageSelect} />
+      <div style={{ position: "fixed", inset: 0, background: "#00000080", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, padding: 36, width: 520, boxShadow: "0 0 60px #00000080" }}>
+          <h3 style={{ fontWeight: 800, fontSize: 20, marginBottom: 24, letterSpacing: -0.5 }}>Log a Mistake</h3>
 
-        {error && <div style={{ background: "#f871711a", border: "1px solid #f8717140", color: "#f87171", borderRadius: 10, padding: "10px 14px", fontSize: 13, marginBottom: 16 }}>{error}</div>}
+          {error && <div style={{ background: "#f871711a", border: "1px solid #f8717140", color: "#f87171", borderRadius: 10, padding: "10px 14px", fontSize: 13, marginBottom: 16 }}>{error}</div>}
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            <div>
-              <label style={labelStyle}>TOPIC</label>
-              <input value={topic} onChange={e => setTopic(e.target.value)} placeholder="e.g. Rotational Dynamics" style={inputStyle} />
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div>
+                <label style={labelStyle}>TOPIC</label>
+                <input value={topic} onChange={e => setTopic(e.target.value)} placeholder="e.g. Rotational Dynamics" style={inputStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}>SUBJECT</label>
+                <select value={subject} onChange={e => setSubject(e.target.value)} style={{ ...inputStyle, cursor: "pointer" }}>
+                  {SUBJECTS.map(s => <option key={s}>{s}</option>)}
+                </select>
+              </div>
             </div>
             <div>
-              <label style={labelStyle}>SUBJECT</label>
-              <select value={subject} onChange={e => setSubject(e.target.value)} style={{ ...inputStyle, cursor: "pointer" }}>
-                {SUBJECTS.map(s => <option key={s}>{s}</option>)}
-              </select>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
+                <label style={{ ...labelStyle, marginBottom: 0 }}>PROBLEM STATEMENT</label>
+                <span
+                  onClick={() => imgInputRef.current?.click()}
+                  title="Attach a photo of the problem"
+                  style={{ fontSize: 13, color: TEAL, cursor: "pointer", display: "flex", alignItems: "center", gap: 5 }}
+                ><Icon name="camera" color={TEAL} size={13} /> Attach photo</span>
+              </div>
+              <textarea value={problem} onChange={e => setProblem(e.target.value)} rows={4} placeholder="Paste or type the problem here... (or attach a photo above)" style={inputStyle} />
+              {imageBase64 && (
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8, background: TEAL + "0d", border: `1px solid ${TEAL}30`, borderRadius: 8, padding: "7px 10px" }}>
+                  <img src={imageBase64} alt="preview" style={{ width: 36, height: 36, objectFit: "cover", borderRadius: 5, flexShrink: 0 }} />
+                  <span style={{ fontSize: 12, color: TEAL, flex: 1 }}>{imageName}</span>
+                  <span onClick={() => { setImageBase64(null); setImageName(""); }} style={{ cursor: "pointer", color: MUTED, fontSize: 16 }}>✕</span>
+                </div>
+              )}
+            </div>
+            <div>
+              <label style={labelStyle}>YOUR NOTE <span style={{ color: MUTED, fontWeight: 400 }}>(optional — what went wrong?)</span></label>
+              <textarea value={userNote} onChange={e => setUserNote(e.target.value)} rows={2} placeholder="e.g. I forgot to account for rotational KE..." style={inputStyle} />
             </div>
           </div>
-          <div>
-            <label style={labelStyle}>PROBLEM STATEMENT</label>
-            <textarea value={problem} onChange={e => setProblem(e.target.value)} rows={4} placeholder="Paste or type the problem here..." style={inputStyle} />
-          </div>
-          <div>
-            <label style={labelStyle}>YOUR NOTE <span style={{ color: MUTED, fontWeight: 400 }}>(optional — what went wrong?)</span></label>
-            <textarea value={userNote} onChange={e => setUserNote(e.target.value)} rows={2} placeholder="e.g. I forgot to account for rotational KE..." style={inputStyle} />
-          </div>
-        </div>
 
-        <div style={{ display: "flex", gap: 10, marginTop: 24 }}>
-          <Btn onClick={handleSave} style={{ flex: 1, justifyContent: "center", opacity: saving ? 0.7 : 1 }}>
-            {saving ? "Saving + diagnosing..." : "Save & Diagnose ✦"}
-          </Btn>
-          <Btn variant="ghost" onClick={onClose}>Cancel</Btn>
+          <div style={{ display: "flex", gap: 10, marginTop: 24 }}>
+            <Btn onClick={handleSave} style={{ flex: 1, justifyContent: "center", opacity: saving ? 0.7 : 1 }}>
+              {saving ? "Saving + diagnosing..." : "Save & Diagnose ✦"}
+            </Btn>
+            <Btn variant="ghost" onClick={onClose}>Cancel</Btn>
+          </div>
+          <p style={{ fontSize: 12, color: MUTED, marginTop: 12, margin: "12px 0 0" }}>AI will auto-generate a diagnosis from your problem + note.</p>
         </div>
-        <p style={{ fontSize: 12, color: MUTED, marginTop: 12, margin: "12px 0 0" }}>AI will auto-generate a diagnosis from your problem + note.</p>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -246,7 +286,9 @@ export default function MistakeJournalPage() {
                   </div>
 
                   <div style={{ fontSize: 12, color: MUTED, fontWeight: 700, letterSpacing: 0.5, marginBottom: 8 }}>PROBLEM</div>
-                  <p style={{ fontSize: 14, lineHeight: 1.7, color: TEXT, marginBottom: 20, padding: "14px 16px", background: CARD2, borderRadius: 10 }}>{detail.problem}</p>
+                  <div style={{ fontSize: 14, lineHeight: 1.7, color: TEXT, marginBottom: 20, padding: "14px 16px", background: CARD2, borderRadius: 10 }}>
+                    <Md>{detail.problem}</Md>
+                  </div>
 
                   {detail.user_note && (
                     <>
@@ -258,7 +300,9 @@ export default function MistakeJournalPage() {
                   {detail.ai_diagnosis && (
                     <>
                       <div style={{ fontSize: 12, color: MUTED, fontWeight: 700, letterSpacing: 0.5, marginBottom: 8 }}>✦ AI DIAGNOSIS</div>
-                      <p style={{ fontSize: 13, lineHeight: 1.75, color: TEXT, marginBottom: 20, padding: "14px 16px", background: TEAL + "0d", border: `1px solid ${TEAL}25`, borderRadius: 10 }}>{detail.ai_diagnosis}</p>
+                      <div style={{ fontSize: 13, lineHeight: 1.75, color: TEXT, marginBottom: 20, padding: "14px 16px", background: TEAL + "0d", border: `1px solid ${TEAL}25`, borderRadius: 10 }}>
+                        <Md>{detail.ai_diagnosis}</Md>
+                      </div>
                     </>
                   )}
 

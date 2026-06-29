@@ -1,4 +1,5 @@
 import "./globals.css";
+import "katex/dist/katex.min.css";
 
 export const metadata = {
   title: "EurekaAI — Study smarter for JEE Advanced",
