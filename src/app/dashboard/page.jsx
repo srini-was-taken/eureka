@@ -11,6 +11,8 @@ import Card from "@/components/ui/Card";
 import Icon from "@/components/ui/Icon";
 import { createClient } from "@/lib/supabase/client";
 
+const INTER = "'Inter', system-ui, sans-serif";
+
 const quickActions = [
   { label: "Start Focus Session",  sub: "Upload a PDF and dive in",    icon: "eye",     color: D_ACCENT,   href: "/focus"    },
   { label: "Feynman a Concept",    sub: "Test your understanding",      icon: "feynman", color: "#E8C98A",  href: "/feynman"  },
@@ -107,7 +109,17 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div style={{ minHeight: "100vh", background: D_BG, color: D_TEXT, display: "flex", position: "relative", overflow: "hidden" }}>
+    <div style={{ minHeight: "100vh", background: D_BG, color: D_TEXT, display: "flex", position: "relative", overflow: "hidden", fontFamily: INTER }}>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .dash-stats   { grid-template-columns: 1fr 1fr !important; }
+          .dash-mid     { grid-template-columns: 1fr !important; }
+          .dash-actions { grid-template-columns: 1fr !important; }
+          .dash-content { padding: 20px 16px !important; padding-top: 60px !important; }
+          .dash-header  { flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; }
+        }
+      `}</style>
 
       {/* Subtle ambient shimmer — neutral, not green */}
       <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0 }}>
@@ -117,28 +129,14 @@ export default function DashboardPage() {
 
       <Sidebar />
 
-      <div style={{ flex: 1, padding: "36px 40px", overflowY: "auto", maxWidth: 1100, position: "relative", zIndex: 1 }}>
+      <div className="dash-content" style={{ flex: 1, padding: "36px 40px", overflowY: "auto", maxWidth: 1100, position: "relative", zIndex: 1 }}>
 
-        {/* ── Header ───────────────────────────────────────────────────────── */}
+        {/* ── Header ─────────────────────────────────────────────────────────── */}
         <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            marginBottom: 36,
-          }}
-        >
+          className="dash-header"
+          style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 36 }}>
           <div>
-            <h1
-              style={{
-                fontSize: 28,
-                fontWeight: 800,
-                margin: 0,
-                letterSpacing: -0.6,
-                fontFamily: "var(--font-syne, inherit)",
-                color: D_TEXT,
-              }}
-            >
+            <h1 style={{ fontSize: 28, fontWeight: 800, margin: 0, letterSpacing: -0.6, fontFamily: INTER, color: D_TEXT }}>
               {getGreeting()},{" "}
               <span style={{ color: D_ACCENT }}>{firstName}</span>
             </h1>
@@ -175,15 +173,8 @@ export default function DashboardPage() {
           </Btn>
         </div>
 
-        {/* ── Stats row ─────────────────────────────────────────────────────── */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
-            gap: 14,
-            marginBottom: 28,
-          }}
-        >
+        {/* ── Stats row ──────────────────────────────────────────────────────── */}
+        <div className="dash-stats" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 28 }}>
           {stats.map((s, i) => (
             <div
               key={i}
@@ -206,29 +197,8 @@ export default function DashboardPage() {
                 }}
               >
                 <div>
-                  <div
-                    style={{
-                      color: D_MUTED,
-                      fontSize: 11,
-                      marginBottom: 10,
-                      fontWeight: 700,
-                      letterSpacing: 0.8,
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    {s.label}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 34,
-                      fontWeight: 800,
-                      lineHeight: 1,
-                      color: s.color,
-                      fontFamily: "var(--font-syne, inherit)",
-                    }}
-                  >
-                    {s.val}
-                  </div>
+              <div style={{ color: D_MUTED, fontSize: 11, marginBottom: 10, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", fontFamily: INTER }}>{s.label}</div>
+              <div style={{ fontSize: 34, fontWeight: 800, lineHeight: 1, color: s.color, fontFamily: INTER }}>{s.val}</div>
                   <div style={{ color: D_MUTED, fontSize: 11.5, marginTop: 5 }}>{s.unit}</div>
                 </div>
                 <div
@@ -249,15 +219,8 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        {/* ── Problem of Day + Weak Areas ──────────────────────────────────── */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1.5fr 1fr",
-            gap: 18,
-            marginBottom: 18,
-          }}
-        >
+        {/* ── Problem of Day + Weak Areas ───────────────────────────────────── */}
+        <div className="dash-mid" style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: 18, marginBottom: 18 }}>
           {/* Problem of the Day */}
           <div
             style={{
@@ -461,7 +424,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ── Quick Actions ─────────────────────────────────────────────────── */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
+        <div className="dash-actions" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
           {quickActions.map((a, i) => (
             <div
               key={i}

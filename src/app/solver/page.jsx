@@ -47,7 +47,9 @@ function SolverInner() {
   const chatRef = useRef();
   const messagesRef = useRef(messages);
   const fileInputRef = useRef();
-  const autoSentRef = useRef(false);
+  const [hintsGiven, setHintsGiven] = useState(0);
+
+  const [showMobileStats, setShowMobileStats] = useState(false);
 
   useEffect(() => { messagesRef.current = messages; }, [messages]);
 
@@ -70,6 +72,8 @@ function SolverInner() {
     // Small delay so state is settled
     setTimeout(() => sendText(problemText), 100);
   }, [searchParams]);
+  
+  const autoSentRef = useRef(false);
 
   // Save the session (any messages beyond the greeting)
   async function saveSession(msgs) {
@@ -203,9 +207,8 @@ function SolverInner() {
 
   useEffect(() => {
     if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    setHintsGiven(Math.max(0, messages.filter(m => m.role === "assistant").length - 1));
   }, [messages]);
-
-  const hintsGiven = messages.filter(m => m.role === "assistant").length - 1;
 
   async function handleBack() {
     await saveSession(messagesRef.current);
@@ -213,7 +216,27 @@ function SolverInner() {
   }
 
   return (
-    <div style={{ height: "100vh", background: BG, color: TEXT, display: "flex", flexDirection: "column", position: "relative", overflow: "hidden" }}>
+    <div style={{ height: "100vh", background: BG, color: TEXT, display: "flex", flexDirection: "column", position: "relative", overflow: "hidden", fontFamily: "'Inter', system-ui, sans-serif" }}>
+      <style>{`
+        @media (max-width: 768px) {
+          .solver-right-panel {
+            display: ${showMobileStats ? "flex" : "none"} !important;
+            position: absolute;
+            top: 68px; /* header height */
+            right: 0;
+            bottom: 0;
+            width: 280px !important;
+            z-index: 50;
+            background: #0A0A0A;
+            border-left: 1px solid rgba(255,255,255,0.08);
+            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+          }
+          .solver-chat { padding: 16px 16px !important; }
+          .solver-input { padding: 10px 14px 16px !important; }
+          .solver-header { padding: 12px 16px !important; }
+          .mobile-stats-btn { display: flex !important; }
+        }
+      `}</style>
       {/* Ambient orbs */}
       <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0 }}>
         <div style={{ position: "absolute", top: "-15%", right: "15%", width: 500, height: 500, background: "radial-gradient(ellipse, rgba(232,97,10,0.05) 0%, transparent 60%)", borderRadius: "50%" }} />
@@ -223,25 +246,34 @@ function SolverInner() {
       <input ref={fileInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleImageSelect} />
 
       {/* Header */}
-      <div style={{ padding: "16px 28px", borderBottom: `1px solid rgba(255,255,255,0.09)`, display: "flex", alignItems: "center", gap: 14, background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", position: "sticky", top: 0, zIndex: 10 }}>
+      <div className="solver-header" style={{ padding: "16px 28px", borderBottom: `1px solid rgba(255,255,255,0.09)`, display: "flex", alignItems: "center", gap: 14, background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", position: "sticky", top: 0, zIndex: 10 }}>
         <Btn variant="ghost" small onClick={handleBack} style={{ padding: "7px 12px" }}>← Back</Btn>
         <div style={{ width: 1, height: 24, background: BORDER }} />
         <div style={{ width: 36, height: 36, background: TEAL + "20", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <Icon name="brain" color={TEAL} size={18} />
         </div>
         <div>
-          <div style={{ fontWeight: 700, fontSize: 15 }}>Socratic Solver</div>
-          <div style={{ fontSize: 11, color: MUTED }}>Guided problem-solving · {examLabel} mode</div>
+          <div style={{ fontWeight: 700, fontSize: 14.5, fontFamily: "var(--font-syne, inherit)" }}>Socratic Solver</div>
+          <div style={{ fontSize: 11, color: MUTED, fontStyle: "italic", fontFamily: "var(--font-playfair, inherit)" }}>Guided hints. No free answers.</div>
         </div>
-        <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
-          <Badge>{examLabel}</Badge>
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
+          <div className="mobile-stats-btn" style={{ display: "none", cursor: "pointer", background: "rgba(255,255,255,0.08)", padding: "6px 10px", borderRadius: 8, fontSize: 12, fontWeight: 600 }}
+               onClick={() => setShowMobileStats(s => !s)}>
+            {showMobileStats ? "Close Stats" : "Stats"}
+          </div>
+          <Badge context="dashboard">{hintsGiven} / 5 Hints Used</Badge>
         </div>
       </div>
 
       <div style={{ flex: 1, display: "flex", overflow: "hidden", position: "relative", zIndex: 1 }}>
+        {/* Overlay when mobile stats are open */}
+        {showMobileStats && (
+          <div onClick={() => setShowMobileStats(false)} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 40 }} />
+        )}
+        
         {/* Chat area */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-          <div ref={chatRef} style={{ flex: 1, overflowY: "auto", padding: "28px 32px", display: "flex", flexDirection: "column", gap: 20 }}>
+          <div ref={chatRef} className="solver-chat" style={{ flex: 1, overflowY: "auto", padding: "28px 32px", display: "flex", flexDirection: "column", gap: 20 }}>
             {messages.map((m, i) => (
               <div key={i} style={{ display: "flex", gap: 12, flexDirection: m.role === "user" ? "row-reverse" : "row", alignItems: "flex-end" }}>
                 {m.role === "assistant" && (
@@ -279,7 +311,7 @@ function SolverInner() {
           </div>
 
           {/* Input area */}
-          <div style={{ padding: "12px 28px 20px", borderTop: `1px solid ${BORDER}`, background: CARD }}>
+          <div className="solver-input" style={{ padding: "12px 28px 20px", borderTop: `1px solid ${BORDER}`, background: CARD }}>
 
             {/* Hint chips — only shown AFTER the first problem+reply exchange */}
             {messages.length >= 3 && !loading && (
@@ -347,7 +379,7 @@ function SolverInner() {
         </div>
 
         {/* Right panel */}
-        <div style={{ width: 280, borderLeft: `1px solid ${BORDER}`, padding: "24px 20px", display: "flex", flexDirection: "column", gap: 16, overflowY: "auto" }}>
+        <div className="solver-right-panel" style={{ width: 280, borderLeft: `1px solid ${BORDER}`, padding: "24px 20px", display: "flex", flexDirection: "column", gap: 16, overflowY: "auto" }}>
           <Card context="dashboard" style={{ padding: 18 }}>
             <div style={{ fontSize: 12, color: MUTED, fontWeight: 600, marginBottom: 12, letterSpacing: 0.5 }}>HINT PROGRESS</div>
             <div style={{ display: "flex", gap: 6 }}>
