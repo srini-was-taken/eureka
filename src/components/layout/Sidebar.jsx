@@ -9,7 +9,7 @@ import { getExamConfig, DEFAULT_EXAM_KEY } from "@/lib/examConfig";
 const NAV_ITEMS = [
   { label: "Dashboard",       icon: "home",    href: "/dashboard" },
   { label: "Socratic Solver", icon: "brain",   href: "/solver"    },
-  { label: "Feynman Mode",    icon: "feynman", href: "/feynman"   },
+  { label: "Feynman Explainer", icon: "feynman", href: "/feynman"   },
   { label: "Focus Mode",      icon: "eye",     href: "/focus"     },
   { label: "Mistake Journal", icon: "mistake", href: "/mistakes"  },
   { label: "Problem Bank",    icon: "book",    href: "/problems"  },
