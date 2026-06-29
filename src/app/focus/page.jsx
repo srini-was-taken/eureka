@@ -367,34 +367,45 @@ export default function FocusPage() {
             const isActive = activeTab === tab.key;
             return (
               <div key={tab.key} onClick={() => setActiveTab(tab.key)}
-                style={{ padding: "13px 28px", display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontFamily: INTER, fontSize: 14, fontWeight: isActive ? 700 : 500, color: isActive ? TEXT : MUTED, borderBottom: `2px solid ${isActive ? TEAL : "transparent"}`, transition: "all .15s", background: isActive ? TEAL + "08" : "transparent", whiteSpace: "nowrap", flexShrink: 0 }}>
+                style={{
+                  padding: "16px 28px", display: "flex", alignItems: "center", gap: 10, cursor: "pointer",
+                  fontFamily: INTER, fontSize: 13, fontWeight: isActive ? 600 : 500,
+                  color: isActive ? TEAL : MUTED,
+                  background: isActive ? TEAL + "08" : "transparent",
+                  borderBottom: `2px solid ${isActive ? TEAL : "transparent"}`,
+                  transition: "all .15s", whiteSpace: "nowrap", flexShrink: 0
+                }}>
                 {tab.label}
-                {tab.badge ? <span style={{ fontSize: 10, fontWeight: 800, background: TEAL + "25", color: TEAL, borderRadius: 999, padding: "1px 7px" }}>{tab.badge}</span> : null}
+                {tab.badge ? <span style={{ fontSize: 10, fontWeight: 800, background: isActive ? TEAL + "25" : "rgba(255,255,255,0.1)", color: isActive ? TEAL : MUTED, borderRadius: 999, padding: "2px 8px" }}>{tab.badge}</span> : null}
               </div>
             );
           })}
 
           {/* Tool buttons in tab bar right */}
-          <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 4, padding: "0 12px", flexShrink: 0 }}>
+          <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 20, padding: "0 28px", flexShrink: 0 }}>
             <div onClick={() => setMode(m => m === "highlight" ? null : "highlight")}
-              style={{ padding: "6px 10px", borderRadius: 7, cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: INTER, color: mode === "highlight" ? "#fef08a" : MUTED, background: mode === "highlight" ? "#fef08a10" : "transparent", border: `1px solid ${mode === "highlight" ? "#fef08a30" : "transparent"}`, transition: "all .15s" }}>
+              style={{ cursor: "pointer", fontSize: 13, fontWeight: 500, fontFamily: INTER, color: mode === "highlight" ? "#fef08a" : MUTED, transition: "color .15s" }}>
               Highlight
             </div>
             <div onClick={() => setMode(m => m === "note" ? null : "note")}
-              style={{ padding: "6px 10px", borderRadius: 7, cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: INTER, color: mode === "note" ? TEAL : MUTED, background: mode === "note" ? TEAL + "10" : "transparent", border: `1px solid ${mode === "note" ? TEAL + "30" : "transparent"}`, transition: "all .15s" }}>
+              style={{ cursor: "pointer", fontSize: 13, fontWeight: 500, fontFamily: INTER, color: mode === "note" ? TEAL : MUTED, transition: "color .15s" }}>
               Note
             </div>
-            <div style={{ width: 1, height: 16, background: BORDER, margin: "0 2px" }} />
+
+            <div style={{ width: 1, height: 16, background: BORDER, margin: "0 4px" }} />
+
             <div onClick={generateQuestions}
-              style={{ padding: "6px 10px", borderRadius: 7, cursor: pdfText && !genQLoading ? "pointer" : "default", fontSize: 12, fontWeight: 600, fontFamily: INTER, color: TEAL, opacity: pdfText ? 1 : 0.4 }}>
+              style={{ cursor: pdfText && !genQLoading ? "pointer" : "default", fontSize: 13, fontWeight: 500, fontFamily: INTER, color: TEAL, opacity: pdfText ? 1 : 0.4, transition: "opacity .15s" }}>
               {genQLoading ? "Generating…" : "Generate Quiz"}
             </div>
             <div onClick={() => setShowFlashcardModal(true)}
-              style={{ padding: "6px 10px", borderRadius: 7, cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: INTER, color: "#818cf8" }}>
+              style={{ cursor: "pointer", fontSize: 13, fontWeight: 500, fontFamily: INTER, color: "#818cf8", transition: "opacity .15s" }}
+              onMouseEnter={e => e.currentTarget.style.opacity = "0.8"} onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
               + Card
             </div>
             <div onClick={() => { const params = new URLSearchParams(); if (pdfText) params.set("pdfText", pdfText.slice(0, 8000)); router.push(`/feynman?${params.toString()}`); }}
-              style={{ padding: "6px 10px", borderRadius: 7, cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: INTER, color: "#e879f9" }}>
+              style={{ cursor: "pointer", fontSize: 13, fontWeight: 500, fontFamily: INTER, color: "#e879f9", transition: "opacity .15s" }}
+              onMouseEnter={e => e.currentTarget.style.opacity = "0.8"} onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
               Feynman It
             </div>
           </div>
