@@ -97,13 +97,10 @@ function FaqItem({ q, a, open, onToggle }) {
   );
 }
 
+// ─── GIF Placeholder ──────────────────────────────────────────────────────────
 function GifPlaceholder({ label = "GIF", aspect = "16/9", style = {}, gifSrc = "", staticSrc = "" }) {
-  const [hovered, setHovered] = useState(false);
-
   return (
     <div 
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
       style={{
         aspectRatio: aspect,
         background: "rgba(255,255,255,0.03)",
@@ -115,21 +112,41 @@ function GifPlaceholder({ label = "GIF", aspect = "16/9", style = {}, gifSrc = "
       }}
     >
       {gifSrc ? (
-        <img 
-          src={hovered ? gifSrc : (staticSrc || gifSrc)} 
-          alt={label}
-          style={{ width: "100%", height: "100%", objectFit: "cover" }} 
-        />
+        <>
+          <img 
+            className="gif-static-view"
+            src={staticSrc || gifSrc} 
+            alt={label}
+            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} 
+          />
+          <img 
+            className="gif-animated-view"
+            src={gifSrc} 
+            alt={label}
+            style={{ width: "100%", height: "100%", objectFit: "cover", display: "none" }} 
+          />
+        </>
       ) : (
         <>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5">
-            <rect x="2" y="2" width="20" height="20" rx="3" />
-            <circle cx="8.5" cy="8.5" r="1.5" />
-            <path d="m21 15-5-5L5 21" />
-          </svg>
-          <span style={{ fontSize: 10, fontFamily: MONO, color: "rgba(255,255,255,0.22)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
-            {hovered ? "Play GIF" : label}
-          </span>
+          <div className="gif-static-view" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5">
+              <rect x="2" y="2" width="20" height="20" rx="3" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <path d="m21 15-5-5L5 21" />
+            </svg>
+            <span style={{ fontSize: 10, fontFamily: MONO, color: "rgba(255,255,255,0.22)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+              {label}
+            </span>
+          </div>
+          <div className="gif-animated-view" style={{ display: "none", flexDirection: "column", alignItems: "center", gap: 8 }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="1.5">
+              <rect x="2" y="2" width="20" height="20" rx="3" />
+              <polygon points="10 8 16 12 10 16 10 8" fill="rgba(255,255,255,0.6)" />
+            </svg>
+            <span style={{ fontSize: 10, fontFamily: MONO, color: "rgba(255,255,255,0.5)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+              Play GIF
+            </span>
+          </div>
         </>
       )}
     </div>
@@ -140,7 +157,7 @@ function GifPlaceholder({ label = "GIF", aspect = "16/9", style = {}, gifSrc = "
 function BentoCard({ children, style = {}, className = "" }) {
   return (
     <div
-      className={className}
+      className={`bento-card ${className}`}
       style={{
         background: "rgba(255,255,255,0.055)",
         backdropFilter: "blur(20px)",
@@ -259,7 +276,7 @@ function FocusBentoCard() {
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const stats = [
-  { n: "98th", body: "percentile performance is reached by students who receive personalized 1-on-1 tutoring.", cite: "Bloom, 1984 — 2 Sigma Problem" },
+  { n: "98%ile", body: "performance is reached by students who receive personalized 1-on-1 tutoring.", cite: "Bloom, 1984 — 2 Sigma Problem" },
   { n: "2.4×", body: "more likely to retain knowledge through active recall vs passive reading.", cite: "Karpicke & Roediger, 2008 — Science" },
   { n: "0", body: "marks awarded for incorrect or partial understanding in competitive exams." },
 ];
@@ -451,7 +468,7 @@ export default function LandingPage() {
             </h1>
 
             <p className="he he3" style={{ fontSize: 15.5, color: T.muted, lineHeight: 1.75, maxWidth: 440, marginBottom: 28, fontWeight: 400, fontFamily: INTER }}>
-              EurekaAI uses the Socratic method and Feynman technique; systems used by Nobel laureates; to help students master complex subjects globally, from University STEM and APs, and to competitive exams with millions of takers such as the JEE Advanced and the SATs.
+              EurekaAI uses the Socratic method and Feynman technique; systems used by Nobel laureates; to help students master complex subjects globally, from University STEM and APs, and to competitive exams with millions of takers such as the JEE Advanced and the SAT.
             </p>
 
             <div className="he he4" style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
