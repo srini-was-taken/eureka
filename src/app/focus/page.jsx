@@ -31,7 +31,7 @@ function FlashcardModal({ onSave, onClose }) {
           <textarea value={back} onChange={e => setBack(e.target.value)} rows={3} placeholder="e.g. In the absence of external torques, total angular momentum L = Iω remains constant." style={inputStyle} />
         </div>
         <div style={{ display: "flex", gap: 10 }}>
-          <Btn onClick={() => { if (front.trim() && back.trim()) onSave({ front: front.trim(), back: back.trim() }); }} style={{ flex: 1, justifyContent: "center" }}>Save Card ✦</Btn>
+          <Btn onClick={() => { if (front.trim() && back.trim()) onSave({ front: front.trim(), back: back.trim() }); }} style={{ flex: 1, justifyContent: "center" }}>Save Card <Icon name="brain" size={14} /></Btn>
           <Btn variant="ghost" onClick={onClose}>Cancel</Btn>
         </div>
       </div>

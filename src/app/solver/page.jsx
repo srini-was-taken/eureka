@@ -277,7 +277,7 @@ function SolverInner() {
             {messages.map((m, i) => (
               <div key={i} style={{ display: "flex", gap: 12, flexDirection: m.role === "user" ? "row-reverse" : "row", alignItems: "flex-end" }}>
                 {m.role === "assistant" && (
-                  <div style={{ width: 34, height: 34, background: TEAL + "20", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17, flexShrink: 0 }}>✦</div>
+                  <div style={{ width: 34, height: 34, background: TEAL + "20", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><Icon name="brain" size={17} color={TEAL} /></div>
                 )}
                 <div style={{
                   maxWidth: "65%",

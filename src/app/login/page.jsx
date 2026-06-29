@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { TEAL, TEAL_DIM, BG, CARD, CARD2, BORDER, TEXT, MUTED } from "@/lib/theme";
 import Btn from "@/components/ui/Btn";
+import Icon from "@/components/ui/Icon";
 import { createClient } from "@/lib/supabase/client";
 
 const EXAM_OPTIONS = [
@@ -116,7 +117,7 @@ export default function LoginPage() {
       {/* Logo */}
       <div style={{ padding: "24px 40px", cursor: "pointer" }} onClick={() => router.push("/")}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 32, height: 32, background: `linear-gradient(135deg,${TEAL},${TEAL_DIM})`, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15 }}>✦</div>
+          <div style={{ width: 32, height: 32, background: `linear-gradient(135deg,${TEAL},${TEAL_DIM})`, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}><Icon name="brain" size={16} color="#fff" /></div>
           <span style={{ fontSize: 17, fontWeight: 800, letterSpacing: -0.5 }}>EurekaAI</span>
         </div>
       </div>
@@ -180,7 +181,7 @@ export default function LoginPage() {
                 </div>
               )}
               <Btn onClick={handleSubmit} style={{ width: "100%", justifyContent: "center", padding: 14, fontSize: 15, marginTop: 4, opacity: loading ? 0.7 : 1 }}>
-                {loading ? "Please wait…" : mode === "login" ? "Log In ✦" : "Create Account ✦"}
+                {loading ? "Please wait…" : <>{mode === "login" ? "Log In " : "Create Account "} <Icon name="brain" size={14} /></>}
               </Btn>
             </div>
 

@@ -247,10 +247,10 @@ const stats = [
 ];
 
 const faqs = [
-  { q: "Is this just another AI solver?", a: "No — and that's the entire point. EurekaAI refuses to give you the answer until you've genuinely attempted the problem. It asks Socratic questions that expose where your reasoning breaks down." },
-  { q: "What topics does it cover?", a: "Full JEE Advanced syllabus across Physics, Chemistry, and Mathematics — mechanics, electrostatics, organic chemistry, integral calculus. The archive covers 20+ years of past JEE Advanced papers." },
-  { q: "How is this different from Doubtnut or PhysicsWallah AI?", a: "Doubtnut and PhysicsWallah show you the solution. EurekaAI doesn't. Passive reading of solutions produces shallow encoding. Active retrieval — what EurekaAI forces — produces knowledge that survives exam day." },
-  { q: "Is it free?", a: "Yes. The core Socratic Solver and Feynman Explainer are free. Advanced features — the full 20-year archive, Concept Graph, and adaptive mistake surfacing — are part of the full plan." },
+  { q: "Is this just another AI solver?", a: "No, EurekaAI isn't built to just give you answers. Our Socratic Solver acts as a world-class tutor, asking guided questions to help you reach the solution yourself." },
+  { q: "What topics does it cover?", a: "EurekaAI is completely subject-agnostic. Whether you're studying University Physics, AP Chemistry, or high school History, the AI dynamically adapts its focus to your material." },
+  { q: "How is this different from standard AI?", a: "While general AI often blurts out the answer, EurekaAI is designed exclusively for active learning. Through Focus Mode and Feynman Explainer, it ensures you actually retain the knowledge." },
+  { q: "Is it free?", a: "Yes! You can start using our core tools completely for free. We also offer premium features for advanced progress tracking and limitless AI interactions." },
 ];
 
 const steps = [
@@ -642,7 +642,7 @@ export default function LandingPage() {
           boxShadow: "0 4px 40px rgba(10,10,10,.06)",
         }}>
           <div style={{ width: 46, height: 46, borderRadius: 11, background: T.accent, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 18px" }}>
-            <span style={{ color: "#fff", fontWeight: 900, fontSize: 18 }}>✦</span>
+            <Icon name="brain" size={24} color="#fff" />
           </div>
           <h2 style={{ fontFamily: INTER, fontSize: "clamp(24px, 3vw, 38px)", fontWeight: 900, letterSpacing: "-0.03em", color: T.text, marginBottom: 12, lineHeight: 1.1 }}>
             Ready to actually understand?
@@ -651,8 +651,8 @@ export default function LandingPage() {
             Stop consuming solutions. Start building the kind of understanding that survives exam day.
           </p>
           <button onClick={() => router.push("/login")} className="cta"
-            style={{ fontSize: 14, fontWeight: 700, color: "#fff", background: T.accent, border: "none", borderRadius: 11, padding: "14px 34px", cursor: "pointer", fontFamily: INTER }}>
-            Start for free — no card required ✦
+            style={{ fontSize: 14, fontWeight: 700, color: "#fff", background: T.accent, border: "none", borderRadius: 11, padding: "14px 34px", cursor: "pointer", fontFamily: INTER, display: "flex", alignItems: "center", gap: 8 }}>
+            Start for free <Icon name="brain" size={14} color="#fff" />
           </button>
         </div>
       </section>
@@ -663,11 +663,11 @@ export default function LandingPage() {
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 5 }}>
               <div style={{ width: 22, height: 22, borderRadius: 6, background: T.accent, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <span style={{ color: "#fff", fontWeight: 900, fontSize: 9 }}>✦</span>
+                <Icon name="brain" size={12} color="#fff" />
               </div>
               <span style={{ fontFamily: INTER, fontWeight: 800, fontSize: 13.5, color: T.text }}>EurekaAI</span>
             </div>
-            <p style={{ fontSize: 12, color: T.muted, lineHeight: 1.5, maxWidth: 260, fontFamily: INTER }}>Made for JEE Advanced aspirants who want to actually understand.</p>
+            <p style={{ fontSize: 12, color: T.muted, lineHeight: 1.5, maxWidth: 260, fontFamily: INTER }}>Made for students worldwide who want to actually understand.</p>
             <p style={{ fontSize: 11.5, color: T.muted, marginTop: 10, fontFamily: INTER }}>© {new Date().getFullYear()} EurekaAI. All rights reserved.</p>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 18 }}>

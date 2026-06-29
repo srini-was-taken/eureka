@@ -169,7 +169,7 @@ export default function DashboardPage() {
             onClick={() => router.push("/solver")}
             style={{ borderRadius: 10 }}
           >
-            Solve with AI ✦
+            <>Solve with AI <Icon name="brain" size={14} /></>
           </Btn>
         </div>
 
