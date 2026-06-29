@@ -198,7 +198,11 @@ export default function FocusPage() {
 
   function getRelativePos(e, el) {
     const rect = el.getBoundingClientRect();
-    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    // Return normalised [0,1] fractions so coords are resolution-independent
+    return {
+      x: (e.clientX - rect.left) / rect.width,
+      y: (e.clientY - rect.top) / rect.height,
+    };
   }
 
   function onOverlayMouseDown(e, pageNum, overlayEl) {
@@ -212,13 +216,19 @@ export default function FocusPage() {
   function onOverlayMouseMove(e, pageNum, overlayEl) {
     if (mode === "highlight" && dragStart.current && dragStart.current.pageNum === pageNum) {
       const pos = getRelativePos(e, overlayEl);
-      setDraggingHighlight({ pageNum, x: Math.min(pos.x, dragStart.current.x), y: Math.min(pos.y, dragStart.current.y), w: Math.abs(pos.x - dragStart.current.x), h: Math.abs(pos.y - dragStart.current.y) });
+      setDraggingHighlight({
+        pageNum,
+        x: Math.min(pos.x, dragStart.current.x),
+        y: Math.min(pos.y, dragStart.current.y),
+        w: Math.abs(pos.x - dragStart.current.x),
+        h: Math.abs(pos.y - dragStart.current.y),
+      });
     }
   }
 
   function onOverlayMouseUp(e, pageNum, overlayEl) {
     if (mode === "highlight" && dragStart.current && draggingHighlight) {
-      if (draggingHighlight.w > 10 && draggingHighlight.h > 5) {
+      if (draggingHighlight.w > 0.005 && draggingHighlight.h > 0.003) {
         setHighlights(h => [...h, { id: Date.now(), ...draggingHighlight }]);
       }
       dragStart.current = null;
@@ -390,17 +400,42 @@ export default function FocusPage() {
                   onMouseDown={e => onOverlayMouseDown(e, pageNum, e.currentTarget)}
                   onMouseMove={e => onOverlayMouseMove(e, pageNum, e.currentTarget)}
                   onMouseUp={e => onOverlayMouseUp(e, pageNum, e.currentTarget)}>
-                  {pageHighlights.map(h => {
-                    const scaleX = Math.min(width, 780) / width;
-                    return <div key={h.id} onClick={() => setHighlights(hs => hs.filter(x => x.id !== h.id))} title="Click to remove" style={{ position: "absolute", left: h.x * scaleX, top: h.y * scaleX, width: h.w * scaleX, height: h.h * scaleX, background: "#fef08a50", border: "1px solid #fef08a80", cursor: "pointer", borderRadius: 2 }} />;
-                  })}
-                  {isDraggingThisPage && draggingHighlight.w > 5 && (
-                    <div style={{ position: "absolute", left: draggingHighlight.x, top: draggingHighlight.y, width: draggingHighlight.w, height: draggingHighlight.h, background: "#fef08a40", border: "2px dashed #fef08a", borderRadius: 2, pointerEvents: "none" }} />
+                  {pageHighlights.map(h => (
+                    // h.x/y/w/h are normalised [0,1] fractions — multiply by 100 for %
+                    <div key={h.id}
+                      onClick={() => setHighlights(hs => hs.filter(x => x.id !== h.id))}
+                      title="Click to remove"
+                      style={{
+                        position: "absolute",
+                        left: `${h.x * 100}%`, top: `${h.y * 100}%`,
+                        width: `${h.w * 100}%`, height: `${h.h * 100}%`,
+                        background: "#fef08a50", border: "1px solid #fef08a80",
+                        cursor: "pointer", borderRadius: 2,
+                      }}
+                    />
+                  ))}
+                  {isDraggingThisPage && draggingHighlight.w > 0.002 && (
+                    <div style={{
+                      position: "absolute",
+                      left: `${draggingHighlight.x * 100}%`, top: `${draggingHighlight.y * 100}%`,
+                      width: `${draggingHighlight.w * 100}%`, height: `${draggingHighlight.h * 100}%`,
+                      background: "#fef08a40", border: "2px dashed #fef08a",
+                      borderRadius: 2, pointerEvents: "none",
+                    }} />
                   )}
-                  {pageNotes.map(n => {
-                    const scaleX = Math.min(width, 780) / width;
-                    return <div key={n.id} onClick={e => { e.stopPropagation(); setActiveNote(activeNote?.id === n.id ? null : n); }} style={{ position: "absolute", left: n.x * scaleX - 12, top: n.y * scaleX - 12, width: 24, height: 24, background: TEAL, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, cursor: "pointer", boxShadow: `0 2px 8px ${TEAL}60`, zIndex: 10 }} title={n.text}>🗒</div>;
-                  })}
+                  {pageNotes.map(n => (
+                    <div key={n.id}
+                      onClick={e => { e.stopPropagation(); setActiveNote(activeNote?.id === n.id ? null : n); }}
+                      style={{
+                        position: "absolute",
+                        left: `calc(${n.x * 100}% - 12px)`, top: `calc(${n.y * 100}% - 12px)`,
+                        width: 24, height: 24, background: TEAL, borderRadius: "50%",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        fontSize: 12, cursor: "pointer", boxShadow: `0 2px 8px ${TEAL}60`, zIndex: 10,
+                      }}
+                      title={n.text}
+                    >🗒</div>
+                  ))}
                 </div>
                 <div style={{ position: "absolute", bottom: -22, left: 0, right: 0, textAlign: "center", fontSize: 11, color: MUTED }}>Page {pageNum} of {totalPages}</div>
               </div>
