@@ -5,25 +5,25 @@ import Icon from "@/components/ui/Icon";
 
 // ─── Tokens — clean white aesthetic ──────────────────────────────────────────
 const T = {
-  bg:      "#FAFAFA",
-  bg2:     "#F2F2F2",
+  bg: "#FAFAFA",
+  bg2: "#F2F2F2",
   surface: "#FFFFFF",
-  border:  "#E4E4E4",
-  text:    "#0A0A0A",
-  muted:   "#6B6B6B",
-  accent:  "#1A4D2E",
+  border: "#E4E4E4",
+  text: "#0A0A0A",
+  muted: "#6B6B6B",
+  accent: "#1A4D2E",
   accentL: "#E8F0EB",
   accentB: "#C2D6CA",
   // dark section tokens
-  dk:      "#0A0A0A",
-  dkSurf:  "rgba(255,255,255,0.05)",
-  dkBord:  "rgba(255,255,255,0.10)",
-  dkText:  "#F0F0F0",
+  dk: "#0A0A0A",
+  dkSurf: "rgba(255,255,255,0.05)",
+  dkBord: "rgba(255,255,255,0.10)",
+  dkText: "#F0F0F0",
   dkMuted: "#888",
 };
 
 const INTER = "'Inter', system-ui, sans-serif";
-const MONO  = "'JetBrains Mono', monospace";
+const MONO = "'JetBrains Mono', monospace";
 
 // ─── Scroll-reveal + stagger ──────────────────────────────────────────────────
 function useScrollReveal() {
@@ -67,17 +67,17 @@ function useParallax(ref, speed = 0.2) {
 // ─── SVG icons ────────────────────────────────────────────────────────────────
 const Chevron = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="6 9 12 15 18 9"/>
+    <polyline points="6 9 12 15 18 9" />
   </svg>
 );
 const TwitterX = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
   </svg>
 );
 const GithubIcon = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2z"/>
+    <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2z" />
   </svg>
 );
 
@@ -109,9 +109,9 @@ function GifPlaceholder({ label = "GIF", aspect = "16/9", style = {} }) {
       ...style,
     }}>
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5">
-        <rect x="2" y="2" width="20" height="20" rx="3"/>
-        <circle cx="8.5" cy="8.5" r="1.5"/>
-        <path d="m21 15-5-5L5 21"/>
+        <rect x="2" y="2" width="20" height="20" rx="3" />
+        <circle cx="8.5" cy="8.5" r="1.5" />
+        <path d="m21 15-5-5L5 21" />
       </svg>
       <span style={{ fontSize: 10, fontFamily: MONO, color: "rgba(255,255,255,0.22)", letterSpacing: "0.12em", textTransform: "uppercase" }}>{label}</span>
     </div>
@@ -241,9 +241,9 @@ function FocusBentoCard() {
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const stats = [
-  { n: "87%",  body: "of JEE aspirants who fail say they understood the concept before the exam." },
+  { n: "87%", body: "of JEE aspirants who fail say they understood the concept before the exam." },
   { n: "2.4×", body: "more likely to retain knowledge through active recall vs passive reading.", cite: "Karpicke & Roediger, 2008 — Science" },
-  { n: "0",    body: "marks awarded for almost-correct reasoning in JEE Advanced. Partial is nothing." },
+  { n: "0", body: "marks awarded for almost-correct reasoning in JEE Advanced. Partial is nothing." },
 ];
 
 const faqs = [
@@ -465,7 +465,7 @@ export default function LandingPage() {
               animation: "slide-up 0.65s cubic-bezier(.22,1,.36,1) 0.18s both",
             }}>
               <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
-                {["#FF5F57","#FEBC2E","#28C840"].map(c => <div key={c} style={{ width: 9, height: 9, borderRadius: "50%", background: c }} />)}
+                {["#FF5F57", "#FEBC2E", "#28C840"].map(c => <div key={c} style={{ width: 9, height: 9, borderRadius: "50%", background: c }} />)}
               </div>
               <p style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#818CF8", marginBottom: 10, fontFamily: MONO }}><Icon name="brain" size={10} color="#818CF8" /> Feynman Explainer</p>
               <div style={{ background: "#F0EFFF", borderRadius: 8, padding: "10px 12px", marginBottom: 10, border: "1px solid #C7D2FE" }}>
@@ -483,7 +483,7 @@ export default function LandingPage() {
               animation: "slide-up 0.65s cubic-bezier(.22,1,.36,1) 0.34s both",
             }}>
               <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
-                {["#FF5F57","#FEBC2E","#28C840"].map(c => <div key={c} style={{ width: 9, height: 9, borderRadius: "50%", background: c }} />)}
+                {["#FF5F57", "#FEBC2E", "#28C840"].map(c => <div key={c} style={{ width: 9, height: 9, borderRadius: "50%", background: c }} />)}
               </div>
               <p style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: T.accent, marginBottom: 10, fontFamily: MONO }}><Icon name="brain" size={10} color={T.accent} /> Socratic Solver</p>
               <div style={{ fontFamily: MONO, fontSize: 11, background: "#FAF9F7", borderRadius: 8, padding: "10px 12px", marginBottom: 10, border: `1px solid ${T.border}`, lineHeight: 1.75, color: T.text }}>
@@ -671,12 +671,12 @@ export default function LandingPage() {
             <p style={{ fontSize: 11.5, color: T.muted, marginTop: 10, fontFamily: INTER }}>© {new Date().getFullYear()} EurekaAI. All rights reserved.</p>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-            {[["https://twitter.com", <TwitterX key="tw" />], ["https://github.com", <GithubIcon key="gh" />]].map(([href, icon]) => (
+            {[["https://github.com/srin1k3th", <GithubIcon key="gh" />]].map(([href, icon]) => (
               <a key={href} href={href} target="_blank" rel="noopener noreferrer" style={{ color: T.muted, display: "flex", transition: "color .15s" }}
                 onMouseEnter={e => e.currentTarget.style.color = T.text}
                 onMouseLeave={e => e.currentTarget.style.color = T.muted}>{icon}</a>
             ))}
-            <a href="mailto:hello@eurekaai.app" style={{ fontSize: 12.5, color: T.muted, textDecoration: "none", fontFamily: INTER, transition: "color .15s" }}
+            <a href="mailto:srinikethnatarajan@gmail.com" style={{ fontSize: 12.5, color: T.muted, textDecoration: "none", fontFamily: INTER, transition: "color .15s" }}
               onMouseEnter={e => e.currentTarget.style.color = T.text}
               onMouseLeave={e => e.currentTarget.style.color = T.muted}>Contact</a>
           </div>
