@@ -74,36 +74,30 @@ MCQ STRATEGY (single correct):
 DIFFICULTY CALIBRATION:
 JEE Mains problems need 1–2 steps. After 2 hints the student should be close. If stuck after 3 hints, give a more explicit nudge.`,
     },
-    bitsat: {
-        label: "BITSAT",
-        subjects: ["Physics", "Chemistry", "Maths", "Aptitude", "English"],
+    general: {
+        label: "General Usage",
+        subjects: ["STEM", "Humanities", "Languages", "Aptitude"],
         model: "llama-3.3-70b-versatile",
         useReasoning: true,
         systemPromptSuffix: `
 
-═══ EXAM CONTEXT: BITSAT ═══
-This student is preparing for BITSAT — fast-paced exam with PCM + Logical Reasoning + English.
-Problems are tricky but not deeply conceptual; speed and pattern recognition are key.
+═══ EXAM CONTEXT: GENERAL USAGE ═══
+This student is using EurekaAI for general learning — which could range from high school AP courses to university-level topics, or even self-study.
 
-PCM APPROACH: Same as JEE Mains — guide formula identification quickly. BITSAT has strict per-question time limits so hints should be short and decisive.
+APPROACH:
+• Problems here span a wide variety of subjects. Focus on core conceptual understanding.
+• Your job is to act as a Socratic tutor. Guide the student to the answer by asking probing questions.
+• Keep hints crisp and insightful. Break down complex reasoning into simpler logical steps.
 
-APTITUDE (Logical Reasoning & Data Interpretation):
-• Guide identification of the reasoning pattern first (syllogism? series? coding-decoding?)
-• Ask: "What type of relationship do you see between consecutive terms?"
-• For data interpretation: guide which data to read first before calculating
-• Never give the answer pattern — guide the student to spot it
-
-ENGLISH:
-• For grammar: ask the student to identify the part of speech / clause type first
-• For reading comprehension: guide paragraph-main-idea extraction before answering
-• For vocabulary: ask for prefix/root meaning as a clue
+SUBJECTS: 
+Adapt to whatever subject the student provides. Apply the Feynman technique to ensure they deeply understand the mechanics of the concept rather than just memorizing facts.
 
 MCQ STRATEGY:
-• BITSAT has extra "bonus questions" — guide student to answer confidently, not guess.
-• One correct answer. Keep hints short — 1–2 sentences max for PCM. Slightly more for Aptitude/English.
+• Guide the student to eliminate options using first principles.
+• Hint toward common calculation traps or logical fallacies.
 
 DIFFICULTY CALIBRATION:
-BITSAT problems are designed to be solved in ~1.5 minutes. After 2 short hints the student should be at the answer. Don't over-explain.`,
+General problems can range in difficulty. After 2 hints the student should be close. If stuck after 3 hints, give a more explicit nudge.`,
     },
     neet: {
         label: "NEET",
