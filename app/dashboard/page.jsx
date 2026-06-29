@@ -29,16 +29,20 @@ function getDaysUntil(targetDate) {
 }
 
 function getExamSubtitle(exam) {
-  if (!exam || exam === "None / General Use") return "Keep learning";
-  if (exam === "JEE Advanced") {
+  if (!exam) return "Keep learning";
+  if (exam === "jee_adv") {
     const days = getDaysUntil(new Date("2026-05-18"));
     return `JEE Advanced · ${days} days left`;
   }
-  if (exam === "JEE Mains") {
+  if (exam === "jee_mains") {
     const days = getDaysUntil(new Date("2026-04-05"));
     return `JEE Mains · ${days} days left`;
   }
-  if (exam === "NEET") {
+  if (exam === "bitsat") {
+    const days = getDaysUntil(new Date("2026-05-25"));
+    return `BITSAT · ${days} days left`;
+  }
+  if (exam === "neet") {
     const days = getDaysUntil(new Date("2026-05-03"));
     return `NEET 2026 · ${days} days left`;
   }
