@@ -1,7 +1,4 @@
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
-// Use lib path directly to avoid pdf-parse's test-data loader crashing in Next.js
-const pdf = require("pdf-parse/lib/pdf-parse.js");
+﻿import pdf from "pdf-parse";
 
 export async function POST(req) {
   try {
