@@ -212,7 +212,7 @@ function SocraticBentoCard() {
         </p>
       </div>
       {/* GIF placeholder — tall format for hero card */}
-      <GifPlaceholder label="Socratic Solver Demo" aspect="auto" style={{ flex: 1, minHeight: 200 }} />
+      <GifPlaceholder label="Socratic Solver Demo" aspect="auto" style={{ flex: 1, minHeight: 200, width: "100%" }} />
     </BentoCard>
   );
 }
