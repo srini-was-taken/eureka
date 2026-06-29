@@ -134,9 +134,29 @@ export default function FocusPage() {
   }
 
   useEffect(() => {
-    if (!running) return;
+    if (!running) {
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => { });
+      }
+      return;
+    }
+
+    const enterFullscreen = async () => {
+      try {
+        if (!document.fullscreenElement) {
+          await document.documentElement.requestFullscreen();
+        }
+      } catch (e) {
+        console.warn("Fullscreen request failed:", e);
+      }
+    };
+
+    enterFullscreen();
+
     const t = setInterval(() => setTimer(s => s > 0 ? s - 1 : 0), 1000);
-    return () => clearInterval(t);
+    return () => {
+      clearInterval(t);
+    };
   }, [running]);
 
   useEffect(() => {
