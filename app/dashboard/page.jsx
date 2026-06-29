@@ -55,6 +55,8 @@ export default function DashboardPage() {
   const [feynmanAvg, setFeynmanAvg] = useState(null);
   const [weakTopics, setWeakTopics] = useState([]);
   const [unresolvedMistakes, setUnresolvedMistakes] = useState(null);
+  const [dailyProblem, setDailyProblem] = useState(null);
+  const [dailyProblemLoaded, setDailyProblemLoaded] = useState(false);
 
   useEffect(() => {
     async function loadDashboard() {
@@ -62,11 +64,12 @@ export default function DashboardPage() {
       if (!user) { router.push("/login"); return; }
 
       // Load in parallel
-      const [profileRes, solverRes, feynmanRes, mistakesRes] = await Promise.all([
+      const [profileRes, solverRes, feynmanRes, mistakesRes, problemsRes] = await Promise.all([
         supabase.from("profiles").select("name, exam").eq("id", user.id).single(),
         supabase.from("solver_sessions").select("id", { count: "exact" }).eq("user_id", user.id),
         supabase.from("feynman_attempts").select("score, gaps").eq("user_id", user.id).order("created_at", { ascending: false }).limit(20),
         supabase.from("mistakes").select("id", { count: "exact" }).eq("user_id", user.id).eq("status", "unresolved"),
+        supabase.from("problem_attempts").select("id, title, subject, difficulty, statement").eq("user_id", user.id),
       ]);
 
       // Profile
@@ -101,6 +104,14 @@ export default function DashboardPage() {
 
       // Unresolved mistakes
       setUnresolvedMistakes(mistakesRes.count ?? 0);
+
+      // Random problem of the day from problem bank
+      const allProblems = problemsRes.data || [];
+      if (allProblems.length > 0) {
+        const randomIdx = Math.floor(Math.random() * allProblems.length);
+        setDailyProblem(allProblems[randomIdx]);
+      }
+      setDailyProblemLoaded(true);
     }
     loadDashboard();
   }, []);
@@ -131,7 +142,7 @@ export default function DashboardPage() {
               )}
             </p>
           </div>
-          <Btn small onClick={() => router.push("/solver")}>Today's Problem ✦</Btn>
+          <Btn small onClick={() => router.push("/problems")}>Problem Bank</Btn>
         </div>
 
         {/* Stats row */}
@@ -160,15 +171,31 @@ export default function DashboardPage() {
                 <Icon name="target" color={TEAL} size={16} />
                 <span style={{ fontWeight: 700, fontSize: 15 }}>Problem of the Day</span>
               </div>
-              <Badge>Physics · Hard</Badge>
+              {dailyProblem && <Badge>{dailyProblem.subject || "Problem"} · {dailyProblem.difficulty || ""}</Badge>}
             </div>
-            <p style={{ fontSize: 14, lineHeight: 1.8, color: "#cdd0d8", marginBottom: 20 }}>
-              Two particles of masses m₁ and m₂ are connected by a string over a frictionless pulley on an inclined plane. If m₁ slides down at constant velocity, find the coefficient of kinetic friction between m₂ and the surface...
-            </p>
-            <div style={{ display: "flex", gap: 10 }}>
-              <Btn small onClick={() => router.push("/solver")}>Solve with AI Tutor ✦</Btn>
-              <Btn variant="ghost" small>Skip</Btn>
-            </div>
+            {!dailyProblemLoaded ? (
+              <p style={{ color: MUTED, fontSize: 14, marginBottom: 20 }}>Loading...</p>
+            ) : dailyProblem ? (
+              <>
+                <p style={{ fontSize: 14, lineHeight: 1.8, color: "#cdd0d8", marginBottom: 20 }}>
+                  {dailyProblem.title && <strong style={{ display: "block", marginBottom: 6, color: TEXT }}>{dailyProblem.title}</strong>}
+                  {dailyProblem.statement?.slice(0, 280)}{dailyProblem.statement?.length > 280 ? "..." : ""}
+                </p>
+                <div style={{ display: "flex", gap: 10 }}>
+                  <Btn small onClick={() => router.push(`/solver?problemText=${encodeURIComponent(dailyProblem.statement)}`)}>
+                    Solve with AI Tutor
+                  </Btn>
+                  <Btn variant="ghost" small onClick={() => router.push("/problems")}>View Bank</Btn>
+                </div>
+              </>
+            ) : (
+              <>
+                <p style={{ fontSize: 14, lineHeight: 1.8, color: MUTED, marginBottom: 20 }}>
+                  No problems in your bank yet. Add problems to see them here as your daily challenge.
+                </p>
+                <Btn small onClick={() => router.push("/problems")}>Go to Problem Bank</Btn>
+              </>
+            )}
           </Card>
 
           <Card>

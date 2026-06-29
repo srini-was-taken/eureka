@@ -1,6 +1,6 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useRef, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { TEAL, TEAL_DIM, BG, CARD, CARD2, BORDER, TEXT, MUTED } from "@/lib/theme";
 import Badge from "@/components/ui/Badge";
 import Btn from "@/components/ui/Btn";
@@ -12,14 +12,14 @@ import { createClient } from "@/lib/supabase/client";
 const INITIAL_MESSAGES = [
   {
     role: "assistant",
-    content: "Hey! Drop a problem in — paste it, type it, or upload an image of it. I won't solve it for you, but I'll make sure *you* do. 🧠",
+    content: "Upload an image of your problem — a photo, screenshot, or scan. Then describe what you're stuck on and I'll guide you through it step by step.",
   },
 ];
 
-const QUICK_PROMPTS = ["I'm stuck", "Give me a small hint", "What concept is this?", "Can I see a better approach?"];
 
 export default function SolverPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [input, setInput] = useState("");
@@ -29,6 +29,7 @@ export default function SolverPage() {
   const chatRef = useRef();
   const messagesRef = useRef(messages);
   const fileInputRef = useRef();
+  const autoSentRef = useRef(false);
 
   useEffect(() => { messagesRef.current = messages; }, [messages]);
 
@@ -37,6 +38,15 @@ export default function SolverPage() {
       if (user) setUserId(user.id);
     });
   }, []);
+
+  // Auto-load problem from URL query param (from Dashboard / Problem Bank)
+  useEffect(() => {
+    const problemText = searchParams?.get("problemText");
+    if (!problemText || autoSentRef.current) return;
+    autoSentRef.current = true;
+    // Small delay so state is settled
+    setTimeout(() => sendText(problemText), 100);
+  }, [searchParams]);
 
   // Save the session (any messages beyond the greeting)
   async function saveSession(msgs) {
@@ -72,8 +82,42 @@ export default function SolverPage() {
     e.target.value = "";
   }
 
+  // sendText: used by auto-load from URL param
+  async function sendText(text) {
+    if (!text || loading) return;
+    const userMsg = { role: "user", content: text };
+    const updatedMessages = [...messagesRef.current, userMsg];
+    setMessages(updatedMessages);
+    setLoading(true);
+    try {
+      const apiMessages = updatedMessages.slice(1).map(m => ({ role: m.role, content: m.content }));
+      const res = await fetch("/api/solver", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: apiMessages }),
+      });
+      if (!res.ok) throw new Error("API error");
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let aiText = "";
+      setMessages(m => [...m, { role: "assistant", content: "" }]);
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        aiText += decoder.decode(value, { stream: true });
+        setMessages(m => { const u = [...m]; u[u.length - 1] = { role: "assistant", content: aiText }; return u; });
+      }
+    } catch (err) {
+      console.error(err);
+      setMessages(m => [...m, { role: "assistant", content: "Something went wrong — check your API key and try again." }]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function send() {
-    if ((!input.trim() && !pendingImage) || loading) return;
+    // Require image for any new problem submission
+    if (!pendingImage || loading) return;
 
     // Build the user message
     const textContent = input.trim() || (pendingImage ? "What can you tell me about this problem?" : "");
@@ -211,52 +255,65 @@ export default function SolverPage() {
 
           {/* Input area */}
           <div style={{ padding: "16px 28px 24px", borderTop: `1px solid ${BORDER}`, background: CARD }}>
-            {/* Image preview strip */}
-            {pendingImage && (
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "8px 12px" }}>
-                <img src={pendingImage.url} alt="preview" style={{ width: 44, height: 44, objectFit: "cover", borderRadius: 7, flexShrink: 0 }} />
-                <span style={{ fontSize: 13, color: TEXT, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{pendingImage.name}</span>
-                <span onClick={() => setPendingImage(null)} style={{ cursor: "pointer", color: MUTED, fontSize: 18, lineHeight: 1 }}>✕</span>
-              </div>
-            )}
-            <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
-              <div style={{ flex: 1, background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "12px 16px", display: "flex", gap: 10, alignItems: "flex-end" }}>
-                <textarea
-                  value={input}
-                  onChange={e => setInput(e.target.value)}
-                  onKeyDown={e => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      send();
-                    }
-                  }}
-                  placeholder="Type your thinking, or upload an image... (Shift+Enter for new line)"
-                  disabled={loading}
-                  rows={1}
-                  style={{
-                    flex: 1, background: "transparent", border: "none", outline: "none",
-                    color: TEXT, fontSize: 14, resize: "none", fontFamily: "inherit",
-                    lineHeight: 1.6, maxHeight: "8em", overflowY: "auto",
-                  }}
-                />
-                <div
-                  onClick={() => !loading && fileInputRef.current?.click()}
-                  title="Attach image"
-                  style={{ cursor: loading ? "default" : "pointer", opacity: pendingImage ? 1 : 0.45, transition: "opacity .15s", display: "flex" }}
-                ><Icon name="image" color={TEXT} size={18} /></div>
-              </div>
-              <Btn onClick={send} style={{ padding: "14px 20px" }}>
-                {loading ? "..." : "➤"}
-              </Btn>
-            </div>
-            <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
-              {QUICK_PROMPTS.map(q => (
-                <div key={q} onClick={() => !loading && setInput(q)}
-                  style={{ background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "5px 12px", fontSize: 12, color: MUTED, cursor: loading ? "default" : "pointer" }}>
-                  {q}
+            {/* No image yet — show upload CTA */}
+            {!pendingImage ? (
+              <div
+                onClick={() => !loading && fileInputRef.current?.click()}
+                style={{
+                  border: `2px dashed ${BORDER}`, borderRadius: 14, padding: "22px 28px",
+                  display: "flex", alignItems: "center", gap: 16, cursor: loading ? "default" : "pointer",
+                  background: CARD2, transition: "border-color .15s",
+                }}
+              >
+                <div style={{ width: 40, height: 40, borderRadius: 10, background: TEAL + "18", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Icon name="image" color={TEAL} size={20} />
                 </div>
-              ))}
-            </div>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>Upload an image of your problem</div>
+                  <div style={{ fontSize: 12, color: MUTED }}>Photo, screenshot, or scan — required to start</div>
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* Image preview */}
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12, background: TEAL + "0d", border: `1px solid ${TEAL}30`, borderRadius: 10, padding: "8px 12px" }}>
+                  <img src={pendingImage.url} alt="preview" style={{ width: 44, height: 44, objectFit: "cover", borderRadius: 7, flexShrink: 0 }} />
+                  <span style={{ fontSize: 13, color: TEXT, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{pendingImage.name}</span>
+                  <span onClick={() => setPendingImage(null)} style={{ cursor: "pointer", color: MUTED, fontSize: 18, lineHeight: 1 }}>✕</span>
+                </div>
+                {/* Topic / question input */}
+                <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
+                  <div style={{ flex: 1, background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "12px 16px", display: "flex", gap: 10, alignItems: "flex-end" }}>
+                    <textarea
+                      value={input}
+                      onChange={e => setInput(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          send();
+                        }
+                      }}
+                      placeholder="Describe what you're stuck on... (optional)"
+                      disabled={loading}
+                      rows={1}
+                      style={{
+                        flex: 1, background: "transparent", border: "none", outline: "none",
+                        color: TEXT, fontSize: 14, resize: "none", fontFamily: "inherit",
+                        lineHeight: 1.6, maxHeight: "6em", overflowY: "auto",
+                      }}
+                    />
+                    <div
+                      onClick={() => !loading && fileInputRef.current?.click()}
+                      title="Change image"
+                      style={{ cursor: loading ? "default" : "pointer", opacity: 0.45, transition: "opacity .15s", display: "flex" }}
+                    ><Icon name="image" color={TEXT} size={18} /></div>
+                  </div>
+                  <Btn onClick={send} style={{ padding: "14px 20px" }}>
+                    {loading ? "..." : "➤"}
+                  </Btn>
+                </div>
+              </>
+            )}
           </div>
         </div>
 

@@ -132,7 +132,7 @@ export default function Sidebar() {
           transition: "all .15s",
         }}
       >
-        <span style={{ fontSize: 15 }}>⎋</span> Log out
+        <Icon name="back" color="#f87171" size={15} /> Log out
       </div>
 
       {/* User card */}
@@ -151,7 +151,7 @@ export default function Sidebar() {
             flexShrink: 0,
           }}
         >
-          {initials || "👤"}
+          {initials || <Icon name="home" size={14} color={TEAL} />}
         </div>
         <div style={{ overflow: "hidden" }}>
           <div style={{ fontSize: 13, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>

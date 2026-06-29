@@ -12,30 +12,24 @@ export async function POST(req) {
 
     if (!file) return Response.json({ error: "No file provided" }, { status: 400 });
 
-    const arrayBuffer = await file.arrayBuffer();
-    const fileBuffer = Buffer.from(arrayBuffer);
-
-    const storagePath = `${user.id}/${Date.now()}_${filename}`;
-
     const service = createServiceClient();
 
-    // Upload to Supabase Storage
-    const { error: uploadError } = await service.storage
-        .from("pdfs")
-        .upload(storagePath, fileBuffer, {
-            contentType: "application/pdf",
-            upsert: false,
-        });
-
-    if (uploadError) {
-        console.error("Storage upload error:", uploadError);
-        return Response.json({ error: uploadError.message }, { status: 500 });
+    // Try to upload to storage — non-fatal if bucket doesn't exist
+    try {
+        const arrayBuffer = await file.arrayBuffer();
+        const fileBuffer = Buffer.from(arrayBuffer);
+        const storagePath = `${user.id}/${Date.now()}_${filename}`;
+        await service.storage
+            .from("pdfs")
+            .upload(storagePath, fileBuffer, { contentType: "application/pdf", upsert: false });
+    } catch (e) {
+        console.warn("PDF storage upload skipped:", e?.message);
     }
 
-    // Insert record into pdfs table
+    // Always insert DB record so annotations can be linked
     const { data, error: dbError } = await service
         .from("pdfs")
-        .insert({ user_id: user.id, filename, storage_path: storagePath })
+        .insert({ user_id: user.id, filename, storage_path: null })
         .select()
         .single();
 
@@ -44,5 +38,6 @@ export async function POST(req) {
         return Response.json({ error: dbError.message }, { status: 500 });
     }
 
-    return Response.json({ pdf_id: data.id, storage_path: storagePath });
+    return Response.json({ pdf_id: data.id });
 }
+
