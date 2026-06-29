@@ -20,7 +20,7 @@ export default function FeynmanPage() {
 }
 
 // ── Inline PDF Mini-Viewer ────────────────────────────────────────────────────
-function PdfMiniViewer({ file, highlightPageRange, style }) {
+function PdfMiniViewer({ file, highlightPageRange, onExtracted, style }) {
   const [pages, setPages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(0);
@@ -46,21 +46,29 @@ function PdfMiniViewer({ file, highlightPageRange, style }) {
       if (cancelled) return;
       setTotalPages(doc.numPages);
       const rendered = [];
+      const pageTexts = [];
       for (let i = 1; i <= doc.numPages; i++) {
         const page = await doc.getPage(i);
+        // Render to canvas
         const vp = page.getViewport({ scale: 1.1 });
         const canvas = document.createElement("canvas");
         canvas.width = vp.width; canvas.height = vp.height;
         await page.render({ canvasContext: canvas.getContext("2d"), viewport: vp }).promise;
+        // Extract text from this page
+        const tc = await page.getTextContent();
+        const pageText = tc.items.map(item => item.str).join(" ");
+        pageTexts.push({ pageNum: i, text: pageText });
         rendered.push({ canvas, pageNum: i });
         if (cancelled) return;
       }
       setPages(rendered);
       setLoading(false);
+      // Notify parent with per-page text array + total pages
+      if (onExtracted) onExtracted(pageTexts, doc.numPages);
     }
     load();
     return () => { cancelled = true; };
-  }, [file]);
+  }, [file, onExtracted]);
 
   if (loading) return (
     <div style={{ textAlign: "center", color: MUTED, padding: 32, fontSize: 14, ...style }}>
@@ -122,6 +130,7 @@ function FeynmanInner() {
   const [pdfFile, setPdfFile] = useState(null);
   const [pdfTotalPages, setPdfTotalPages] = useState(null);
   const [sourceMaterial, setSourceMaterial] = useState("");
+  const [pageTexts, setPageTexts] = useState([]); // [{pageNum, text}] — per-page
   const [imageBase64, setImageBase64] = useState(null);
   const [attachedFile, setAttachedFile] = useState(null);
   const [extracting, setExtracting] = useState(false);
@@ -152,72 +161,54 @@ function FeynmanInner() {
   }, []);
 
   function clearAttachment() {
-    setPdfFile(null); setSourceMaterial(""); setImageBase64(null);
+    setPdfFile(null); setSourceMaterial(""); setPageTexts([]); setImageBase64(null);
     setAttachedFile(null); setPdfTotalPages(null);
     setPageStart(""); setPageEnd(""); setShowPdfPreview(false); setPageRangeConfirmed(false);
   }
 
-  async function handleFileSelect(e) {
+  function handleFileSelect(e) {
     const file = e.target.files?.[0];
     if (!file) return;
     e.target.value = "";
-    setExtracting(true); setError("");
+    setError("");
 
     if (file.type === "application/pdf") {
-      // First: get page count by parsing the full PDF (fast, just metadata)
-      try {
-        const form = new FormData();
-        form.append("file", file);
-        const res = await fetch("/api/pdf/extract", { method: "POST", body: form });
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        setPdfFile(file);
-        setPdfTotalPages(data.pages);
-        setSourceMaterial(data.text || "");
-        setAttachedFile({ name: file.name, type: "pdf" });
-        setShowPdfPreview(true);
-        // Don't confirm range yet — user needs to pick pages
-      } catch {
-        setError("Could not read PDF. Try an image instead.");
-      }
+      // Set file immediately — PdfMiniViewer will extract text + page count via onExtracted
+      setPdfFile(file);
+      setAttachedFile({ name: file.name, type: "pdf" });
+      setShowPdfPreview(true);
+      setSourceMaterial(""); // will be filled by onExtracted
     } else if (file.type.startsWith("image/")) {
       const reader = new FileReader();
       reader.onload = () => {
         setImageBase64(reader.result);
         setSourceMaterial("");
         setAttachedFile({ name: file.name, type: "image" });
-        setPageRangeConfirmed(true); // images go straight through
+        setPageRangeConfirmed(true);
       };
       reader.readAsDataURL(file);
     }
-    setExtracting(false);
+
   }
 
-  async function confirmPageRange() {
+  function confirmPageRange() {
     if (!pdfFile) { setPageRangeConfirmed(true); setShowPdfPreview(false); return; }
+    if (!pdfTotalPages) { setError("PDF is still loading, please wait."); return; }
     const s = parseInt(pageStart) || 1;
     const e = parseInt(pageEnd) || pdfTotalPages;
     if (s > e || s < 1 || e > pdfTotalPages) {
       setError(`Page range must be between 1 and ${pdfTotalPages}.`); return;
     }
     setError("");
-    setExtracting(true);
-    try {
-      const form = new FormData();
-      form.append("file", pdfFile);
-      form.append("pageStart", String(s));
-      form.append("pageEnd", String(e));
-      const res = await fetch("/api/pdf/extract", { method: "POST", body: form });
-      if (!res.ok) throw new Error();
-      const data = await res.json();
-      setSourceMaterial(data.text || "");
-      setPageStart(String(s)); setPageEnd(String(e));
-      setPageRangeConfirmed(true);
-      setShowPdfPreview(false);
-    } catch {
-      setError("Failed to extract page range. Try again.");
-    }
-    setExtracting(false);
+    setPageStart(String(s)); setPageEnd(String(e));
+    // Filter extracted text to selected pages only
+    const filtered = pageTexts
+      .filter(p => p.pageNum >= s && p.pageNum <= e)
+      .map(p => p.text)
+      .join("\n");
+    setSourceMaterial(filtered);
+    setPageRangeConfirmed(true);
+    setShowPdfPreview(false);
   }
 
   async function evaluate() {
@@ -320,17 +311,23 @@ function FeynmanInner() {
                         placeholder={`${pdfTotalPages || "last"}`}
                         style={{ width: "100%", background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "10px 12px", color: TEXT, fontSize: 14, outline: "none", boxSizing: "border-box" }} />
                     </div>
-                    <Btn small onClick={confirmPageRange} style={{ marginTop: 16, opacity: extracting ? 0.6 : 1 }}>
-                      {extracting ? "Extracting..." : "Confirm →"}
+                    <Btn small onClick={confirmPageRange} style={{ marginTop: 16 }}>
+                      Confirm →
                     </Btn>
                   </div>
                   {error && <p style={{ color: "#f87171", fontSize: 13, marginTop: 8 }}>{error}</p>}
                 </div>
 
-                {/* Inline PDF preview */}
+                {/* Inline PDF preview — extracts text via onExtracted callback */}
                 <PdfMiniViewer
                   file={pdfFile}
                   highlightPageRange={pageStart && pageEnd ? { start: parseInt(pageStart), end: parseInt(pageEnd) } : null}
+                  onExtracted={(texts, numPages) => {
+                    setPageTexts(texts);
+                    setPdfTotalPages(numPages);
+                    // Default: all pages (confirmPageRange will filter if user picks a range)
+                    setSourceMaterial(texts.map(p => p.text).join("\n"));
+                  }}
                 />
               </Card>
             )}
