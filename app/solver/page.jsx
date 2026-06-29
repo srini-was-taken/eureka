@@ -27,6 +27,14 @@ const HINT_CHIPS = [
 ];
 
 export default function SolverPage() {
+  return (
+    <Suspense>
+      <SolverInner />
+    </Suspense>
+  );
+}
+
+function SolverInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
