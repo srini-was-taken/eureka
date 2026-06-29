@@ -7,12 +7,12 @@ import Btn from "@/components/ui/Btn";
 import Icon from "@/components/ui/Icon";
 
 const features = [
-  { icon: "brain",   title: "Socratic Solver",       tag: "AI Core",   desc: "Never get handed an answer. The AI asks the right questions to pull the insight out of you — exactly like a brilliant JEE teacher would.", accent: TEAL },
-  { icon: "feynman", title: "Feynman Explainer",      tag: "AI Core",   desc: "Explain a concept in your own words. The AI evaluates your understanding against your uploaded material and pinpoints exactly where you break down.", accent: "#818cf8" },
-  { icon: "clock",   title: "Focus Mode + Pomodoro",  tag: "Deep Work", desc: "Distraction-free PDF reader with a built-in timer. Every session logs to your profile.", accent: "#fb923c" },
-  { icon: "mistake", title: "Mistake Journal",        tag: "Retention", desc: "Every problem you struggle on gets auto-logged. AI diagnoses why you got it wrong. Spaced repetition brings it back.", accent: "#f472b6" },
-  { icon: "target",  title: "Weak Area Tracker",      tag: "Analytics", desc: "Not just 'you solved 40 problems'. Granular topic-level confidence scores that update after every interaction.", accent: "#34d399" },
-  { icon: "cal",     title: "Problem of the Day",     tag: "Habit",     desc: "One problem every morning, pulled from your personal weak areas. The best way to build a daily study habit.", accent: "#facc15" },
+  { icon: "brain", title: "Socratic Solver", tag: "AI Core", desc: "Never get handed an answer. The AI adapts its depth to your exam — deep multi-step reasoning for JEE Advanced & BITSAT, sharp focused hints for Mains & NEET.", accent: TEAL },
+  { icon: "feynman", title: "Feynman Explainer", tag: "AI Core", desc: "Explain a concept in your own words. The AI evaluates your understanding against your uploaded material and pinpoints exactly where you break down.", accent: "#818cf8" },
+  { icon: "clock", title: "Focus Mode + Pomodoro", tag: "Deep Work", desc: "Distraction-free PDF reader with a built-in Pomodoro timer. Every session goes fullscreen automatically when you start.", accent: "#fb923c" },
+  { icon: "mistake", title: "Mistake Journal", tag: "Retention", desc: "Every problem you struggle on gets logged. AI diagnoses why you got it wrong. Subjects adapt to your exam — Biology for NEET, Aptitude for BITSAT.", accent: "#f472b6" },
+  { icon: "target", title: "Weak Area Tracker", tag: "Analytics", desc: "Not just 'you solved 40 problems'. Granular topic-level confidence scores that update after every AI interaction.", accent: "#34d399" },
+  { icon: "cal", title: "Problem of the Day", tag: "Habit", desc: "One problem every morning from your personal weak areas. The best way to build a daily study habit before exam season.", accent: "#facc15" },
 ];
 
 export default function LandingPage() {
@@ -41,14 +41,29 @@ export default function LandingPage() {
       {/* Hero */}
       <div style={{ textAlign: "center", padding: "100px 40px 80px", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: "10%", left: "50%", transform: "translateX(-50%)", width: 600, height: 600, background: `radial-gradient(ellipse at center, ${TEAL}12 0%, transparent 70%)`, pointerEvents: "none" }} />
-        <Badge>✦ The AI Study Companion for JEE Advanced</Badge>
+        <Badge>✦ Your AI Study Companion for Competitive Exams</Badge>
         <h1 style={{ fontSize: 68, fontWeight: 900, lineHeight: 1.05, margin: "24px auto 0", maxWidth: 900, letterSpacing: -2 }}>
           Stop getting answers.<br />
           <span style={{ color: TEAL }}>Start building understanding.</span>
         </h1>
-        <p style={{ fontSize: 19, color: MUTED, maxWidth: 560, margin: "24px auto 40px", lineHeight: 1.7 }}>
-          The only AI tutor that refuses to hand you the solution — until you've earned it. Designed for JEE Advanced, where reasoning is everything.
+        <p style={{ fontSize: 19, color: MUTED, maxWidth: 580, margin: "24px auto 16px", lineHeight: 1.7 }}>
+          The AI tutor that refuses to hand you the solution — until you've earned it.
+          Scales from NEET and JEE Mains all the way up to JEE Advanced, where deep reasoning is everything.
         </p>
+        {/* Exam badges */}
+        <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap", marginBottom: 32 }}>
+          {[
+            { label: "JEE Advanced", note: "Deep Reasoning", color: "#818cf8" },
+            { label: "JEE Mains", note: "Focused Hints", color: "#fb923c" },
+            { label: "BITSAT", note: "Speed + Aptitude", color: "#34d399" },
+            { label: "NEET", note: "PCB + NCERT", color: "#f472b6" },
+          ].map(e => (
+            <div key={e.label} style={{ display: "flex", alignItems: "center", gap: 6, background: e.color + "12", border: `1px solid ${e.color}40`, borderRadius: 20, padding: "6px 14px" }}>
+              <span style={{ fontWeight: 700, fontSize: 13, color: e.color }}>{e.label}</span>
+              <span style={{ fontSize: 11, color: e.color, opacity: 0.7 }}>· {e.note}</span>
+            </div>
+          ))}
+        </div>
         <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
           <Btn onClick={() => router.push("/login")} style={{ fontSize: 16, padding: "15px 36px" }}>Try the Solver ✦</Btn>
           <Btn variant="ghost" onClick={() => router.push("/login")} style={{ fontSize: 16, padding: "15px 36px" }}>Feynman Mode</Btn>
@@ -115,8 +130,11 @@ export default function LandingPage() {
       {/* CTA */}
       <div style={{ textAlign: "center", padding: "60px 40px 100px" }}>
         <div style={{ background: `linear-gradient(135deg, ${TEAL}18, #818cf818)`, border: `1px solid ${TEAL}30`, borderRadius: 24, padding: "60px 40px", maxWidth: 680, margin: "0 auto" }}>
-          <h2 style={{ fontSize: 38, fontWeight: 800, marginBottom: 16, letterSpacing: -1 }}>The exam rewards thinkers, not memorizers.</h2>
-          <p style={{ color: MUTED, fontSize: 16, marginBottom: 32, lineHeight: 1.7 }}>EurekaAI is built for JEE Advanced. Every feature is designed to build the reasoning muscle that separates rank 1 from the rest.</p>
+          <h2 style={{ fontSize: 38, fontWeight: 800, marginBottom: 16, letterSpacing: -1 }}>Calibrated to your exam. From day one.</h2>
+          <p style={{ color: MUTED, fontSize: 16, marginBottom: 32, lineHeight: 1.7 }}>
+            JEE Advanced demands the deepest conceptual reasoning of any entrance exam in the world — EurekaAI matches that with enhanced AI models and Socratic depth.
+            Preparing for Mains, BITSAT, or NEET? The same system adapts — switching subjects, adjusting hint style, and tuning difficulty to your target.
+          </p>
           <Btn onClick={() => router.push("/login")} style={{ fontSize: 16, padding: "15px 40px" }}>Start for free ✦</Btn>
         </div>
       </div>

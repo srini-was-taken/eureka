@@ -8,6 +8,7 @@ import Btn from "@/components/ui/Btn";
 import Card from "@/components/ui/Card";
 import { createClient } from "@/lib/supabase/client";
 import Icon from "@/components/ui/Icon";
+import { getExamConfig, DEFAULT_EXAM_KEY } from "@/lib/examConfig";
 
 const STATUS_CONFIG = {
   solved: { color: "#34d399", label: "✓ Solved" },
@@ -16,13 +17,12 @@ const STATUS_CONFIG = {
   failed: { color: "#f87171", label: "✗ Failed" },
 };
 
-const SUBJECTS = ["Physics", "Chemistry", "Maths", "Other"];
 const DIFFICULTIES = ["Easy", "Medium", "Hard"];
 
 // ── Add Problem Modal ─────────────────────────────────────────
-function AddProblemModal({ onSave, onClose }) {
+function AddProblemModal({ onSave, onClose, subjects = ["Physics", "Chemistry", "Maths"] }) {
   const [title, setTitle] = useState("");
-  const [subject, setSubject] = useState("Physics");
+  const [subject, setSubject] = useState(subjects[0] || "Physics");
   const [topic, setTopic] = useState("");
   const [difficulty, setDifficulty] = useState("Medium");
   const [source, setSource] = useState("");
@@ -60,7 +60,7 @@ function AddProblemModal({ onSave, onClose }) {
             <div>
               <label style={labelStyle}>SUBJECT</label>
               <select value={subject} onChange={e => setSubject(e.target.value)} style={{ ...inputStyle, cursor: "pointer" }}>
-                {SUBJECTS.map(s => <option key={s}>{s}</option>)}
+                {subjects.map(s => <option key={s}>{s}</option>)}
               </select>
             </div>
             <div>
@@ -107,10 +107,18 @@ export default function ProblemBankPage() {
   const [selected, setSelected] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [userId, setUserId] = useState(null);
+  const [examSubjects, setExamSubjects] = useState(["Physics", "Chemistry", "Maths"]);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) { setUserId(user.id); fetchProblems(user.id); }
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (user) {
+        setUserId(user.id);
+        fetchProblems(user.id);
+        // Fetch exam from profile to get correct subjects
+        const { data: profile } = await supabase.from("profiles").select("exam").eq("id", user.id).single();
+        const cfg = getExamConfig(profile?.exam ?? DEFAULT_EXAM_KEY);
+        setExamSubjects([...cfg.subjects, "Other"]);
+      }
     });
   }, []);
 
@@ -163,7 +171,7 @@ export default function ProblemBankPage() {
 
   return (
     <div style={{ minHeight: "100vh", background: BG, color: TEXT, display: "flex" }}>
-      {showModal && <AddProblemModal onSave={handleAddProblem} onClose={() => setShowModal(false)} />}
+      {showModal && <AddProblemModal onSave={handleAddProblem} onClose={() => setShowModal(false)} subjects={examSubjects} />}
       <Sidebar />
 
       <div style={{ flex: 1, padding: "32px 36px", overflowY: "auto" }}>
@@ -197,7 +205,7 @@ export default function ProblemBankPage() {
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by topic or title..."
               style={{ background: "transparent", border: "none", outline: "none", color: TEXT, fontSize: 14, flex: 1 }} />
           </div>
-          {["All", "Physics", "Chemistry", "Maths"].map(s => (
+          {["All", ...examSubjects].map(s => (
             <div key={s} onClick={() => setFilterSubject(s)}
               style={{ padding: "9px 16px", borderRadius: 8, cursor: "pointer", fontSize: 13, fontWeight: 600, background: filterSubject === s ? TEAL + "20" : CARD, border: `1px solid ${filterSubject === s ? TEAL + "50" : BORDER}`, color: filterSubject === s ? TEAL : MUTED, transition: "all .15s" }}>
               {s}

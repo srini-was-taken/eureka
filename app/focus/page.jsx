@@ -413,7 +413,7 @@ export default function FocusPage() {
             <Icon name="note" color={mode === "note" ? TEAL : MUTED} size={14} />
             {mode === "note" ? "Click PDF..." : "Note"}
           </Btn>
-          <Btn variant="outline" small onClick={() => router.push("/solver")}>Ask AI</Btn>
+
         </div>
       </div>
 

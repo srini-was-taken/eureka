@@ -9,14 +9,15 @@ import Btn from "@/components/ui/Btn";
 import Card from "@/components/ui/Card";
 import Icon from "@/components/ui/Icon";
 import Md from "@/components/ui/Md";
+import { createClient } from "@/lib/supabase/client";
+import { getExamConfig, DEFAULT_EXAM_KEY } from "@/lib/examConfig";
 
-const FILTERS = ["all", "unresolved", "resolved", "Physics", "Chemistry", "Maths"];
-const SUBJECTS = ["Physics", "Chemistry", "Maths", "Other"];
+const BASE_FILTERS = ["all", "unresolved", "resolved"];
 
 // ── Log Mistake Modal ─────────────────────────────────────────
-function LogMistakeModal({ onSave, onClose }) {
+function LogMistakeModal({ onSave, onClose, subjects = ["Physics", "Chemistry", "Maths"] }) {
   const [topic, setTopic] = useState("");
-  const [subject, setSubject] = useState("Physics");
+  const [subject, setSubject] = useState(subjects[0] || "Physics");
   const [problem, setProblem] = useState("");
   const [userNote, setUserNote] = useState("");
   const [saving, setSaving] = useState(false);
@@ -76,7 +77,7 @@ function LogMistakeModal({ onSave, onClose }) {
               <div>
                 <label style={labelStyle}>SUBJECT</label>
                 <select value={subject} onChange={e => setSubject(e.target.value)} style={{ ...inputStyle, cursor: "pointer" }}>
-                  {SUBJECTS.map(s => <option key={s}>{s}</option>)}
+                  {subjects.map(s => <option key={s}>{s}</option>)}
                 </select>
               </div>
             </div>
@@ -125,8 +126,20 @@ export default function MistakeJournalPage() {
   const [filter, setFilter] = useState("all");
   const [selected, setSelected] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [examSubjects, setExamSubjects] = useState(["Physics", "Chemistry", "Maths"]);
 
-  useEffect(() => { fetchMistakes(); }, []);
+  useEffect(() => {
+    fetchMistakes();
+    // Fetch exam subjects from Supabase profile
+    const supabase = createClient();
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (user) {
+        const { data: profile } = await supabase.from("profiles").select("exam").eq("id", user.id).single();
+        const cfg = getExamConfig(profile?.exam ?? DEFAULT_EXAM_KEY);
+        setExamSubjects([...cfg.subjects, "Other"]);
+      }
+    });
+  }, []);
 
   async function fetchMistakes() {
     setLoading(true);
@@ -182,7 +195,7 @@ export default function MistakeJournalPage() {
 
   return (
     <div style={{ minHeight: "100vh", background: BG, color: TEXT, display: "flex" }}>
-      {showModal && <LogMistakeModal onSave={handleLog} onClose={() => setShowModal(false)} />}
+      {showModal && <LogMistakeModal onSave={handleLog} onClose={() => setShowModal(false)} subjects={examSubjects} />}
       <Sidebar />
 
       <div style={{ flex: 1, padding: "32px 36px", overflowY: "auto" }}>
@@ -219,7 +232,7 @@ export default function MistakeJournalPage() {
 
         {/* Filters */}
         <div style={{ display: "flex", gap: 8, marginBottom: 22, flexWrap: "wrap" }}>
-          {FILTERS.map(f => (
+          {[...BASE_FILTERS, ...examSubjects].map(f => (
             <div key={f} onClick={() => setFilter(f)}
               style={{ padding: "7px 16px", borderRadius: 8, cursor: "pointer", fontSize: 13, fontWeight: 600, background: filter === f ? TEAL + "20" : CARD, border: `1px solid ${filter === f ? TEAL + "50" : BORDER}`, color: filter === f ? TEAL : MUTED, transition: "all .15s", textTransform: "capitalize" }}>
               {f}

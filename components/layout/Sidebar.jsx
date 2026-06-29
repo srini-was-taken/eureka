@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { TEAL, TEAL_DIM, CARD, CARD2, BORDER, MUTED, TEXT } from "@/lib/theme";
 import Icon from "@/components/ui/Icon";
 import { createClient } from "@/lib/supabase/client";
+import { getExamConfig, DEFAULT_EXAM_KEY } from "@/lib/examConfig";
 
 const NAV_ITEMS = [
   { label: "Dashboard", icon: "home", href: "/dashboard" },
@@ -32,10 +33,17 @@ export default function Sidebar() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    // Get current session user
-    supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (user) {
+        // Fetch exam label from profiles table
+        const { data: profile } = await supabase.from("profiles").select("exam").eq("id", user.id).single();
+        const cfg = getExamConfig(profile?.exam ?? DEFAULT_EXAM_KEY);
+        setUser({ ...user, _examLabel: cfg.label });
+      } else {
+        setUser(null);
+      }
+    });
 
-    // Subscribe to auth changes (e.g. token refresh)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
@@ -54,7 +62,7 @@ export default function Sidebar() {
     ? user.user_metadata.full_name.split(" ").slice(0, 2).join(" ")
     : user?.email?.split("@")[0] ?? "User";
 
-  const displaySub = user?.user_metadata?.target_exam ?? "JEE Advanced '26";
+  const displaySub = user?._examLabel ?? "Loading...";
 
   // Initials avatar
   const initials = displayName
@@ -167,25 +175,6 @@ export default function Sidebar() {
             <div style={{ fontSize: 11, color: MUTED, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 500 }}>
               {displaySub}
             </div>
-          </div>
-
-          {/* Logout Button */}
-          <div
-            onClick={handleLogout}
-            title="Log out"
-            style={{
-              padding: 6, borderRadius: 8, cursor: "pointer",
-              color: "#f87171", display: "flex", alignItems: "center", justifyContent: "center",
-              transition: "opacity .2s", opacity: 0.8
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.opacity = 1}
-            onMouseLeave={(e) => e.currentTarget.style.opacity = 0.8}
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-              <polyline points="16 17 21 12 16 7"></polyline>
-              <line x1="21" y1="12" x2="9" y2="12"></line>
-            </svg>
           </div>
         </div>
       </div>

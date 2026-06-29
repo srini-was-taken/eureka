@@ -12,10 +12,18 @@ import { createClient } from "@/lib/supabase/client";
 const INITIAL_MESSAGES = [
   {
     role: "assistant",
-    content: "Upload an image of your problem — a photo, screenshot, or scan. Then describe what you're stuck on and I'll guide you through it step by step.",
+    content: "Paste your problem or describe what you're stuck on — text is enough to get started. You can also attach an image if you have one.",
   },
 ];
 
+const HINT_CHIPS = [
+  "I'm stuck, give me a nudge",
+  "Explain this concept",
+  "Give me a hint",
+  "Show me the formula",
+  "I think the answer is...",
+  "Can we go over this again?",
+];
 
 export default function SolverPage() {
   const router = useRouter();
@@ -116,8 +124,9 @@ export default function SolverPage() {
   }
 
   async function send() {
-    // Require image for any new problem submission
-    if (!pendingImage || loading) return;
+    const text = input.trim();
+    // Allow text-only OR image; require at least one
+    if ((!text && !pendingImage) || loading) return;
 
     // Build the user message
     const textContent = input.trim() || (pendingImage ? "What can you tell me about this problem?" : "");
@@ -254,66 +263,70 @@ export default function SolverPage() {
           </div>
 
           {/* Input area */}
-          <div style={{ padding: "16px 28px 24px", borderTop: `1px solid ${BORDER}`, background: CARD }}>
-            {/* No image yet — show upload CTA */}
-            {!pendingImage ? (
-              <div
-                onClick={() => !loading && fileInputRef.current?.click()}
-                style={{
-                  border: `2px dashed ${BORDER}`, borderRadius: 14, padding: "22px 28px",
-                  display: "flex", alignItems: "center", gap: 16, cursor: loading ? "default" : "pointer",
-                  background: CARD2, transition: "border-color .15s",
-                }}
-              >
-                <div style={{ width: 40, height: 40, borderRadius: 10, background: TEAL + "18", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <Icon name="image" color={TEAL} size={20} />
-                </div>
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>Upload an image of your problem</div>
-                  <div style={{ fontSize: 12, color: MUTED }}>Photo, screenshot, or scan — required to start</div>
-                </div>
-              </div>
-            ) : (
-              <>
-                {/* Image preview */}
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12, background: TEAL + "0d", border: `1px solid ${TEAL}30`, borderRadius: 10, padding: "8px 12px" }}>
-                  <img src={pendingImage.url} alt="preview" style={{ width: 44, height: 44, objectFit: "cover", borderRadius: 7, flexShrink: 0 }} />
-                  <span style={{ fontSize: 13, color: TEXT, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{pendingImage.name}</span>
-                  <span onClick={() => setPendingImage(null)} style={{ cursor: "pointer", color: MUTED, fontSize: 18, lineHeight: 1 }}>✕</span>
-                </div>
-                {/* Topic / question input */}
-                <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
-                  <div style={{ flex: 1, background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "12px 16px", display: "flex", gap: 10, alignItems: "flex-end" }}>
-                    <textarea
-                      value={input}
-                      onChange={e => setInput(e.target.value)}
-                      onKeyDown={e => {
-                        if (e.key === "Enter" && !e.shiftKey) {
-                          e.preventDefault();
-                          send();
-                        }
-                      }}
-                      placeholder="Describe what you're stuck on... (optional)"
-                      disabled={loading}
-                      rows={1}
-                      style={{
-                        flex: 1, background: "transparent", border: "none", outline: "none",
-                        color: TEXT, fontSize: 14, resize: "none", fontFamily: "inherit",
-                        lineHeight: 1.6, maxHeight: "6em", overflowY: "auto",
-                      }}
-                    />
-                    <div
-                      onClick={() => !loading && fileInputRef.current?.click()}
-                      title="Change image"
-                      style={{ cursor: loading ? "default" : "pointer", opacity: 0.45, transition: "opacity .15s", display: "flex" }}
-                    ><Icon name="image" color={TEXT} size={18} /></div>
+          <div style={{ padding: "12px 28px 20px", borderTop: `1px solid ${BORDER}`, background: CARD }}>
+
+            {/* Hint chips */}
+            {messages.length <= 1 && (
+              <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginBottom: 10 }}>
+                {HINT_CHIPS.map(chip => (
+                  <div key={chip} onClick={() => !loading && setInput(chip)}
+                    style={{
+                      fontSize: 12, padding: "5px 12px", borderRadius: 20,
+                      border: `1px solid ${BORDER}`, color: MUTED, cursor: "pointer",
+                      background: CARD2, transition: "all .15s",
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = TEAL; e.currentTarget.style.color = TEAL; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.color = MUTED; }}
+                  >
+                    {chip}
                   </div>
-                  <Btn onClick={send} style={{ padding: "14px 20px" }}>
-                    {loading ? "..." : "➤"}
-                  </Btn>
-                </div>
-              </>
+                ))}
+              </div>
             )}
+
+            {/* Image preview if attached */}
+            {pendingImage && (
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, background: TEAL + "0d", border: `1px solid ${TEAL}30`, borderRadius: 10, padding: "8px 12px" }}>
+                <img src={pendingImage.url} alt="preview" style={{ width: 40, height: 40, objectFit: "cover", borderRadius: 7, flexShrink: 0 }} />
+                <span style={{ fontSize: 13, color: TEXT, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{pendingImage.name}</span>
+                <span onClick={() => setPendingImage(null)} style={{ cursor: "pointer", color: MUTED, fontSize: 18, lineHeight: 1 }}>✕</span>
+              </div>
+            )}
+
+            {/* Main input row */}
+            <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
+              <div style={{ flex: 1, background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "12px 16px", display: "flex", gap: 10, alignItems: "flex-end" }}>
+                <textarea
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      send();
+                    }
+                  }}
+                  placeholder="Type your problem or question... (Enter to send)"
+                  disabled={loading}
+                  rows={1}
+                  style={{
+                    flex: 1, background: "transparent", border: "none", outline: "none",
+                    color: TEXT, fontSize: 14, resize: "none", fontFamily: "inherit",
+                    lineHeight: 1.6, maxHeight: "6em", overflowY: "auto",
+                  }}
+                />
+                {/* Optional image attach */}
+                <div
+                  onClick={() => !loading && fileInputRef.current?.click()}
+                  title="Attach image (optional)"
+                  style={{ cursor: loading ? "default" : "pointer", opacity: 0.4, transition: "opacity .15s", display: "flex" }}
+                  onMouseEnter={e => e.currentTarget.style.opacity = 0.8}
+                  onMouseLeave={e => e.currentTarget.style.opacity = 0.4}
+                ><Icon name="image" color={TEXT} size={18} /></div>
+              </div>
+              <Btn onClick={send} disabled={loading} style={{ padding: "14px 20px" }}>
+                {loading ? "..." : "➤"}
+              </Btn>
+            </div>
           </div>
         </div>
 
