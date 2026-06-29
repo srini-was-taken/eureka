@@ -11,9 +11,9 @@ const T = {
   border:  "#E4E4E4",
   text:    "#0A0A0A",
   muted:   "#6B6B6B",
-  accent:  "#627254",
-  accentL: "#F5F7F2",
-  accentB: "#E1E6DC",
+  accent:  "#1A4D2E",
+  accentL: "#E8F0EB",
+  accentB: "#C2D6CA",
   // dark section tokens
   dk:      "#0A0A0A",
   dkSurf:  "rgba(255,255,255,0.05)",
@@ -166,7 +166,7 @@ function SocraticBentoCard() {
   return (
     <BentoCard className="sc" style={{ gridColumn: "1", gridRow: "1 / 3" }}>
       <div>
-        <CardTag color="#627254">Socratic Solver</CardTag>
+        <CardTag color="#1A4D2E">Socratic Solver</CardTag>
       </div>
       <div>
         <div style={{ fontSize: 20, fontWeight: 700, color: T.dkText, fontFamily: INTER, lineHeight: 1.25, marginBottom: 8 }}>
@@ -323,7 +323,7 @@ export default function LandingPage() {
         }
         .cta:hover::after { opacity: 1; animation: shimmer .65s ease; }
         @keyframes shimmer { from { background-position: -200% center; } to { background-position: 200% center; } }
-        .cta:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(98,114,84,.4); }
+        .cta:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(26,77,46,.4); }
         .cta:active { transform: none; }
 
         /* ── Nav link underline ── */
