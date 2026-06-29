@@ -33,10 +33,10 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata = {
-  title: "EurekaAI — The AI that refuses to hand you the answer",
+  title: "EurekaAI — Stop getting answers. Start building understanding.",
   description:
-    "You think you understand — we prove if you actually do. The sharpest AI study tool for JEE Advanced, JEE Mains, BITSAT, and NEET.",
-  keywords: "JEE Advanced, JEE Mains, NEET, BITSAT, AI tutor, Feynman technique, Socratic learning",
+    "EurekaAI uses the Socratic method and Feynman technique to help JEE Advanced aspirants actually understand physics, chemistry, and math — not just memorise answers.",
+  keywords: "JEE Advanced, JEE Mains, NEET, AI tutor, Feynman technique, Socratic method, active recall, spaced repetition",
 };
 
 export default function RootLayout({ children }) {
