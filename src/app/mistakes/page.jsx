@@ -63,7 +63,7 @@ function LogMistakeModal({ onSave, onClose, subjects = ["Physics", "Chemistry", 
       {/* Hidden image input */}
       <input ref={imgInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleImageSelect} />
       <div style={{ position: "fixed", inset: 0, background: "#00000080", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, padding: 36, width: 520, boxShadow: "0 0 60px #00000080" }}>
+        <div style={{ background: "#0F0F0F", border: `1px solid ${BORDER}`, borderRadius: 20, padding: 36, width: 520, boxShadow: "0 0 60px #00000080" }}>
           <h3 style={{ fontWeight: 800, fontSize: 20, marginBottom: 24, letterSpacing: -0.5 }}>Log a Mistake</h3>
 
           {error && <div style={{ background: "#f871711a", border: "1px solid #f8717140", color: "#f87171", borderRadius: 10, padding: "10px 14px", fontSize: 13, marginBottom: 16 }}>{error}</div>}
