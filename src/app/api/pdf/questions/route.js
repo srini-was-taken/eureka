@@ -4,7 +4,7 @@ import { checkRateLimit, trackUsage } from "@/lib/rateLimit";
 
 export async function POST(req) {
     try {
-        const { text, topic, pageStart, pageEnd } = await req.json();
+        const { text, topic, pageStart, pageEnd, numQuestions = 4 } = await req.json();
 
         // Input validation
         if (!text || text.trim().length < 50) {
@@ -41,14 +41,14 @@ export async function POST(req) {
         // Track usage asynchronously
         trackUsage(supabase, user.id, "questions");
 
-        const prompt = `You are an expert ${examCfg.label} tutor. Generate EXACTLY 4 multiple-choice questions based ONLY on the following study material${pageRange}.
+        const prompt = `You are an expert ${examCfg.label} tutor. Generate EXACTLY ${numQuestions} multiple-choice questions based ONLY on the following study material${pageRange}.
 
 Rules:
 - Questions must be answerable from the material provided only.
 - Each question must have 4 options labeled (A) (B) (C) (D).
 - One correct answer per question.
 - Questions should test understanding, not just memorization.
-- Vary difficulty: 1 easy, 2 medium, 1 hard.
+- Vary difficulty where possible.
 - Keep questions concise.
 
 Return ONLY a valid JSON array (no markdown, no explanation) in this exact format:

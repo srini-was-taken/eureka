@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { F_ACCENT as TEAL, F_BG as BG, F_SURFACE as CARD, F_BORDER as CARD2, F_BORDER as BORDER, F_TEXT as TEXT, F_MUTED as MUTED } from "@/lib/theme";
 import Btn from "@/components/ui/Btn";
 import Icon from "@/components/ui/Icon";
+import Card from "@/components/ui/Card";
+import PdfMiniViewer from "@/components/ui/PdfMiniViewer";
 import { createClient } from "@/lib/supabase/client";
 
 const INTER = "'Inter', system-ui, sans-serif";
@@ -70,6 +72,12 @@ export default function FocusPage() {
   const [totalPages, setTotalPages] = useState(0);
   const pdfContainerRef = useRef();
 
+  // Page range selection state
+  const [pageStart, setPageStart] = useState("");
+  const [pageEnd, setPageEnd] = useState("");
+  const [pageRangeConfirmed, setPageRangeConfirmed] = useState(false);
+  const [setupError, setSetupError] = useState("");
+
   const [mode, setMode] = useState(null);
   const [pendingNotePos, setPendingNotePos] = useState(null);
   const [noteInput, setNoteInput] = useState("");
@@ -94,6 +102,8 @@ export default function FocusPage() {
   const [questions, setQuestions] = useState([]);
   const [genQLoading, setGenQLoading] = useState(false);
   const [genQError, setGenQError] = useState("");
+  const [numQuestions, setNumQuestions] = useState("4");
+  const [showQuizConfig, setShowQuizConfig] = useState(false);
   const [revealedAnswers, setRevealedAnswers] = useState({});
   const [pdfText, setPdfText] = useState("");
 
@@ -151,10 +161,14 @@ export default function FocusPage() {
       const arrayBuffer = await pdfFile.arrayBuffer();
       const doc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       setPdfDoc(doc);
+      setPdfDoc(doc);
       setTotalPages(doc.numPages);
       const rendered = [];
       let extractedText = "";
-      for (let i = 1; i <= doc.numPages; i++) {
+      const startIdx = pageStart ? parseInt(pageStart) : 1;
+      const endIdx = pageEnd ? parseInt(pageEnd) : doc.numPages;
+      for (let i = startIdx; i <= endIdx; i++) {
+        if (i < 1 || i > doc.numPages) continue;
         const page = await doc.getPage(i);
         const viewport = page.getViewport({ scale: 1.4 });
         const canvas = document.createElement("canvas");
@@ -162,7 +176,7 @@ export default function FocusPage() {
         const ctx = canvas.getContext("2d");
         await page.render({ canvasContext: ctx, viewport }).promise;
         const tc = await page.getTextContent();
-        extractedText += tc.items.map(i => i.str).join(" ") + "\n";
+        extractedText += tc.items.map(item => item.str).join(" ") + "\n";
         rendered.push({ canvas, pageNum: i, width: viewport.width, height: viewport.height });
       }
       setPages(rendered);
@@ -198,7 +212,7 @@ export default function FocusPage() {
       const res = await fetch("/api/pdf/questions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: pdfText, topic: fileName }),
+        body: JSON.stringify({ text: pdfText, topic: fileName, numQuestions: parseInt(numQuestions) || 4 }),
       });
       if (!res.ok) throw new Error();
       const data = await res.json();
@@ -286,6 +300,68 @@ export default function FocusPage() {
             <div style={{ color: MUTED, fontSize: 12, fontFamily: INTER }}>PDF files only · Your session stays private</div>
             <input id="pdf-input" type="file" accept="application/pdf" style={{ display: "none" }} onChange={e => handleFile(e.target.files[0])} />
           </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // ── SETUP STAGE ──────────────────────────────────────────
+  if (stage === "setup" && pdfFile) return (
+    <div className="focus-mode" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", fontFamily: INTER, background: "#080F0B" }}>
+      <div style={{ padding: "16px 28px", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", gap: 14, background: CARD }}>
+        <Btn context="focus" variant="ghost" small onClick={() => { setStage("upload"); setPdfFile(null); }} style={{ padding: "7px 12px" }}>← Back</Btn>
+        <div style={{ width: 1, height: 24, background: BORDER }} />
+        <div style={{ fontWeight: 700, color: TEXT, fontFamily: INTER }}>Setup Session</div>
+      </div>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "40px 20px" }}>
+        <div style={{ width: "100%", maxWidth: 640 }}>
+          <Card style={{ padding: 32, border: `1px solid ${TEAL}40`, background: CARD }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
+              <Icon name="upload" color={TEAL} size={20} />
+              <div style={{ fontSize: 16, fontWeight: 700, color: TEXT }}>{fileName}</div>
+              {totalPages > 0 && <span style={{ color: MUTED, fontSize: 14 }}>({totalPages} pages)</span>}
+            </div>
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ fontSize: 12, color: MUTED, fontWeight: 700, marginBottom: 12, letterSpacing: 0.4 }}>
+                SELECT PAGE RANGE <span style={{ fontWeight: 400 }}>(optional)</span>
+              </div>
+              <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 11, color: MUTED, marginBottom: 6 }}>FROM PAGE</div>
+                  <input type="number" min={1} max={totalPages || 999} value={pageStart} onChange={e => setPageStart(e.target.value)} placeholder="1"
+                    style={{ width: "100%", background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "12px 14px", color: TEXT, fontSize: 14, outline: "none", boxSizing: "border-box" }} />
+                </div>
+                <span style={{ color: MUTED, marginTop: 20 }}>→</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 11, color: MUTED, marginBottom: 6 }}>TO PAGE</div>
+                  <input type="number" min={1} max={totalPages || 999} value={pageEnd} onChange={e => setPageEnd(e.target.value)} placeholder={totalPages ? String(totalPages) : "last"}
+                    style={{ width: "100%", background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "12px 14px", color: TEXT, fontSize: 14, outline: "none", boxSizing: "border-box" }} />
+                </div>
+              </div>
+              {setupError && <p style={{ color: "#f87171", fontSize: 13, marginTop: 12 }}>{setupError}</p>}
+            </div>
+            
+            <PdfMiniViewer
+              file={pdfFile}
+              highlightPageRange={pageStart && pageEnd ? { start: parseInt(pageStart), end: parseInt(pageEnd) } : null}
+              onExtracted={(texts, numPages) => {
+                setTotalPages(numPages);
+              }}
+              style={{ marginBottom: 24 }}
+            />
+            
+            <Btn style={{ width: "100%", justifyContent: "center", padding: "14px", fontSize: 15 }} onClick={() => {
+              if (pageStart && pageEnd && parseInt(pageStart) > parseInt(pageEnd)) {
+                setSetupError("Start page cannot be after end page.");
+                return;
+              }
+              setSetupError("");
+              setPageRangeConfirmed(true);
+              setStage("session");
+            }}>
+              Start Focus Session →
+            </Btn>
+          </Card>
         </div>
       </div>
     </div>
@@ -435,10 +511,24 @@ export default function FocusPage() {
                 <div style={{ maxWidth: 480, margin: "60px auto", textAlign: "center" }}>
                   <div style={{ width: 56, height: 56, borderRadius: 16, background: TEAL + "15", border: `1px solid ${TEAL}30`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", fontSize: 24 }}>📋</div>
                   <h3 style={{ fontFamily: INTER, fontWeight: 800, fontSize: 20, color: TEXT, marginBottom: 10 }}>No quiz generated yet.</h3>
-                  <p style={{ fontFamily: INTER, fontSize: 14, color: MUTED, lineHeight: 1.7, marginBottom: 24 }}>Load a PDF then click "Generate Quiz" above.</p>
-                  <div onClick={generateQuestions} style={{ display: "inline-block", padding: "12px 28px", background: TEAL, borderRadius: 10, fontFamily: INTER, fontWeight: 700, fontSize: 14, color: "#0C1510", cursor: pdfText ? "pointer" : "not-allowed", opacity: pdfText ? 1 : 0.4 }}>
-                    {genQLoading ? "Generating…" : "Generate Quiz Now"}
-                  </div>
+                  <p style={{ fontFamily: INTER, fontSize: 14, color: MUTED, lineHeight: 1.7, marginBottom: 24 }}>Load a PDF then select the number of questions you want.</p>
+                  
+                  {!showQuizConfig ? (
+                    <div onClick={() => setShowQuizConfig(true)} style={{ display: "inline-block", padding: "12px 28px", background: TEAL, borderRadius: 10, fontFamily: INTER, fontWeight: 700, fontSize: 14, color: "#0C1510", cursor: pdfText ? "pointer" : "not-allowed", opacity: pdfText ? 1 : 0.4 }}>
+                      Set up Quiz
+                    </div>
+                  ) : (
+                    <div style={{ background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 14, padding: 24, textAlign: "left" }}>
+                      <div style={{ fontSize: 12, color: MUTED, fontWeight: 700, marginBottom: 10, letterSpacing: 0.4 }}>NUMBER OF QUESTIONS</div>
+                      <input type="number" min={1} max={20} value={numQuestions} onChange={e => setNumQuestions(e.target.value)} style={{ width: "100%", background: CARD, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "10px 12px", color: TEXT, fontSize: 14, outline: "none", boxSizing: "border-box", marginBottom: 16 }} />
+                      <div style={{ display: "flex", gap: 10 }}>
+                        <Btn style={{ flex: 1, justifyContent: "center", opacity: pdfText ? 1 : 0.4 }} onClick={() => pdfText && !genQLoading && generateQuestions()}>
+                          {genQLoading ? "Generating…" : "Generate Quiz"}
+                        </Btn>
+                        <Btn variant="ghost" onClick={() => setShowQuizConfig(false)}>Cancel</Btn>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (() => {
                 const safeIdx = Math.min(deckIdx, questions.length - 1);
