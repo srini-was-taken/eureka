@@ -555,6 +555,7 @@ export default function FocusPage() {
                 );
               })()}
             </div>
+          )}
         </div>
 
         {/* Floating Action Bar */}
