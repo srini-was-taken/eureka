@@ -9,24 +9,10 @@ import Card from "@/components/ui/Card";
 import Icon from "@/components/ui/Icon";
 import { createClient } from "@/lib/supabase/client";
 
-const weakTopics = [
-  { name: "Rotational Dynamics", score: 28, subject: "Physics" },
-  { name: "Electrochemistry", score: 34, subject: "Chemistry" },
-  { name: "Integration by Parts", score: 41, subject: "Maths" },
-  { name: "Thermodynamics", score: 45, subject: "Physics" },
-];
-
-const stats = [
-  { label: "Study Streak", val: "12", unit: "days", icon: "streak", color: "#fb923c" },
-  { label: "Problems Solved", val: "247", unit: "total", icon: "check", color: TEAL },
-  { label: "Focus Hours", val: "38", unit: "this week", icon: "clock", color: "#818cf8" },
-  { label: "Avg Hint Rate", val: "1.4", unit: "hints/prob", icon: "hint", color: "#f472b6" },
-];
-
 const quickActions = [
   { label: "Start Focus Session", sub: "Upload a PDF and dive in", icon: "eye", color: TEAL, href: "/focus" },
   { label: "Feynman a Concept", sub: "Test your understanding", icon: "feynman", color: "#818cf8", href: "/feynman" },
-  { label: "Review Mistakes", sub: "7 unresolved · 3 due today", icon: "mistake", color: "#f472b6", href: "/mistakes" },
+  { label: "Review Mistakes", sub: "Log and diagnose errors", icon: "mistake", color: "#f472b6", href: "/mistakes" },
 ];
 
 function getGreeting() {
@@ -36,18 +22,95 @@ function getGreeting() {
   return "Good evening";
 }
 
+function getDaysUntil(targetDate) {
+  const now = new Date();
+  const diff = targetDate - now;
+  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+}
+
+function getExamSubtitle(exam) {
+  if (!exam || exam === "None / General Use") return "Keep learning 🧠";
+  if (exam === "JEE Advanced") {
+    const days = getDaysUntil(new Date("2026-05-18"));
+    return `JEE Advanced in ${days} days ⚡`;
+  }
+  if (exam === "JEE Mains") {
+    const days = getDaysUntil(new Date("2026-04-05"));
+    return `JEE Mains in ${days} days ⚡`;
+  }
+  if (exam === "NEET") {
+    const days = getDaysUntil(new Date("2026-05-03"));
+    return `NEET 2026 in ${days} days ⚡`;
+  }
+  return "Keep learning 🧠";
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const supabase = createClient();
-  const [firstName, setFirstName] = useState("Arjun");
+
+  const [firstName, setFirstName] = useState("...");
+  const [examSubtitle, setExamSubtitle] = useState("");
+  const [solverCount, setSolverCount] = useState(null);
+  const [feynmanAvg, setFeynmanAvg] = useState(null);
+  const [weakTopics, setWeakTopics] = useState([]);
+  const [unresolvedMistakes, setUnresolvedMistakes] = useState(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) return;
-      const fullName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Arjun";
+    async function loadDashboard() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { router.push("/login"); return; }
+
+      // Load in parallel
+      const [profileRes, solverRes, feynmanRes, mistakesRes] = await Promise.all([
+        supabase.from("profiles").select("name, exam").eq("id", user.id).single(),
+        supabase.from("solver_sessions").select("id", { count: "exact" }).eq("user_id", user.id),
+        supabase.from("feynman_attempts").select("score, gaps").eq("user_id", user.id).order("created_at", { ascending: false }).limit(20),
+        supabase.from("mistakes").select("id", { count: "exact" }).eq("user_id", user.id).eq("status", "unresolved"),
+      ]);
+
+      // Profile
+      const profile = profileRes.data;
+      const fullName = profile?.name || user.user_metadata?.full_name || user.email?.split("@")[0] || "there";
       setFirstName(fullName.split(" ")[0]);
-    });
+      setExamSubtitle(getExamSubtitle(profile?.exam));
+
+      // Solver count
+      setSolverCount(solverRes.count ?? 0);
+
+      // Feynman avg + weak topics
+      const attempts = feynmanRes.data || [];
+      if (attempts.length > 0) {
+        const avg = Math.round(attempts.reduce((sum, a) => sum + (a.score || 0), 0) / attempts.length);
+        setFeynmanAvg(avg);
+
+        // Flatten all gaps into a topic frequency map
+        const gapCount = {};
+        attempts.forEach(a => {
+          (a.gaps || []).forEach(gap => {
+            const key = gap.slice(0, 48); // normalise length
+            gapCount[key] = (gapCount[key] || 0) + 1;
+          });
+        });
+        const sorted = Object.entries(gapCount)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 4)
+          .map(([name, count]) => ({ name, score: Math.max(10, Math.min(55, 55 - count * 8)) }));
+        setWeakTopics(sorted);
+      }
+
+      // Unresolved mistakes
+      setUnresolvedMistakes(mistakesRes.count ?? 0);
+    }
+    loadDashboard();
   }, []);
+
+  const stats = [
+    { label: "Solver Sessions", val: solverCount !== null ? String(solverCount) : "—", unit: "total", icon: "brain", color: TEAL },
+    { label: "Feynman Avg", val: feynmanAvg !== null ? String(feynmanAvg) : "—", unit: "score / 100", icon: "feynman", color: "#818cf8" },
+    { label: "Open Mistakes", val: unresolvedMistakes !== null ? String(unresolvedMistakes) : "—", unit: "unresolved", icon: "mistake", color: "#f472b6" },
+    { label: "Focus Hours", val: "—", unit: "session data soon", icon: "clock", color: "#fb923c" },
+  ];
 
   return (
     <div style={{ minHeight: "100vh", background: BG, color: TEXT, display: "flex" }}>
@@ -61,7 +124,11 @@ export default function DashboardPage() {
               {getGreeting()}, {firstName} ☀️
             </h1>
             <p style={{ color: MUTED, margin: "4px 0 0", fontSize: 14 }}>
-              Your JEE Advanced target: <span style={{ color: TEAL }}>218 days away</span>
+              {examSubtitle ? (
+                <span style={{ color: TEAL }}>{examSubtitle}</span>
+              ) : (
+                <span style={{ opacity: 0.5 }}>Loading...</span>
+              )}
             </p>
           </div>
           <Btn small onClick={() => router.push("/solver")}>Today's Problem ✦</Btn>
@@ -109,18 +176,30 @@ export default function DashboardPage() {
               <span style={{ fontSize: 18 }}>⚡</span>
               <span style={{ fontWeight: 700, fontSize: 15 }}>Weak Areas</span>
             </div>
-            {weakTopics.map((t, i) => (
-              <div key={i} style={{ marginBottom: 14 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-                  <span style={{ fontSize: 13, fontWeight: 500 }}>{t.name}</span>
-                  <span style={{ fontSize: 12, color: t.score < 35 ? "#f87171" : "#fb923c", fontWeight: 700 }}>{t.score}%</span>
-                </div>
-                <div style={{ background: CARD2, borderRadius: 99, height: 5 }}>
-                  <div style={{ width: `${t.score}%`, background: t.score < 35 ? "#f87171" : "#fb923c", borderRadius: 99, height: "100%", transition: "width .8s" }} />
-                </div>
+            {weakTopics.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "20px 0" }}>
+                <div style={{ fontSize: 24, marginBottom: 10 }}>🔬</div>
+                <p style={{ color: MUTED, fontSize: 13, lineHeight: 1.6 }}>
+                  Complete a few Feynman sessions — your weak spots will appear here.
+                </p>
+                <Btn variant="outline" small style={{ marginTop: 12 }} onClick={() => router.push("/feynman")}>Start Feynman →</Btn>
               </div>
-            ))}
-            <Btn variant="outline" small style={{ width: "100%", justifyContent: "center", marginTop: 4 }}>See full report →</Btn>
+            ) : (
+              <>
+                {weakTopics.map((t, i) => (
+                  <div key={i} style={{ marginBottom: 14 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+                      <span style={{ fontSize: 13, fontWeight: 500 }}>{t.name}</span>
+                      <span style={{ fontSize: 12, color: t.score < 35 ? "#f87171" : "#fb923c", fontWeight: 700 }}>{t.score}%</span>
+                    </div>
+                    <div style={{ background: CARD2, borderRadius: 99, height: 5 }}>
+                      <div style={{ width: `${t.score}%`, background: t.score < 35 ? "#f87171" : "#fb923c", borderRadius: 99, height: "100%", transition: "width .8s" }} />
+                    </div>
+                  </div>
+                ))}
+                <Btn variant="outline" small style={{ width: "100%", justifyContent: "center", marginTop: 4 }} onClick={() => router.push("/feynman")}>See all attempts →</Btn>
+              </>
+            )}
           </Card>
         </div>
 
