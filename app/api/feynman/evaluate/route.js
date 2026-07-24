@@ -1,16 +1,6 @@
-import Anthropic from "@anthropic-ai/sdk";
+const SYSTEM_PROMPT = `You are evaluating a student's understanding of a concept based on their explanation. Identify exactly where their understanding is solid and where it breaks down.
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
-const SYSTEM_PROMPT = `You are evaluating a student's understanding of a concept based on their explanation. Your job is to identify exactly where their understanding is solid and where it breaks down — then probe the weak spots.
-
-You will be given:
-- TOPIC: the concept being explained
-- SOURCE MATERIAL: the reference content (uploaded notes or textbook excerpt) — may be empty if no material was uploaded
-- STUDENT EXPLANATION: what the student wrote in their own words
-
-YOUR TASK:
-Evaluate the explanation and return a JSON object with exactly this structure:
+Return ONLY a valid JSON object with exactly this structure, no other text, no markdown:
 {
   "score": <integer 0-100>,
   "strong": [<string>, <string>],
@@ -18,47 +8,58 @@ Evaluate the explanation and return a JSON object with exactly this structure:
   "followUp": <string>
 }
 
-SCORING GUIDE:
-- 90-100: Near complete understanding, minor gaps only
-- 70-89: Good grasp of core idea, missing important conditions or nuances
-- 50-69: Partial understanding, got the intuition but missing key mechanisms
-- 30-49: Surface level only, memorized phrases without real understanding
-- 0-29: Fundamental misconceptions present
+SCORING:
+- 90-100: Near complete understanding
+- 70-89: Good grasp, missing some nuances
+- 50-69: Partial understanding, missing key mechanisms
+- 30-49: Surface level only
+- 0-29: Fundamental misconceptions
 
 RULES:
-- "strong" should name specific things they got right, not generic praise
-- "gaps" should be precise and actionable — name exactly what's missing, not vague
-- "followUp" should be one sharp question that directly targets their biggest gap
-- Be honest and specific. A student who gets 60 should know exactly why.
-- Do not add any text outside the JSON object. Return only valid JSON.`;
+- "strong": specific things they got right, not generic praise
+- "gaps": precise and actionable, name exactly what's missing
+- "followUp": one sharp question targeting their biggest gap
+- Be honest. Return ONLY the JSON object.`;
 
 export async function POST(req) {
   try {
     const { topic, explanation, sourceMaterial = "" } = await req.json();
 
-    const userMessage = `
-TOPIC: ${topic}
+    const userMessage = `TOPIC: ${topic}
 
 SOURCE MATERIAL:
-${sourceMaterial || "No source material uploaded — evaluate based on general knowledge of this topic."}
+${sourceMaterial || "None — evaluate based on general knowledge of this topic."}
 
 STUDENT EXPLANATION:
-${explanation}
-    `.trim();
+${explanation}`;
 
-    const response = await client.messages.create({
-      model: "claude-sonnet-4-6",
-      max_tokens: 1024,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: "user", content: userMessage }],
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: userMessage },
+        ],
+        max_tokens: 1024,
+        temperature: 0.3,
+      }),
     });
 
-    const raw = response.content[0].text.trim();
+    if (!res.ok) {
+      const err = await res.text();
+      console.error("Groq error:", err);
+      return Response.json({ error: "Groq API error" }, { status: 500 });
+    }
 
-    // Strip any accidental markdown code fences
+    const data = await res.json();
+    const raw = data.choices?.[0]?.message?.content?.trim() || "";
     const cleaned = raw.replace(/```json|```/g, "").trim();
     const result = JSON.parse(cleaned);
-
     return Response.json(result);
   } catch (err) {
     console.error("Feynman evaluate error:", err);
