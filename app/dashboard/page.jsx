@@ -29,20 +29,20 @@ function getDaysUntil(targetDate) {
 }
 
 function getExamSubtitle(exam) {
-  if (!exam || exam === "None / General Use") return "Keep learning 🧠";
+  if (!exam || exam === "None / General Use") return "Keep learning";
   if (exam === "JEE Advanced") {
     const days = getDaysUntil(new Date("2026-05-18"));
-    return `JEE Advanced in ${days} days ⚡`;
+    return `JEE Advanced · ${days} days left`;
   }
   if (exam === "JEE Mains") {
     const days = getDaysUntil(new Date("2026-04-05"));
-    return `JEE Mains in ${days} days ⚡`;
+    return `JEE Mains · ${days} days left`;
   }
   if (exam === "NEET") {
     const days = getDaysUntil(new Date("2026-05-03"));
-    return `NEET 2026 in ${days} days ⚡`;
+    return `NEET 2026 · ${days} days left`;
   }
-  return "Keep learning 🧠";
+  return "Keep learning";
 }
 
 export default function DashboardPage() {
@@ -121,7 +121,7 @@ export default function DashboardPage() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
           <div>
             <h1 style={{ fontSize: 26, fontWeight: 800, margin: 0, letterSpacing: -0.5 }}>
-              {getGreeting()}, {firstName} ☀️
+              {getGreeting()}, {firstName}
             </h1>
             <p style={{ color: MUTED, margin: "4px 0 0", fontSize: 14 }}>
               {examSubtitle ? (
@@ -157,7 +157,7 @@ export default function DashboardPage() {
           <Card glow style={{ padding: 28 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 18 }}>🎯</span>
+                <Icon name="target" color={TEAL} size={16} />
                 <span style={{ fontWeight: 700, fontSize: 15 }}>Problem of the Day</span>
               </div>
               <Badge>Physics · Hard</Badge>
@@ -173,12 +173,14 @@ export default function DashboardPage() {
 
           <Card>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 18 }}>
-              <span style={{ fontSize: 18 }}>⚡</span>
+              <Icon name="zap" color="#818cf8" size={16} />
               <span style={{ fontWeight: 700, fontSize: 15 }}>Weak Areas</span>
             </div>
             {weakTopics.length === 0 ? (
               <div style={{ textAlign: "center", padding: "20px 0" }}>
-                <div style={{ fontSize: 24, marginBottom: 10 }}>🔬</div>
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: 10 }}>
+                  <Icon name="feynman" color={MUTED} size={26} />
+                </div>
                 <p style={{ color: MUTED, fontSize: 13, lineHeight: 1.6 }}>
                   Complete a few Feynman sessions — your weak spots will appear here.
                 </p>
