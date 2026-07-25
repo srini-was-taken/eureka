@@ -7,6 +7,7 @@ import Badge from "@/components/ui/Badge";
 import Btn from "@/components/ui/Btn";
 import Card from "@/components/ui/Card";
 import { createClient } from "@/lib/supabase/client";
+import Icon from "@/components/ui/Icon";
 
 const STATUS_CONFIG = {
   solved: { color: "#34d399", label: "✓ Solved" },
@@ -46,7 +47,7 @@ function AddProblemModal({ onSave, onClose }) {
   return (
     <div style={{ position: "fixed", inset: 0, background: "#00000080", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, padding: 36, width: 560, boxShadow: "0 0 60px #00000080", maxHeight: "90vh", overflowY: "auto" }}>
-        <h3 style={{ fontWeight: 800, fontSize: 20, marginBottom: 24, letterSpacing: -0.5 }}>📖 Add to Problem Bank</h3>
+        <h3 style={{ fontWeight: 800, fontSize: 20, marginBottom: 24, letterSpacing: -0.5 }}>Add to Problem Bank</h3>
 
         {error && <div style={{ background: "#f871711a", border: "1px solid #f8717140", color: "#f87171", borderRadius: 10, padding: "10px 14px", fontSize: 13, marginBottom: 16 }}>{error}</div>}
 
@@ -168,7 +169,7 @@ export default function ProblemBankPage() {
       <div style={{ flex: 1, padding: "32px 36px", overflowY: "auto" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
           <div>
-            <h1 style={{ fontSize: 26, fontWeight: 800, letterSpacing: -0.5, marginBottom: 4 }}>Problem Bank 📖</h1>
+            <h1 style={{ fontSize: 26, fontWeight: 800, letterSpacing: -0.5, marginBottom: 4 }}>Problem Bank</h1>
             <p style={{ color: MUTED, fontSize: 14 }}>Your personal collection of problems, tagged and tracked.</p>
           </div>
           <Btn small onClick={() => setShowModal(true)}>+ Add Problem</Btn>
@@ -192,7 +193,7 @@ export default function ProblemBankPage() {
         {/* Search + filters */}
         <div style={{ display: "flex", gap: 12, marginBottom: 22, alignItems: "center", flexWrap: "wrap" }}>
           <div style={{ flex: 1, minWidth: 200, background: CARD, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "10px 16px", display: "flex", gap: 10, alignItems: "center" }}>
-            <span style={{ color: MUTED, fontSize: 16 }}>🔍</span>
+            <Icon name="eye" color={MUTED} size={15} />
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by topic or title..."
               style={{ background: "transparent", border: "none", outline: "none", color: TEXT, fontSize: 14, flex: 1 }} />
           </div>
@@ -217,14 +218,13 @@ export default function ProblemBankPage() {
         {/* Empty state */}
         {!loading && problems.length === 0 && (
           <div style={{ textAlign: "center", padding: "80px 20px" }}>
-            <div style={{ fontSize: 48, marginBottom: 20 }}>📖</div>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}><Icon name="book" color={MUTED} size={48} /></div>
             <h2 style={{ fontWeight: 800, fontSize: 22, marginBottom: 10, letterSpacing: -0.5 }}>Your problem bank is empty</h2>
             <p style={{ color: MUTED, fontSize: 15, lineHeight: 1.7, marginBottom: 32, maxWidth: 400, margin: "0 auto 32px" }}>
-              Add problems directly here, or they'll appear automatically as you work through them in the AI Solver.
+              Add problems you want to work through. Use the Socratic Solver on any problem you add here.
             </p>
             <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
               <Btn onClick={() => setShowModal(true)}>+ Add a Problem</Btn>
-              <Btn variant="ghost" onClick={() => router.push("/solver")}>Open Solver ✦</Btn>
             </div>
           </div>
         )}
@@ -253,8 +253,9 @@ export default function ProblemBankPage() {
                       </div>
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontSize: 12, color: (p.hints_used || 0) === 0 ? "#34d399" : "#fb923c" }}>
-                        {(p.hints_used || 0) === 0 ? "✦ No hints used" : `💡 ${p.hints_used} hints used`}
+                      <span style={{ fontSize: 12, color: (p.hints_used || 0) === 0 ? "#34d399" : "#fb923c", display: "flex", alignItems: "center", gap: 4 }}>
+                        <Icon name="sparkle" color={(p.hints_used || 0) === 0 ? "#34d399" : "#fb923c"} size={12} />
+                        {(p.hints_used || 0) === 0 ? "No hints used" : `${p.hints_used} hints used`}
                       </span>
                       <span style={{ fontSize: 12, color: MUTED }}>{fmtDate(p.created_at)}</span>
                     </div>
@@ -294,8 +295,8 @@ export default function ProblemBankPage() {
                     </div>
                   </div>
                   <div style={{ display: "flex", gap: 10 }}>
-                    <Btn small onClick={() => router.push("/solver")} style={{ flex: 1, justifyContent: "center" }}>
-                      {sel.status === "solved" ? "Solve Again ↺" : "Solve with AI ✦"}
+                    <Btn small onClick={() => router.push(`/solver?problemText=${encodeURIComponent(sel.statement)}`)} style={{ flex: 1, justifyContent: "center" }}>
+                      {sel.status === "solved" ? "Solve Again" : "Solve with AI"}
                     </Btn>
                     {sel.status === "failed" && (
                       <Btn small variant="outline" onClick={() => router.push("/mistakes")}>View in Journal</Btn>

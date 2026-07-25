@@ -189,7 +189,7 @@ export default function MistakeJournalPage() {
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
           <div>
-            <h1 style={{ fontSize: 26, fontWeight: 800, letterSpacing: -0.5, marginBottom: 4 }}>Mistake Journal 📝</h1>
+            <h1 style={{ fontSize: 26, fontWeight: 800, letterSpacing: -0.5, marginBottom: 4 }}>Mistake Journal</h1>
             <p style={{ color: MUTED, fontSize: 14 }}>Every struggle, logged and diagnosed. Your fastest path to improvement.</p>
           </div>
           <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
@@ -233,7 +233,7 @@ export default function MistakeJournalPage() {
 
         {!loading && mistakes.length === 0 && (
           <div style={{ textAlign: "center", padding: "60px 20px" }}>
-            <div style={{ fontSize: 40, marginBottom: 16 }}>📝</div>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}><Icon name="mistake" color={MUTED} size={40} /></div>
             <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 8 }}>No mistakes logged yet</div>
             <p style={{ color: MUTED, fontSize: 14, marginBottom: 24 }}>Every mistake is a learning opportunity. Start logging!</p>
             <Btn onClick={() => setShowModal(true)}>+ Log Your First Mistake</Btn>
@@ -299,7 +299,7 @@ export default function MistakeJournalPage() {
 
                   {detail.ai_diagnosis && (
                     <>
-                      <div style={{ fontSize: 12, color: MUTED, fontWeight: 700, letterSpacing: 0.5, marginBottom: 8 }}>✦ AI DIAGNOSIS</div>
+                      <div style={{ fontSize: 12, color: MUTED, fontWeight: 700, letterSpacing: 0.5, marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}><Icon name="sparkle" color={MUTED} size={12} /> AI DIAGNOSIS</div>
                       <div style={{ fontSize: 13, lineHeight: 1.75, color: TEXT, marginBottom: 20, padding: "14px 16px", background: TEAL + "0d", border: `1px solid ${TEAL}25`, borderRadius: 10 }}>
                         <Md>{detail.ai_diagnosis}</Md>
                       </div>
@@ -307,9 +307,9 @@ export default function MistakeJournalPage() {
                   )}
 
                   <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                    <Btn small onClick={() => router.push("/solver")} style={{ flex: 1, justifyContent: "center" }}>Re-attempt ✦</Btn>
+                    <Btn small onClick={() => router.push("/solver")} style={{ flex: 1, justifyContent: "center" }}>Re-attempt</Btn>
                     <Btn small variant="outline" onClick={() => toggleStatus(detail.id)}>
-                      {detail.status === "resolved" ? "Mark Unresolved" : "Mark Resolved ✓"}
+                      {detail.status === "resolved" ? "Mark Unresolved" : "Mark Resolved"}
                     </Btn>
                     <Btn small variant="ghost" onClick={() => deleteMistake(detail.id)} style={{ color: "#f87171", borderColor: "#f8717140" }}>Delete</Btn>
                   </div>

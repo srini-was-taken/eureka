@@ -9,13 +9,7 @@ import Icon from "@/components/ui/Icon";
 import Md from "@/components/ui/Md";
 import { createClient } from "@/lib/supabase/client";
 
-const TOPICS = [
-  "Conservation of Angular Momentum",
-  "Electrochemical Cells",
-  "Work-Energy Theorem",
-  "Ideal Gas Law",
-  "Integration by Parts",
-];
+
 
 export default function FeynmanPage() {
   const router = useRouter();
@@ -160,29 +154,21 @@ export default function FeynmanPage() {
               <p style={{ color: MUTED, fontSize: 15, lineHeight: 1.6 }}>Pick a topic. Then explain it in your own words — no looking back.</p>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 28 }}>
-              {TOPICS.map((t, i) => (
-                <div key={i} onClick={() => setTopic(t)}
-                  style={{ background: topic === t ? TEAL + "15" : CARD, border: `1px solid ${topic === t ? TEAL + "60" : BORDER}`, borderRadius: 12, padding: "16px 20px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", transition: "all .15s" }}>
-                  <span style={{ fontWeight: topic === t ? 700 : 400, color: topic === t ? TEAL : TEXT, fontSize: 15 }}>{t}</span>
-                  {topic === t && <span style={{ color: TEAL }}>✓</span>}
-                </div>
-              ))}
-              {/* Custom topic input */}
               <input
-                value={TOPICS.includes(topic) ? "" : topic}
+                value={topic}
                 onChange={e => setTopic(e.target.value)}
-                placeholder="Or type your own topic..."
-                style={{ background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 12, padding: "14px 20px", color: TEXT, fontSize: 14, outline: "none" }}
+                placeholder="Type a concept or topic..."
+                style={{ background: CARD2, border: `1px solid ${topic ? TEAL + "60" : BORDER}`, borderRadius: 12, padding: "16px 20px", color: TEXT, fontSize: 15, outline: "none" }}
               />
             </div>
 
-            {/* Source material upload */}
+            {/* Source material upload — required */}
             <div
               onClick={() => !extracting && fileInputRef.current?.click()}
               style={{
                 background: attachedFile ? TEAL + "0d" : CARD2,
                 border: `2px dashed ${attachedFile ? TEAL + "60" : BORDER}`,
-                borderRadius: 14, padding: 22, textAlign: "center", marginBottom: 28,
+                borderRadius: 14, padding: 22, textAlign: "center", marginBottom: 10,
                 cursor: extracting ? "wait" : "pointer", transition: "all .2s",
               }}
             >
@@ -197,7 +183,7 @@ export default function FeynmanPage() {
                   <div style={{ textAlign: "left" }}>
                     <div style={{ fontSize: 13, color: TEAL, fontWeight: 600 }}>{attachedFile.name}</div>
                     <div style={{ fontSize: 12, color: MUTED }}>
-                      {attachedFile.type === "pdf" ? "Text extracted ✓" : "Image attached ✓ — AI will analyse it directly"}
+                      {attachedFile.type === "pdf" ? "Text extracted" : "Image attached — AI will analyse it directly"}
                     </div>
                   </div>
                   <span
@@ -214,8 +200,12 @@ export default function FeynmanPage() {
               )}
             </div>
 
+
             {error && <p style={{ color: "#f87171", fontSize: 13, marginBottom: 12 }}>{error}</p>}
-            <Btn style={{ width: "100%", justifyContent: "center", padding: 15, fontSize: 15 }} onClick={() => topic && setStage("explain")}>
+            <Btn
+              style={{ width: "100%", justifyContent: "center", padding: 15, fontSize: 15, opacity: (topic && attachedFile) ? 1 : 0.45 }}
+              onClick={() => topic && attachedFile && setStage("explain")}
+            >
               Start Explaining →
             </Btn>
           </>
@@ -228,15 +218,16 @@ export default function FeynmanPage() {
               <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 20 }}>
                 <Badge color="#818cf8">{topic}</Badge>
                 {attachedFile && (
-                  <span style={{ fontSize: 12, color: TEAL, background: TEAL + "15", borderRadius: 6, padding: "2px 8px" }}>
-                    {attachedFile.type === "pdf" ? "📄" : "🖼"} {attachedFile.name}
+                  <span style={{ fontSize: 12, color: TEAL, background: TEAL + "15", borderRadius: 6, padding: "2px 8px", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                    <Icon name={attachedFile.type === "pdf" ? "upload" : "image"} color={TEAL} size={12} />
+                    {attachedFile.name}
                   </span>
                 )}
                 <span style={{ color: MUTED, fontSize: 13 }}>No notes, no looking back.</span>
               </div>
               <Card style={{ padding: 24, background: "#818cf810", border: "1px solid #818cf830" }}>
                 <p style={{ color: "#c4b5fd", fontSize: 14, lineHeight: 1.7, margin: 0 }}>
-                  ✦ Imagine you're explaining <strong>{topic}</strong> to a classmate who's never heard of it. Use your own words, examples, intuition. Don't worry about being perfect — that's kind of the point.
+                  Imagine you're explaining <strong>{topic}</strong> to a classmate who's never heard of it. Use your own words, examples, intuition. Don't worry about being perfect — that's kind of the point.
                 </p>
               </Card>
             </div>
@@ -250,7 +241,7 @@ export default function FeynmanPage() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 16 }}>
               <span style={{ color: MUTED, fontSize: 13 }}>{explanation.length} characters</span>
               <Btn onClick={evaluate} style={{ padding: "13px 28px" }}>
-                {loading ? "Evaluating..." : "Submit for Evaluation ✦"}
+                {loading ? "Evaluating..." : "Submit for Evaluation"}
               </Btn>
             </div>
           </>
@@ -294,7 +285,9 @@ export default function FeynmanPage() {
             </div>
 
             <Card style={{ padding: 22, background: "#818cf810", border: "1px solid #818cf830", marginBottom: 24 }}>
-              <div style={{ color: "#818cf8", fontWeight: 700, fontSize: 13, marginBottom: 10 }}>✦ Follow-up question</div>
+              <div style={{ color: "#818cf8", fontWeight: 700, fontSize: 13, marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
+                <Icon name="sparkle" color="#818cf8" size={13} /> Follow-up question
+              </div>
               <p style={{ fontSize: 14, lineHeight: 1.7, margin: 0, color: TEXT }}><Md>{feedback.followUp}</Md></p>
               <textarea
                 placeholder="Answer here..."
