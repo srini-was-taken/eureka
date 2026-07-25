@@ -46,7 +46,7 @@ ${explanation}`;
     }
 
     const model = imageBase64
-      ? "meta-llama/llama-4-scout-17b-16e-instruct"
+      ? "llama-3.2-11b-vision-preview"
       : "llama-3.3-70b-versatile";
 
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {

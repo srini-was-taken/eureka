@@ -99,66 +99,93 @@ export default function Sidebar() {
       </div>
 
       {/* Nav items */}
-      {NAV_ITEMS.map((item) => {
-        const isActive = pathname === item.href;
-        return (
-          <div
-            key={item.href}
-            onClick={() => router.push(item.href)}
-            style={{
-              display: "flex", alignItems: "center", gap: 10,
-              padding: "10px 14px", borderRadius: 10, cursor: "pointer",
-              background: isActive ? activeColor + "18" : "transparent",
-              color: isActive ? activeColor : MUTED,
-              fontWeight: isActive ? 600 : 400,
-              fontSize: 14,
-              transition: "all .15s",
-            }}
-          >
-            <Icon name={item.icon} color={isActive ? activeColor : MUTED} size={15} />
-            {item.label}
-          </div>
-        );
-      })}
-
-      {/* Divider + Logout */}
-      <div style={{ height: 1, background: BORDER, margin: "8px 0" }} />
-      <div
-        onClick={handleLogout}
-        style={{
-          display: "flex", alignItems: "center", gap: 10,
-          padding: "10px 14px", borderRadius: 10, cursor: "pointer",
-          color: "#f87171", fontSize: 14, fontWeight: 500,
-          transition: "all .15s",
-        }}
-      >
-        <Icon name="back" color="#f87171" size={15} /> Log out
+      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+        {NAV_ITEMS.map((item) => {
+          const isActive = pathname === item.href;
+          return (
+            <div
+              key={item.href}
+              onClick={() => router.push(item.href)}
+              style={{
+                display: "flex", alignItems: "center", gap: 12,
+                padding: "10px 14px", borderRadius: 10, cursor: "pointer",
+                background: isActive ? activeColor + "18" : "transparent",
+                color: isActive ? activeColor : MUTED,
+                fontWeight: isActive ? 600 : 500,
+                fontSize: 14,
+                transition: "all .2s ease",
+              }}
+            >
+              <Icon name={item.icon} color={isActive ? activeColor : MUTED} size={16} />
+              {item.label}
+            </div>
+          );
+        })}
       </div>
 
-      {/* User card */}
-      <div
-        style={{
-          marginTop: "auto", padding: "12px 14px",
-          borderRadius: 10, background: CARD2,
-          display: "flex", alignItems: "center", gap: 10,
-        }}
-      >
+      {/* Profile Section at Bottom */}
+      <div style={{ marginTop: "auto", display: "flex", flexDirection: "column" }}>
+        <div style={{ height: 1, background: BORDER, margin: "16px 0 16px 0" }} />
+
         <div
           style={{
-            width: 32, height: 32, background: TEAL + "30",
-            borderRadius: "50%", display: "flex", alignItems: "center",
-            justifyContent: "center", fontSize: 13, fontWeight: 700, color: TEAL,
-            flexShrink: 0,
+            padding: "10px 12px",
+            borderRadius: 12,
+            background: CARD2,
+            border: `1px solid ${BORDER}`,
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
           }}
         >
-          {initials || <Icon name="home" size={14} color={TEAL} />}
-        </div>
-        <div style={{ overflow: "hidden" }}>
-          <div style={{ fontSize: 13, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            {displayName}
+          {/* Avatar */}
+          <div
+            style={{
+              width: 36, height: 36, background: `linear-gradient(135deg, ${TEAL}, ${TEAL_DIM})`,
+              borderRadius: 10, display: "flex", alignItems: "center",
+              justifyContent: "center", fontSize: 13, fontWeight: 700, color: "#fff",
+              flexShrink: 0,
+              boxShadow: `0 4px 10px ${TEAL}40`
+            }}
+          >
+            {initials || <Icon name="home" size={14} color="#fff" />}
           </div>
-          <div style={{ fontSize: 11, color: MUTED, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            {displaySub}
+
+          <div
+            onClick={() => router.push("/profile")}
+            style={{
+              overflow: "hidden", flex: 1, display: "flex", flexDirection: "column", gap: 2,
+              cursor: "pointer"
+            }}
+          >
+            <div style={{ fontSize: 13, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: TEXT, transition: "color 0.2s" }}
+              onMouseEnter={(e) => e.currentTarget.style.color = TEAL}
+              onMouseLeave={(e) => e.currentTarget.style.color = TEXT}
+            >
+              {displayName}
+            </div>
+            <div style={{ fontSize: 11, color: MUTED, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 500 }}>
+              {displaySub}
+            </div>
+          </div>
+
+          {/* Logout Button */}
+          <div
+            onClick={handleLogout}
+            title="Log out"
+            style={{
+              padding: 6, borderRadius: 8, cursor: "pointer",
+              color: "#f87171", display: "flex", alignItems: "center", justifyContent: "center",
+              transition: "opacity .2s", opacity: 0.8
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = 1}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = 0.8}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
           </div>
         </div>
       </div>
