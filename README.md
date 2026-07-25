@@ -1,80 +1,93 @@
 # EurekaAI 🧠
 
-> The AI tutor that refuses to hand you the answer — until you've earned it.
+An AI-powered study companion built for JEE aspirants. EurekaAI combines a Socratic solver, Feynman technique evaluator, focus mode, mistake journal, and a problem bank — all in one clean interface.
 
-Built for JEE Advanced. Every feature is designed around how you actually learn, not just how you consume content.
+---
 
 ## Features
 
-- **Socratic Solver** — Guided problem-solving via Socratic questioning. Never gives you the answer directly.
-- **Feynman Explainer** — Explain a concept in your own words. AI evaluates your understanding and finds the gaps.
-- **Focus Mode** — Distraction-free PDF reader with built-in Pomodoro timer.
-- **Mistake Journal** — Auto-logs struggles with AI diagnosis and spaced repetition.
-- **Problem Bank** — Personal tagged problem collection with status tracking.
-- **Dashboard** — Weak area tracker, Problem of the Day, study stats.
+- **Solver** — Paste a problem and get Socratic hints (not answers). Supports image uploads for handwritten/printed questions.
+- **Feynman Mode** — Explain a concept in your own words and get AI feedback on gaps in your understanding.
+- **Focus Mode** — Upload a PDF, study distraction-free with highlights, notes, and a Pomodoro timer.
+- **Mistake Journal** — Log wrong answers and revisit them later with AI diagnosis of what went wrong.
+- **Problem Bank** — Save problems for future practice.
+- **Dashboard** — Overview of all your activity.
 
-## Stack
+---
 
-- **Frontend**: Next.js 14 (App Router) + inline styles
-- **Backend**: Next.js API Routes (coming soon)
-- **Database**: Supabase (coming soon)
-- **AI**: Claude API via Anthropic SDK (coming soon)
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 14 (App Router) |
+| Auth & Database | Supabase |
+| AI | Groq API |
+| Math Rendering | KaTeX |
+| PDF Rendering | PDF.js |
+
+### AI Models Used
+
+| Use Case | Model |
+|---|---|
+| Text-based Socratic hints & Feynman evaluation | `llama-3.3-70b-versatile` |
+| Image/vision inputs (photo of problem) | `meta-llama/llama-4-scout-17b-16e-instruct` |
+
+Both models are served via **[Groq](https://groq.com)** — free tier available.
+
+---
 
 ## Getting Started
 
+### 1. Clone the repo
+
 ```bash
-# 1. Install dependencies
+git clone https://github.com/your-username/eureka-ai.git
+cd eureka-ai
 npm install
+```
 
-# 2. Set up environment variables
-cp .env.local.example .env.local
-# Fill in your Anthropic API key and Supabase credentials
+### 2. Get your API keys
 
-# 3. Run dev server
+You'll need keys from two services:
+
+#### 🔑 Groq (for AI)
+1. Go to [console.groq.com](https://console.groq.com) and sign up for free.
+2. In the dashboard, navigate to **API Keys** → **Create API Key**.
+3. Copy the key — this is your `GROQ_API_KEY`.
+
+#### 🗄️ Supabase (for database & auth)
+1. Go to [supabase.com](https://supabase.com) and create a free account.
+2. Create a **New Project**.
+3. Once set up, go to **Project Settings → API**.
+4. Copy the following:
+   - **Project URL** → `NEXT_PUBLIC_SUPABASE_URL`
+   - **anon / public key** → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - **service_role key** (under "Service role") → `SUPABASE_SERVICE_ROLE_KEY`
+
+> ⚠️ Keep your `SUPABASE_SERVICE_ROLE_KEY` secret — it has full database access. Never commit it to git.
+
+### 3. Set up environment variables
+
+Create a `.env.local` file in the project root:
+
+```env
+GROQ_API_KEY=your_groq_api_key_here
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key_here
+```
+
+### 4. Run the app
+
+```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Project Structure
+---
 
-```
-eureka-ai/
-├── app/
-│   ├── layout.jsx          # Root layout + font
-│   ├── globals.css         # Global styles
-│   ├── page.jsx            # Landing page
-│   ├── login/page.jsx      # Login / Signup
-│   ├── dashboard/page.jsx  # Main dashboard
-│   ├── solver/page.jsx     # Socratic Solver
-│   ├── feynman/page.jsx    # Feynman Explainer
-│   ├── focus/page.jsx      # Focus Mode + Pomodoro
-│   ├── mistakes/page.jsx   # Mistake Journal
-│   └── problems/page.jsx   # Problem Bank
-├── components/
-│   ├── ui/
-│   │   ├── Badge.jsx
-│   │   ├── Btn.jsx
-│   │   ├── Card.jsx
-│   │   └── Icon.jsx
-│   └── layout/
-│       └── Sidebar.jsx
-├── lib/
-│   └── theme.js            # Color constants
-└── .env.local.example
-```
+## Notes
 
-## Next Steps (post-hackathon)
-
-- [ ] Wire up `/api/solver` with Claude API + streaming
-- [ ] Wire up `/api/feynman/evaluate` with structured JSON response
-- [ ] PDF upload to Supabase Storage + text extraction
-- [ ] Supabase Auth (login/signup)
-- [ ] User progress tracking + confidence scores
-- [ ] Real problem bank with JEE past papers
-
-## Deploy
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new)
-
-One click. Works out of the box on Vercel.
+- Both Groq and Supabase have generous **free tiers** — you won't need a credit card to get started.
+- The `.env.local` file is gitignored by default; don't share it publicly.

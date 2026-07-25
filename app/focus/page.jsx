@@ -61,7 +61,6 @@ export default function FocusPage() {
   const [dragging, setDragging] = useState(false);
   const [pdfId, setPdfId] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [previousPdfs, setPreviousPdfs] = useState([]);
   const [userId, setUserId] = useState(null);
 
   const [pdfDoc, setPdfDoc] = useState(null);
@@ -94,20 +93,10 @@ export default function FocusPage() {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
         setUserId(user.id);
-        loadPreviousPdfs(user.id);
       }
     });
   }, []);
 
-  async function loadPreviousPdfs(uid) {
-    const { data } = await supabase
-      .from("pdfs")
-      .select("id, filename, created_at")
-      .eq("user_id", uid)
-      .order("created_at", { ascending: false })
-      .limit(10);
-    if (data) setPreviousPdfs(data);
-  }
 
   async function loadAnnotations(pid) {
     const { data } = await supabase
@@ -209,7 +198,6 @@ export default function FocusPage() {
           const { pdf_id } = await res.json();
           setPdfId(pdf_id);
           await loadAnnotations(pdf_id);
-          loadPreviousPdfs(userId);
         }
       } catch (e) {
         // Silent fail — local session still works fine
@@ -218,14 +206,6 @@ export default function FocusPage() {
     }
   }
 
-  async function reopenPdf(pdf) {
-    // For previously uploaded PDFs we can't re-download (private bucket), 
-    // so we prompt user to re-upload the same file
-    setFileName(pdf.filename);
-    setPdfId(pdf.id);
-    await loadAnnotations(pdf.id);
-    setStage("reopen");
-  }
 
   function getRelativePos(e, el) {
     const rect = el.getBoundingClientRect();
@@ -285,7 +265,7 @@ export default function FocusPage() {
   }
 
   // ── UPLOAD STAGE ──────────────────────────────────────────
-  if (stage === "upload" || stage === "reopen") return (
+  if (stage === "upload") return (
     <div style={{ minHeight: "100vh", background: BG, color: TEXT, display: "flex", flexDirection: "column" }}>
       <div style={{ padding: "16px 28px", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", gap: 14, background: CARD }}>
         <Btn variant="ghost" small onClick={() => router.push("/dashboard")} style={{ padding: "7px 12px" }}>← Back</Btn>
@@ -293,65 +273,22 @@ export default function FocusPage() {
         <span style={{ fontWeight: 700 }}>Focus Mode</span>
       </div>
 
-      {stage === "reopen" ? (
-        // Reopen: ask user to pick the file again to load into PDF.js
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 40 }}>
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}><Icon name="book" color={MUTED} size={40} /></div>
-          <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 8 }}>{fileName}</h2>
-          <p style={{ color: MUTED, fontSize: 14, marginBottom: 32, textAlign: "center" }}>Your annotations are loaded. Re-upload this PDF file to resume the session.</p>
-          <div onClick={() => document.getElementById("pdf-reopen-input").click()}
-            style={{ border: `2px dashed ${TEAL}60`, borderRadius: 14, padding: "32px 48px", textAlign: "center", cursor: "pointer", background: TEAL + "08" }}>
-            <div style={{ display: "flex", justifyContent: "center", marginBottom: 10 }}><Icon name="upload" color={TEAL} size={26} /></div>
-            <div style={{ fontWeight: 700, fontSize: 15 }}>Click to re-upload the same PDF</div>
-            <input id="pdf-reopen-input" type="file" accept="application/pdf" style={{ display: "none" }}
-              onChange={async e => {
-                const file = e.target.files[0];
-                if (!file) return;
-                setPdfFile(file);
-                setFileName(file.name);
-                setStage("session");
-              }} />
-          </div>
-          <Btn variant="ghost" small onClick={() => { setStage("upload"); setPdfId(null); }} style={{ marginTop: 16 }}>Cancel</Btn>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 40 }}>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}><Icon name="eye" color={TEAL} size={44} /></div>
+        <h2 style={{ fontSize: 28, fontWeight: 800, marginBottom: 10, letterSpacing: -0.5 }}>Upload your study material</h2>
+        <p style={{ color: MUTED, fontSize: 15, marginBottom: 40 }}>Drop a PDF — render it distraction-free, highlight and annotate directly on the page.</p>
+        <div
+          onDragOver={e => { e.preventDefault(); setDragging(true); }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={e => { e.preventDefault(); setDragging(false); handleFile(e.dataTransfer.files[0]); }}
+          onClick={() => document.getElementById("pdf-input").click()}
+          style={{ width: 500, border: `2px dashed ${dragging ? TEAL : BORDER}`, borderRadius: 18, padding: "52px 40px", textAlign: "center", cursor: uploading ? "wait" : "pointer", background: dragging ? TEAL + "08" : CARD, transition: "all .2s" }}>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}><Icon name="upload" color={dragging ? TEAL : MUTED} size={36} /></div>
+          <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 8 }}>{uploading ? "Uploading..." : "Click to upload or drag & drop"}</div>
+          <div style={{ color: MUTED, fontSize: 13 }}>PDF files only</div>
+          <input id="pdf-input" type="file" accept="application/pdf" style={{ display: "none" }} onChange={e => handleFile(e.target.files[0])} />
         </div>
-      ) : (
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 40 }}>
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}><Icon name="eye" color={TEAL} size={44} /></div>
-          <h2 style={{ fontSize: 28, fontWeight: 800, marginBottom: 10, letterSpacing: -0.5 }}>Upload your study material</h2>
-          <p style={{ color: MUTED, fontSize: 15, marginBottom: 40 }}>Drop a PDF — render it distraction-free, highlight and annotate directly on the page.</p>
-          <div
-            onDragOver={e => { e.preventDefault(); setDragging(true); }}
-            onDragLeave={() => setDragging(false)}
-            onDrop={e => { e.preventDefault(); setDragging(false); handleFile(e.dataTransfer.files[0]); }}
-            onClick={() => document.getElementById("pdf-input").click()}
-            style={{ width: 500, border: `2px dashed ${dragging ? TEAL : BORDER}`, borderRadius: 18, padding: "52px 40px", textAlign: "center", cursor: uploading ? "wait" : "pointer", background: dragging ? TEAL + "08" : CARD, transition: "all .2s" }}>
-            <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}><Icon name="upload" color={dragging ? TEAL : MUTED} size={36} /></div>
-            <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 8 }}>{uploading ? "Uploading..." : "Click to upload or drag & drop"}</div>
-            <div style={{ color: MUTED, fontSize: 13 }}>PDF files only</div>
-            <input id="pdf-input" type="file" accept="application/pdf" style={{ display: "none" }} onChange={e => handleFile(e.target.files[0])} />
-          </div>
-
-          {/* Previous PDFs */}
-          {previousPdfs.length > 0 && (
-            <div style={{ width: 500, marginTop: 36 }}>
-              <div style={{ fontSize: 12, color: MUTED, fontWeight: 700, letterSpacing: 0.5, marginBottom: 14 }}>PREVIOUS UPLOADS</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {previousPdfs.map(pdf => (
-                  <div key={pdf.id} onClick={() => reopenPdf(pdf)}
-                    style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 12, padding: "13px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 12, transition: "all .15s" }}>
-                    <Icon name="book" color={MUTED} size={18} />
-                    <div style={{ flex: 1, overflow: "hidden" }}>
-                      <div style={{ fontWeight: 600, fontSize: 14, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{pdf.filename}</div>
-                      <div style={{ fontSize: 12, color: MUTED }}>{new Date(pdf.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</div>
-                    </div>
-                    <span style={{ fontSize: 12, color: TEAL, fontWeight: 600 }}>Open →</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+      </div>
     </div>
   );
 

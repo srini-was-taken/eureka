@@ -18,12 +18,12 @@ const INITIAL_MESSAGES = [
 ];
 
 const HINT_CHIPS = [
-  "I'm stuck, give me a nudge",
-  "Explain this concept",
-  "Give me a hint",
-  "Show me the formula",
-  "I think the answer is...",
-  "Can we go over this again?",
+  "I'm still stuck on this",
+  "Can you rephrase the hint?",
+  "What formula is relevant here?",
+  "I think I need to apply conservation of energy",
+  "What concept is this testing?",
+  "I tried substituting but got confused",
 ];
 
 export default function SolverPage() {
@@ -272,8 +272,8 @@ export default function SolverPage() {
           {/* Input area */}
           <div style={{ padding: "12px 28px 20px", borderTop: `1px solid ${BORDER}`, background: CARD }}>
 
-            {/* Hint chips */}
-            {messages.length <= 1 && (
+            {/* Hint chips — only shown AFTER the first problem+reply exchange */}
+            {messages.length >= 3 && !loading && (
               <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginBottom: 10 }}>
                 {HINT_CHIPS.map(chip => (
                   <div key={chip} onClick={() => !loading && setInput(chip)}

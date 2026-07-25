@@ -48,7 +48,6 @@ TONE: Warm, sharp, peer-mentor. Short replies feel more like a real tutor.`;
 
 
 
-
 export async function POST(req) {
   try {
     const { messages } = await req.json();
@@ -71,9 +70,14 @@ export async function POST(req) {
     const examCfg = getExamConfig(examKey);
     const fullSystemPrompt = SYSTEM_PROMPT + examCfg.systemPromptSuffix;
 
+    // DEBUG: verify system prompt and exam config are loading correctly
+    console.log("[SOLVER] examKey:", examKey);
+    console.log("[SOLVER] systemPromptSuffix:", examCfg.systemPromptSuffix);
+    console.log("[SOLVER] fullSystemPrompt length:", fullSystemPrompt.length);
+    console.log("[SOLVER] message count:", messages.length);
+
     // Few-shot examples injected at the START of every call.
     // This pattern-locks the model into giving short Socratic hints.
-    // The model learns from the conversation pattern, not just the system prompt.
     const FEW_SHOT = [
       {
         role: "user",
@@ -83,44 +87,75 @@ export async function POST(req) {
         role: "assistant",
         content: "Good starting point. When the ball is at max height — what is its velocity at that exact instant, and why?"
       },
+      {
+        role: "user",
+        content: "velocity is 0 at max height because it momentarily stops"
+      },
+      {
+        role: "assistant",
+        content: "Exactly. Now — which kinematic equation connects initial velocity, final velocity, acceleration, and displacement?"
+      },
     ];
 
-    // Inject a soft reminder before the LAST user message to resist drift
+    // Inject a reminder as a USER turn (not system) — Groq silently drops
+    // mid-conversation system messages, so this is the reliable approach.
     const injectReminder = (msgs) => {
       if (msgs.length === 0) return msgs;
       const copy = [...msgs];
-      const lastUserIdx = [...copy].reverse().findIndex(m => m.role === "user");
+      // Find the index of the last user message
+      let lastUserIdx = -1;
+      for (let i = copy.length - 1; i >= 0; i--) {
+        if (copy[i].role === "user") { lastUserIdx = i; break; }
+      }
       if (lastUserIdx === -1) return copy;
-      const insertAt = copy.length - lastUserIdx - 1;
-      copy.splice(insertAt, 0, {
-        role: "system",
-        content: "[REMINDER: Give ONE hint only. Ask ONE question. Do NOT solve or show steps. Max 3 sentences.]"
-      });
+      // Prepend a reminder to the content of the last user message instead of
+      // inserting a fake system message (which Groq ignores mid-conversation).
+      const lastMsg = copy[lastUserIdx];
+      const reminderPrefix = "[TUTOR RULE REMINDER: Respond with ONE hint only. ONE question. Do NOT solve or reveal steps. Max 3 sentences. Be Socratic.]\n\nStudent says: ";
+      if (typeof lastMsg.content === "string") {
+        copy[lastUserIdx] = { ...lastMsg, content: reminderPrefix + lastMsg.content };
+      } else if (Array.isArray(lastMsg.content)) {
+        // For vision messages, prepend to the text part
+        const newContent = lastMsg.content.map(part => {
+          if (part.type === "text") {
+            return { ...part, text: reminderPrefix + part.text };
+          }
+          return part;
+        });
+        copy[lastUserIdx] = { ...lastMsg, content: newContent };
+      }
       return copy;
     };
 
     // Detect if any message contains image content
     const hasImages = messages.some(m => Array.isArray(m.content));
 
+    console.log("[SOLVER] hasImages:", hasImages);
+
     // Vision model doesn't support streaming on Groq — fall back to non-streaming
     // but still wrap in ReadableStream so the frontend interface stays identical
     if (hasImages) {
+      const payload = {
+        model: "meta-llama/llama-4-scout-17b-16e-instruct",
+        messages: [
+          { role: "system", content: fullSystemPrompt },
+          // Skip text-only few-shot for vision — irrelevant without images
+          ...injectReminder(messages),
+        ],
+        max_tokens: 250,
+        temperature: 0,
+      };
+
+      console.log("[SOLVER] vision payload system prompt (first 300 chars):", payload.messages[0].content.slice(0, 300));
+      console.log("[SOLVER] vision message count sent to API:", payload.messages.length);
+
       const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
         },
-        body: JSON.stringify({
-          model: "meta-llama/llama-4-scout-17b-16e-instruct",
-          messages: [
-            { role: "system", content: fullSystemPrompt },
-            ...FEW_SHOT,
-            ...injectReminder(messages),
-          ],
-          max_tokens: 300,
-          temperature: 0,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
@@ -131,6 +166,8 @@ export async function POST(req) {
 
       const data = await res.json();
       const text = data.choices?.[0]?.message?.content ?? "";
+      console.log("[SOLVER] vision raw response (first 300 chars):", text.slice(0, 300));
+
       const encoder = new TextEncoder();
       return new Response(
         new ReadableStream({
@@ -144,23 +181,28 @@ export async function POST(req) {
     }
 
     // Text-only path — streaming with the fast model
+    const textPayload = {
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        { role: "system", content: fullSystemPrompt },
+        ...FEW_SHOT,
+        ...injectReminder(messages),
+      ],
+      max_tokens: 300,
+      stream: true,
+      temperature: 0,
+    };
+
+    console.log("[SOLVER] text payload system prompt (first 300 chars):", textPayload.messages[0].content.slice(0, 300));
+    console.log("[SOLVER] text message count sent to API:", textPayload.messages.length);
+
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
       },
-      body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        messages: [
-          { role: "system", content: fullSystemPrompt },
-          ...FEW_SHOT,
-          ...injectReminder(messages),
-        ],
-        max_tokens: 300,
-        stream: true,
-        temperature: 0,
-      }),
+      body: JSON.stringify(textPayload),
     });
 
     if (!res.ok) {
