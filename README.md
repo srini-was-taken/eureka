@@ -1,17 +1,17 @@
-# EurekaAI 🧠
+# EurekaAI
 
-An AI-powered study companion built for JEE aspirants. EurekaAI combines a Socratic solver, Feynman technique evaluator, focus mode, mistake journal, and a problem bank — all in one clean interface.
+An AI-powered study companion built for JEE aspirants. EurekaAI combines a Socratic solver, Feynman technique evaluator, focus mode, mistake journal, and a problem bank; all in one clean interface.
 
 ---
 
 ## Features
 
-- **Solver** — Paste a problem and get Socratic hints (not answers). Supports image uploads for handwritten/printed questions.
-- **Feynman Mode** — Explain a concept in your own words and get AI feedback on gaps in your understanding.
-- **Focus Mode** — Upload a PDF, study distraction-free with highlights, notes, and a Pomodoro timer.
-- **Mistake Journal** — Log wrong answers and revisit them later with AI diagnosis of what went wrong.
-- **Problem Bank** — Save problems for future practice.
-- **Dashboard** — Overview of all your activity.
+- **Solver** : Paste a problem and get Socratic hints (not answers). Supports image uploads for handwritten/printed questions.
+- **Feynman Mode** : Explain a concept in your own words and get AI feedback on gaps in your understanding.
+- **Focus Mode** : Upload a PDF, study distraction-free with highlights, notes, and a Pomodoro timer.
+- **Mistake Journal** : Log wrong answers and revisit them later with AI diagnosis of what went wrong.
+- **Problem Bank** : Save problems for future practice.
+- **Dashboard** : Overview of all your activity.
 
 ---
 
@@ -32,7 +32,7 @@ An AI-powered study companion built for JEE aspirants. EurekaAI combines a Socra
 | Text-based Socratic hints & Feynman evaluation | `llama-3.3-70b-versatile` |
 | Image/vision inputs (photo of problem) | `meta-llama/llama-4-scout-17b-16e-instruct` |
 
-Both models are served via **[Groq](https://groq.com)** — free tier available.
+Both models are served via **[Groq](https://groq.com)**; free tier available.
 
 ---
 
@@ -50,12 +50,12 @@ npm install
 
 You'll need keys from two services:
 
-#### 🔑 Groq (for AI)
+#### Groq (for AI)
 1. Go to [console.groq.com](https://console.groq.com) and sign up for free.
 2. In the dashboard, navigate to **API Keys** → **Create API Key**.
-3. Copy the key — this is your `GROQ_API_KEY`.
+3. Copy the key; this is your `GROQ_API_KEY`.
 
-#### 🗄️ Supabase (for database & auth)
+#### Supabase (for database & auth)
 1. Go to [supabase.com](https://supabase.com) and create a free account.
 2. Create a **New Project**.
 3. Once set up, go to **Project Settings → API**.
@@ -64,7 +64,6 @@ You'll need keys from two services:
    - **anon / public key** → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - **service_role key** (under "Service role") → `SUPABASE_SERVICE_ROLE_KEY`
 
-> ⚠️ Keep your `SUPABASE_SERVICE_ROLE_KEY` secret — it has full database access. Never commit it to git.
 
 ### 3. Set up environment variables
 
@@ -87,7 +86,3 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## Notes
-
-- Both Groq and Supabase have generous **free tiers** — you won't need a credit card to get started.
-- The `.env.local` file is gitignored by default; don't share it publicly.
