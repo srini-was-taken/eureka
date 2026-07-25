@@ -89,6 +89,13 @@ export default function FocusPage() {
   const [flippedCards, setFlippedCards] = useState({});
   const [deckIdx, setDeckIdx] = useState(0);
 
+  // AI Questions (Generate Questions feature)
+  const [questions, setQuestions] = useState([]);
+  const [genQLoading, setGenQLoading] = useState(false);
+  const [genQError, setGenQError] = useState("");
+  const [revealedAnswers, setRevealedAnswers] = useState({});
+  const [pdfText, setPdfText] = useState(""); // store extracted text for Feynman + Questions
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
@@ -184,8 +191,18 @@ export default function FocusPage() {
     if (!file || file.type !== "application/pdf") return;
     setPdfFile(file);
     setFileName(file.name);
-    // Start the session immediately — don't block on upload
     setStage("session");
+
+    // Extract text in background for Feynman + Generate Questions
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const extractRes = await fetch("/api/pdf/extract", { method: "POST", body: form });
+      if (extractRes.ok) {
+        const d = await extractRes.json();
+        setPdfText(d.text || "");
+      }
+    } catch { /* non-fatal */ }
 
     // Upload to Supabase in the background (non-blocking)
     if (userId) {
@@ -200,10 +217,28 @@ export default function FocusPage() {
           await loadAnnotations(pdf_id);
         }
       } catch (e) {
-        // Silent fail — local session still works fine
         console.warn("PDF upload to cloud failed:", e);
       }
     }
+  }
+
+  async function generateQuestions() {
+    if (!pdfText || genQLoading) return;
+    setGenQLoading(true); setGenQError(""); setQuestions([]); setRevealedAnswers({});
+    try {
+      const res = await fetch("/api/pdf/questions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: pdfText, topic: fileName }),
+      });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      setQuestions(data.questions || []);
+      if (!data.questions?.length) setGenQError("Couldn't generate questions. Try a PDF with more text.");
+    } catch {
+      setGenQError("Something went wrong generating questions.");
+    }
+    setGenQLoading(false);
   }
 
 
@@ -493,9 +528,69 @@ export default function FocusPage() {
                 </div>
 
                 <div style={{ height: 1, background: BORDER }} />
-                <Btn variant="outline" small style={{ justifyContent: "center" }} onClick={() => router.push("/feynman")}>
-                  Test understanding
+
+                {/* Feynman deeplink */}
+                <Btn
+                  variant="outline"
+                  small
+                  style={{ justifyContent: "center", borderColor: "#818cf840", color: "#818cf8" }}
+                  onClick={() => {
+                    const params = new URLSearchParams();
+                    if (pdfText) params.set("pdfText", pdfText.slice(0, 8000));
+                    router.push(`/feynman?${params.toString()}`);
+                  }}
+                >
+                  <Icon name="feynman" color="#818cf8" size={13} style={{ marginRight: 6 }} /> Feynman It
                 </Btn>
+
+                {/* Generate Questions */}
+                <Btn
+                  small
+                  style={{ justifyContent: "center", opacity: pdfText ? 1 : 0.4 }}
+                  onClick={generateQuestions}
+                  disabled={!pdfText || genQLoading}
+                >
+                  <Icon name="sparkle" color="#000" size={13} style={{ marginRight: 6 }} />
+                  {genQLoading ? "Generating..." : "Generate Questions"}
+                </Btn>
+
+                {genQError && <p style={{ fontSize: 11, color: "#f87171", margin: 0, textAlign: "center" }}>{genQError}</p>}
+
+                {/* Questions list */}
+                {questions.length > 0 && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 4 }}>
+                    {questions.map((q, i) => (
+                      <div key={i} style={{ background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 12, padding: "14px 14px" }}>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: TEXT, lineHeight: 1.5, marginBottom: 10 }}>Q{i + 1}. {q.question}</div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 5, marginBottom: 10 }}>
+                          {Object.entries(q.options || {}).map(([k, v]) => (
+                            <div key={k} style={{
+                              fontSize: 11, padding: "5px 8px", borderRadius: 7,
+                              background: revealedAnswers[i] && k === q.answer ? TEAL + "20" : "transparent",
+                              border: `1px solid ${revealedAnswers[i] && k === q.answer ? TEAL + "50" : BORDER}`,
+                              color: revealedAnswers[i] && k === q.answer ? TEAL : MUTED,
+                              fontWeight: revealedAnswers[i] && k === q.answer ? 700 : 400,
+                            }}>
+                              ({k}) {v}
+                            </div>
+                          ))}
+                        </div>
+                        {!revealedAnswers[i] ? (
+                          <span
+                            onClick={() => setRevealedAnswers(r => ({ ...r, [i]: true }))}
+                            style={{ fontSize: 11, color: TEAL, cursor: "pointer", fontWeight: 600 }}
+                          >
+                            Reveal answer
+                          </span>
+                        ) : (
+                          <div style={{ fontSize: 11, color: MUTED, lineHeight: 1.5 }}>
+                            <span style={{ color: TEAL, fontWeight: 700 }}>({q.answer})</span> {q.explanation}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
