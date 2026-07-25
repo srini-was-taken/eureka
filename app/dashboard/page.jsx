@@ -142,7 +142,7 @@ export default function DashboardPage() {
               )}
             </p>
           </div>
-          <Btn small onClick={() => router.push("/problems")}>Problem Bank</Btn>
+          <Btn small onClick={() => router.push("/solver")}>Solve with AI ✦</Btn>
         </div>
 
         {/* Stats row */}
