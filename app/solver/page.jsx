@@ -8,6 +8,7 @@ import Card from "@/components/ui/Card";
 import Icon from "@/components/ui/Icon";
 import Md from "@/components/ui/Md";
 import { createClient } from "@/lib/supabase/client";
+import { EXAM_CONFIG, DEFAULT_EXAM_KEY } from "@/lib/examConfig";
 
 const INITIAL_MESSAGES = [
   {
@@ -34,6 +35,7 @@ export default function SolverPage() {
   const [pendingImage, setPendingImage] = useState(null); // { url: string, name: string }
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState(null);
+  const [examLabel, setExamLabel] = useState(EXAM_CONFIG[DEFAULT_EXAM_KEY].label);
   const chatRef = useRef();
   const messagesRef = useRef(messages);
   const fileInputRef = useRef();
@@ -42,8 +44,13 @@ export default function SolverPage() {
   useEffect(() => { messagesRef.current = messages; }, [messages]);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) setUserId(user.id);
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return;
+      setUserId(user.id);
+      const { data: profile } = await supabase.from("profiles").select("exam").eq("id", user.id).single();
+      if (profile?.exam && EXAM_CONFIG[profile.exam]) {
+        setExamLabel(EXAM_CONFIG[profile.exam].label);
+      }
     });
   }, []);
 
@@ -217,10 +224,10 @@ export default function SolverPage() {
         </div>
         <div>
           <div style={{ fontWeight: 700, fontSize: 15 }}>Socratic Solver</div>
-          <div style={{ fontSize: 11, color: MUTED }}>Guided problem-solving · JEE Advanced mode</div>
+          <div style={{ fontSize: 11, color: MUTED }}>Guided problem-solving · {examLabel} mode</div>
         </div>
         <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
-          <Badge>JEE Advanced</Badge>
+          <Badge>{examLabel}</Badge>
         </div>
       </div>
 

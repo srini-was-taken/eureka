@@ -151,6 +151,13 @@ export default function ProblemBankPage() {
     return null;
   }
 
+  async function handleDelete(e, id) {
+    e.stopPropagation();
+    await supabase.from("problem_attempts").delete().eq("id", id);
+    setProblems(ps => ps.filter(p => p.id !== id));
+    if (selected === id) setSelected(null);
+  }
+
   const filtered = problems.filter(p => {
     const matchSearch = (p.title || "").toLowerCase().includes(search.toLowerCase()) || (p.topic || "").toLowerCase().includes(search.toLowerCase());
     const matchSubject = filterSubject === "All" || p.subject === filterSubject;
@@ -258,6 +265,13 @@ export default function ProblemBankPage() {
                       <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4, flexShrink: 0 }}>
                         <span style={{ background: statusCfg.color + "20", color: statusCfg.color, borderRadius: 6, padding: "3px 9px", fontSize: 11, fontWeight: 700 }}>{statusCfg.label}</span>
                         {p.source && <span style={{ color: MUTED, fontSize: 11 }}>{p.source}</span>}
+                        <span
+                          onClick={e => handleDelete(e, p.id)}
+                          title="Delete problem"
+                          style={{ cursor: "pointer", color: "#f87171", fontSize: 14, opacity: 0.5, lineHeight: 1, marginTop: 2, transition: "opacity .15s" }}
+                          onMouseEnter={e => e.currentTarget.style.opacity = 1}
+                          onMouseLeave={e => e.currentTarget.style.opacity = 0.5}
+                        >✕</span>
                       </div>
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
