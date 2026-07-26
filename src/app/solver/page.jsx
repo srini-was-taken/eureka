@@ -213,18 +213,17 @@ function SolverInner() {
   }
 
   return (
-    <div style={{ height: "100vh", background: BG, color: TEXT, display: "flex", flexDirection: "column" }}>
+    <div style={{ height: "100vh", background: BG, color: TEXT, display: "flex", flexDirection: "column", position: "relative", overflow: "hidden" }}>
+      {/* Ambient orbs */}
+      <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0 }}>
+        <div style={{ position: "absolute", top: "-15%", right: "15%", width: 500, height: 500, background: "radial-gradient(ellipse, rgba(232,97,10,0.05) 0%, transparent 60%)", borderRadius: "50%" }} />
+        <div style={{ position: "absolute", bottom: "0", left: "10%", width: 300, height: 300, background: "radial-gradient(ellipse, rgba(255,255,255,0.02) 0%, transparent 65%)", borderRadius: "50%" }} />
+      </div>
       {/* Hidden file input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        style={{ display: "none" }}
-        onChange={handleImageSelect}
-      />
+      <input ref={fileInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleImageSelect} />
 
       {/* Header */}
-      <div style={{ padding: "16px 28px", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", gap: 14, background: CARD }}>
+      <div style={{ padding: "16px 28px", borderBottom: `1px solid rgba(255,255,255,0.09)`, display: "flex", alignItems: "center", gap: 14, background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", position: "sticky", top: 0, zIndex: 10 }}>
         <Btn variant="ghost" small onClick={handleBack} style={{ padding: "7px 12px" }}>← Back</Btn>
         <div style={{ width: 1, height: 24, background: BORDER }} />
         <div style={{ width: 36, height: 36, background: TEAL + "20", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -239,7 +238,7 @@ function SolverInner() {
         </div>
       </div>
 
-      <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
+      <div style={{ flex: 1, display: "flex", overflow: "hidden", position: "relative", zIndex: 1 }}>
         {/* Chat area */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
           <div ref={chatRef} style={{ flex: 1, overflowY: "auto", padding: "28px 32px", display: "flex", flexDirection: "column", gap: 20 }}>
@@ -251,10 +250,12 @@ function SolverInner() {
                 <div style={{
                   maxWidth: "65%",
                   borderRadius: m.role === "assistant" ? "16px 16px 16px 4px" : "16px 16px 4px 16px",
-                  background: m.role === "assistant" ? CARD2 : `linear-gradient(135deg,${TEAL},${TEAL_DIM})`,
-                  color: m.role === "user" ? "#000" : TEXT,
+                  background: m.role === "assistant" ? "rgba(255,255,255,0.06)" : `linear-gradient(135deg,${TEAL},${TEAL_DIM})`,
+                  backdropFilter: m.role === "assistant" ? "blur(14px)" : "none",
+                  WebkitBackdropFilter: m.role === "assistant" ? "blur(14px)" : "none",
+                  color: m.role === "user" ? "#fff" : TEXT,
                   fontSize: 14, lineHeight: 1.7,
-                  border: m.role === "assistant" ? `1px solid ${BORDER}` : "none",
+                  border: m.role === "assistant" ? `1px solid rgba(255,255,255,0.09)` : "none",
                   overflow: "hidden",
                 }}>
                   {/* Image thumbnail inside bubble */}
@@ -347,21 +348,21 @@ function SolverInner() {
 
         {/* Right panel */}
         <div style={{ width: 280, borderLeft: `1px solid ${BORDER}`, padding: "24px 20px", display: "flex", flexDirection: "column", gap: 16, overflowY: "auto" }}>
-          <Card style={{ padding: 18 }}>
+          <Card context="dashboard" style={{ padding: 18 }}>
             <div style={{ fontSize: 12, color: MUTED, fontWeight: 600, marginBottom: 12, letterSpacing: 0.5 }}>HINT PROGRESS</div>
             <div style={{ display: "flex", gap: 6 }}>
               {[1, 2, 3, 4, 5].map(n => (
-                <div key={n} style={{ flex: 1, height: 6, borderRadius: 3, background: n <= hintsGiven ? TEAL : CARD2 }} />
+                <div key={n} style={{ flex: 1, height: 6, borderRadius: 3, background: n <= hintsGiven ? TEAL : "rgba(255,255,255,0.08)" }} />
               ))}
             </div>
             <div style={{ fontSize: 12, color: MUTED, marginTop: 8 }}>{hintsGiven} of 5 hints given</div>
           </Card>
-          <Card style={{ padding: 18 }}>
+          <Card context="dashboard" style={{ padding: 18 }}>
             <div style={{ fontSize: 12, color: MUTED, fontWeight: 600, marginBottom: 10, letterSpacing: 0.5 }}>MESSAGES</div>
             <div style={{ fontSize: 26, fontWeight: 800, color: TEAL }}>{messages.length - 1}</div>
             <div style={{ fontSize: 12, color: MUTED }}>exchanged this session</div>
           </Card>
-          <Card style={{ padding: 18 }}>
+          <Card context="dashboard" style={{ padding: 18 }}>
             <div style={{ fontSize: 12, color: MUTED, fontWeight: 600, marginBottom: 10, letterSpacing: 0.5 }}>REMEMBER</div>
             <div style={{ fontSize: 13, color: MUTED, lineHeight: 1.7 }}>
               After 3 exchanges without progress the tutor will give you a bigger nudge automatically.

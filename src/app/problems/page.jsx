@@ -11,10 +11,10 @@ import Icon from "@/components/ui/Icon";
 import { getExamConfig, DEFAULT_EXAM_KEY } from "@/lib/examConfig";
 
 const STATUS_CONFIG = {
-  solved: { color: "#34d399", label: "✓ Solved" },
-  hinted: { color: "#fb923c", label: "⚡ Hinted" },
-  attempted: { color: "#818cf8", label: "◎ Attempted" },
-  failed: { color: "#f87171", label: "✗ Failed" },
+  solved:    { color: "#4ADE80", label: "✓ Solved" },
+  hinted:    { color: "#E8C98A", label: "⚡ Hinted" },
+  attempted: { color: "#A0AEC0", label: "◎ Attempted" },
+  failed:    { color: "#F87171", label: "✗ Failed" },
 };
 
 const DIFFICULTIES = ["Easy", "Medium", "Hard"];
@@ -193,12 +193,12 @@ export default function ProblemBankPage() {
         {/* Stats */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, margin: "24px 0" }}>
           {[
-            { label: "Total Problems", val: total, color: TEAL },
-            { label: "Solved Clean", val: solvedClean, color: "#34d399" },
-            { label: "Need Revisit", val: needRevisit, color: "#f87171" },
-            { label: "Subjects", val: [...new Set(problems.map(p => p.subject))].length, color: "#818cf8" },
+            { label: "Total Problems", val: total,                                                          color: TEAL   },
+            { label: "Solved Clean",   val: solvedClean,                                                    color: "#4ADE80" },
+            { label: "Need Revisit",   val: needRevisit,                                                    color: "#F87171" },
+            { label: "Subjects",       val: [...new Set(problems.map(p => p.subject))].length,              color: "#E8C98A" },
           ].map((s, i) => (
-            <Card key={i} style={{ padding: "18px 20px" }}>
+            <Card key={i} context="dashboard" style={{ padding: "18px 20px" }}>
               <div style={{ fontSize: 28, fontWeight: 800, color: s.color, marginBottom: 4 }}>{s.val}</div>
               <div style={{ fontSize: 12, color: MUTED, fontWeight: 600 }}>{s.label}</div>
             </Card>

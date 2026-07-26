@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { TEAL, BG, CARD, CARD2, BORDER, TEXT, MUTED } from "@/lib/theme";
+import { F_ACCENT as TEAL, F_BG as BG, F_SURFACE as CARD, F_BORDER as CARD2, F_BORDER as BORDER, F_TEXT as TEXT, F_MUTED as MUTED } from "@/lib/theme";
 import Btn from "@/components/ui/Btn";
 import Icon from "@/components/ui/Icon";
 import { createClient } from "@/lib/supabase/client";
@@ -13,7 +13,7 @@ function fmt(s) {
 function FlashcardModal({ onSave, onClose }) {
   const [front, setFront] = useState("");
   const [back, setBack] = useState("");
-  const inputStyle = { width: "100%", background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 10, padding: "12px 14px", color: TEXT, fontSize: 14, outline: "none", fontFamily: "inherit", boxSizing: "border-box", resize: "none" };
+  const inputStyle = { width: "100%", background: "#0F1A14", border: `1px solid ${BORDER}`, borderRadius: 10, padding: "12px 14px", color: TEXT, fontSize: 14, outline: "none", fontFamily: "inherit", boxSizing: "border-box", resize: "none" };
   return (
     <div style={{ position: "fixed", inset: 0, background: "#00000080", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 18, padding: 32, width: 460, boxShadow: "0 0 60px #00000080" }}>
@@ -296,27 +296,38 @@ export default function FocusPage() {
 
   // ── UPLOAD STAGE ──────────────────────────────────────────
   if (stage === "upload") return (
-    <div style={{ minHeight: "100vh", background: BG, color: TEXT, display: "flex", flexDirection: "column" }}>
+    <div className="focus-mode" style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       <div style={{ padding: "16px 28px", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", gap: 14, background: CARD }}>
-        <Btn variant="ghost" small onClick={() => router.push("/dashboard")} style={{ padding: "7px 12px" }}>← Back</Btn>
+        <Btn context="focus" variant="ghost" small onClick={() => router.push("/dashboard")} style={{ padding: "7px 12px" }}>← Dashboard</Btn>
         <div style={{ width: 1, height: 24, background: BORDER }} />
-        <span style={{ fontWeight: 700 }}>Focus Mode</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Icon name="eye" color={TEAL} size={15} />
+          <span style={{ fontWeight: 700, color: TEXT, fontFamily: "var(--font-syne, inherit)" }}>Focus Mode</span>
+        </div>
       </div>
 
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 40 }}>
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}><Icon name="eye" color={TEAL} size={44} /></div>
-        <h2 style={{ fontSize: 28, fontWeight: 800, marginBottom: 10, letterSpacing: -0.5 }}>Upload your study material</h2>
-        <p style={{ color: MUTED, fontSize: 15, marginBottom: 40 }}>Drop a PDF — render it distraction-free, highlight and annotate directly on the page.</p>
-        <div
-          onDragOver={e => { e.preventDefault(); setDragging(true); }}
-          onDragLeave={() => setDragging(false)}
-          onDrop={e => { e.preventDefault(); setDragging(false); handleFile(e.dataTransfer.files[0]); }}
-          onClick={() => document.getElementById("pdf-input").click()}
-          style={{ width: 500, border: `2px dashed ${dragging ? TEAL : BORDER}`, borderRadius: 18, padding: "52px 40px", textAlign: "center", cursor: uploading ? "wait" : "pointer", background: dragging ? TEAL + "08" : CARD, transition: "all .2s" }}>
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}><Icon name="upload" color={dragging ? TEAL : MUTED} size={36} /></div>
-          <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 8 }}>{uploading ? "Uploading..." : "Click to upload or drag & drop"}</div>
-          <div style={{ color: MUTED, fontSize: 13 }}>PDF files only</div>
-          <input id="pdf-input" type="file" accept="application/pdf" style={{ display: "none" }} onChange={e => handleFile(e.target.files[0])} />
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 40, position: "relative" }}>
+        {/* Ambient forest blobs */}
+        <div style={{ position: "absolute", top: "10%", left: "5%", width: 300, height: 300, background: "radial-gradient(ellipse, #4CAF7210, transparent 70%)", borderRadius: "50%", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", bottom: "10%", right: "5%", width: 250, height: 250, background: "radial-gradient(ellipse, #2D6B4015, transparent 70%)", borderRadius: "50%", pointerEvents: "none" }} />
+
+        <div style={{ position: "relative", textAlign: "center", maxWidth: 520 }}>
+          <div style={{ width: 72, height: 72, background: `${TEAL}18`, borderRadius: 20, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px", border: `1px solid ${TEAL}25`, boxShadow: `0 0 40px ${TEAL}18` }}>
+            <Icon name="eye" color={TEAL} size={32} />
+          </div>
+          <h2 style={{ fontSize: 30, fontWeight: 800, marginBottom: 10, letterSpacing: -0.5, fontFamily: "var(--font-syne, inherit)", color: TEXT }}>Enter the forest.</h2>
+          <p style={{ color: MUTED, fontSize: 15, marginBottom: 40, lineHeight: 1.75 }}>Drop a PDF — render it distraction-free, highlight and annotate directly on the page.</p>
+          <div
+            onDragOver={e => { e.preventDefault(); setDragging(true); }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={e => { e.preventDefault(); setDragging(false); handleFile(e.dataTransfer.files[0]); }}
+            onClick={() => document.getElementById("pdf-input").click()}
+            style={{ border: `2px dashed ${dragging ? TEAL : BORDER}`, borderRadius: 18, padding: "48px 40px", cursor: uploading ? "wait" : "pointer", background: dragging ? TEAL + "10" : "#0F1A14", transition: "all .2s", boxShadow: dragging ? `0 0 30px ${TEAL}20` : "none" }}>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 14 }}><Icon name="upload" color={dragging ? TEAL : MUTED} size={32} /></div>
+            <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 6, color: TEXT }}>{uploading ? "Uploading..." : "Click to upload or drag & drop"}</div>
+            <div style={{ color: MUTED, fontSize: 12 }}>PDF files only · Your session stays private</div>
+            <input id="pdf-input" type="file" accept="application/pdf" style={{ display: "none" }} onChange={e => handleFile(e.target.files[0])} />
+          </div>
         </div>
       </div>
     </div>
@@ -324,7 +335,7 @@ export default function FocusPage() {
 
   // ── SESSION STAGE ─────────────────────────────────────────
   return (
-    <div style={{ height: "100vh", background: BG, color: TEXT, display: "flex", flexDirection: "column" }}>
+    <div className="focus-mode" style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
 
       {showFlashcardModal && (
         <FlashcardModal
@@ -349,10 +360,10 @@ export default function FocusPage() {
         </div>
       )}
 
-      {/* Top bar */}
+      {/* Top bar — forest dark */}
       <div style={{ padding: "10px 24px", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", gap: 12, background: CARD, flexShrink: 0 }}>
-        <Btn variant="ghost" small onClick={exitSession} style={{ padding: "6px 12px" }}>← Exit</Btn>
-        <span style={{ fontSize: 12, color: MUTED, maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{fileName}</span>
+        <Btn context="focus" variant="ghost" small onClick={exitSession} style={{ padding: "6px 12px", opacity: 0.6 }}>← Exit</Btn>
+        <span style={{ fontSize: 11.5, color: MUTED, maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{fileName}</span>
         <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center", gap: 12 }}>
           <div style={{ position: "relative", width: 44, height: 44 }}>
             <svg width="44" height="44" style={{ transform: "rotate(-90deg)" }}>
@@ -365,34 +376,33 @@ export default function FocusPage() {
             <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700, color: TEAL }}>{fmt(timer).split(":")[0]}</div>
           </div>
           <div>
-            <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: 1 }}>{fmt(timer)}</div>
+            <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: 1, color: TEXT, fontFamily: "var(--font-mono, monospace)" }}>{fmt(timer)}</div>
             <div style={{ fontSize: 10, color: MUTED }}>Pomodoro · 25 min</div>
           </div>
-          <Btn small variant={running ? "ghost" : "primary"} onClick={() => setRunning(r => !r)}>{running ? "⏸" : "▶ Start"}</Btn>
-          <Btn small variant="ghost" onClick={() => { setTimer(25 * 60); setRunning(false); }}>↺</Btn>
+          <Btn context="focus" small variant={running ? "ghost" : "primary"} onClick={() => setRunning(r => !r)}>{running ? "⏸" : "▶ Start"}</Btn>
+          <Btn context="focus" small variant="ghost" onClick={() => { setTimer(25 * 60); setRunning(false); }}>↺</Btn>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
-          <Btn small variant={mode === "highlight" ? "primary" : "ghost"} onClick={() => setMode(m => m === "highlight" ? null : "highlight")} style={{ display: "flex", gap: 6, alignItems: "center" }}>
-            <Icon name="highlight" color={mode === "highlight" ? "#000" : MUTED} size={14} />
+          <Btn context="focus" small variant={mode === "highlight" ? "primary" : "ghost"} onClick={() => setMode(m => m === "highlight" ? null : "highlight")} style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            <Icon name="highlight" color={mode === "highlight" ? "#0C1510" : MUTED} size={14} />
             {mode === "highlight" ? "Highlighting..." : "Highlight"}
           </Btn>
-          <Btn small variant={mode === "note" ? "outline" : "ghost"} onClick={() => setMode(m => m === "note" ? null : "note")} style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          <Btn context="focus" small variant={mode === "note" ? "outline" : "ghost"} onClick={() => setMode(m => m === "note" ? null : "note")} style={{ display: "flex", gap: 6, alignItems: "center" }}>
             <Icon name="note" color={mode === "note" ? TEAL : MUTED} size={14} />
             {mode === "note" ? "Click PDF..." : "Note"}
           </Btn>
-
         </div>
       </div>
 
       {mode && (
-        <div style={{ padding: "8px 24px", background: mode === "highlight" ? "#fef08a12" : TEAL + "10", borderBottom: `1px solid ${mode === "highlight" ? "#fef08a30" : TEAL + "25"}`, fontSize: 12, color: mode === "highlight" ? "#fef08a" : TEAL, fontWeight: 600 }}>
-          {mode === "highlight" ? "Click and drag on the PDF to highlight. Press Esc to cancel." : "Click anywhere on the PDF to drop a note. Press Esc to cancel."}
+        <div style={{ padding: "6px 24px", background: mode === "highlight" ? "#fef08a08" : TEAL + "0A", borderBottom: `1px solid ${mode === "highlight" ? "#fef08a20" : TEAL + "18"}`, fontSize: 11.5, color: mode === "highlight" ? "#fef08a" : TEAL, fontWeight: 600 }}>
+          {mode === "highlight" ? "Drag to highlight · Esc to cancel" : "Click on PDF to pin a note · Esc to cancel"}
         </div>
       )}
 
       <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
-        {/* PDF canvas */}
-        <div ref={pdfContainerRef} style={{ flex: 1, overflowY: "auto", background: "#0a0c0f", padding: "32px 0", display: "flex", flexDirection: "column", alignItems: "center", gap: 24 }}
+        {/* PDF canvas — deep forest background */}
+        <div ref={pdfContainerRef} style={{ flex: 1, overflowY: "auto", background: "#080F0B", padding: "32px 0", display: "flex", flexDirection: "column", alignItems: "center", gap: 24 }}
           onKeyDown={e => e.key === "Escape" && setMode(null)} tabIndex={0}>
           {pages.length === 0 && <div style={{ color: MUTED, fontSize: 14, marginTop: 80 }}>Rendering PDF...</div>}
           {pages.map(({ canvas, pageNum, width, height }) => {
@@ -455,7 +465,7 @@ export default function FocusPage() {
           </div>
         )}
 
-        {/* Right panel */}
+        {/* Right panel — forest sidebar */}
         <div style={{ width: 280, borderLeft: `1px solid ${BORDER}`, display: "flex", flexDirection: "column", background: CARD, flexShrink: 0 }}>
           {/* Tab bar */}
           <div style={{ display: "flex", borderBottom: `1px solid ${BORDER}`, flexShrink: 0 }}>
@@ -466,7 +476,7 @@ export default function FocusPage() {
               { key: "flashcards", icon: "sparkle" },
             ].map(tab => (
               <div key={tab.key} onClick={() => setActiveTab(tab.key)}
-                style={{ flex: 1, padding: "13px 4px", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, cursor: "pointer", borderBottom: `2px solid ${activeTab === tab.key ? TEAL : "transparent"}`, transition: "all .15s" }}>
+                style={{ flex: 1, padding: "13px 4px", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, cursor: "pointer", borderBottom: `2px solid ${activeTab === tab.key ? TEAL : "transparent"}`, transition: "all .15s", background: activeTab === tab.key ? TEAL + "08" : "transparent" }}>
                 <Icon name={tab.icon} color={activeTab === tab.key ? TEAL : MUTED} size={15} />
                 {tab.key === "highlights" && highlights.length > 0 && (
                   <span style={{ fontSize: 9, fontWeight: 800, color: activeTab === tab.key ? TEAL : MUTED }}>{highlights.length}</span>
