@@ -1,0 +1,253 @@
+version: "2"
+type: frontend
+tech_stack:
+  - JavaScript
+  - Next.js 14
+  - React 18
+  - Supabase (auth + database)
+  - CSS-in-JS (inline styles)
+  - Google Fonts (Syne, DM Sans, Playfair Display, JetBrains Mono)
+
+routes:
+  - path: /
+    file: src/app/page.jsx
+    auth_required: false
+    description: Landing page with hero, features, pricing and CTA
+  - path: /login
+    file: src/app/login/page.jsx
+    auth_required: false
+    description: Login and signup page with email/password
+  - path: /dashboard
+    file: src/app/dashboard/page.jsx
+    auth_required: true
+    description: Main user dashboard with stats, quick actions, and problem of the day
+  - path: /focus
+    file: src/app/focus/page.jsx
+    auth_required: true
+    description: Focus session with PDF upload, flashcard generation, and Q&A
+  - path: /feynman
+    file: src/app/feynman/page.jsx
+    auth_required: true
+    description: Feynman technique explainer with AI feedback and scoring
+  - path: /solver
+    file: src/app/solver/page.jsx
+    auth_required: true
+    description: Socratic solver chatbot for guided problem-solving
+  - path: /mistakes
+    file: src/app/mistakes/page.jsx
+    auth_required: true
+    description: Mistake journal to log and track errors
+  - path: /problems
+    file: src/app/problems/page.jsx
+    auth_required: true
+    description: Personal problem bank with status tracking
+  - path: /profile
+    file: src/app/profile/page.jsx
+    auth_required: true
+    description: User profile with exam selection and account settings
+  - path: /auth/callback
+    file: src/app/auth/callback/route.js
+    auth_required: false
+    description: OAuth and email confirmation callback handler
+
+features:
+  - name: User Signup
+    description: Create a new account with name, email, password, and target exam
+    files:
+      - src/app/login/page.jsx
+    entry_route: /login
+    user_interactions:
+      - Click Sign Up tab
+      - Fill name input
+      - Fill email input
+      - Fill password input
+      - Select target exam from dropdown
+      - Click Create Account button
+      - Redirected to /dashboard on success
+    api_calls:
+      - method: POST
+        endpoint: Supabase auth.signUp
+    auth_required: false
+
+  - name: User Login
+    description: Log in with email and password
+    files:
+      - src/app/login/page.jsx
+    entry_route: /login
+    user_interactions:
+      - Fill email input
+      - Fill password input
+      - Click Log In button
+      - Redirected to /dashboard on success
+      - See error message on invalid credentials
+    api_calls:
+      - method: POST
+        endpoint: Supabase auth.signInWithPassword
+    auth_required: false
+
+  - name: Dashboard Overview
+    description: View study stats, quick actions, problem of the day, and weak areas
+    files:
+      - src/app/dashboard/page.jsx
+      - src/components/layout/Sidebar.jsx
+    entry_route: /dashboard
+    user_interactions:
+      - View solver session count
+      - View Feynman average score
+      - View open mistakes count
+      - Click Start Focus Session quick action
+      - Click Feynman a Concept quick action
+      - Click Review Mistakes quick action
+      - View problem of the day
+      - View weak areas list
+    api_calls:
+      - method: GET
+        endpoint: Supabase solver_sessions count
+      - method: GET
+        endpoint: Supabase feynman_attempts average score
+      - method: GET
+        endpoint: Supabase mistakes count
+    auth_required: true
+
+  - name: Focus Session
+    description: Upload a PDF, select page range, generate flashcards, and answer AI questions
+    files:
+      - src/app/focus/page.jsx
+    entry_route: /focus
+    user_interactions:
+      - Click upload area or drag PDF
+      - Select page range (optional)
+      - Click Start Session
+      - View generated flashcards
+      - Click Next/Previous on flashcard
+      - Type answer in text area
+      - Submit answer for AI feedback
+    api_calls:
+      - method: POST
+        endpoint: /api/focus/generate
+    auth_required: true
+
+  - name: Feynman Explainer
+    description: Pick a topic, optionally upload notes, explain it from memory, get AI score
+    files:
+      - src/app/feynman/page.jsx
+    entry_route: /feynman
+    user_interactions:
+      - Type topic in input
+      - Optionally upload PDF or image
+      - Click Next to proceed to explain stage
+      - Type explanation in textarea
+      - Click Submit for Evaluation
+      - View score, strengths, gaps, and follow-up questions
+    api_calls:
+      - method: POST
+        endpoint: /api/feynman/evaluate
+    auth_required: true
+
+  - name: Socratic Solver
+    description: Chat-based AI tutor that guides problem-solving with hints
+    files:
+      - src/app/solver/page.jsx
+    entry_route: /solver
+    user_interactions:
+      - Type problem or question in text area
+      - Optionally attach image
+      - Press Enter or click send button
+      - View AI hint/response
+      - Click hint chip suggestions
+      - View hint progress bar
+      - Click Back to return to dashboard
+    api_calls:
+      - method: POST
+        endpoint: /api/solver (streaming)
+    auth_required: true
+
+  - name: Mistake Journal
+    description: Log study mistakes with subject, topic, error type, and correction
+    files:
+      - src/app/mistakes/page.jsx
+    entry_route: /mistakes
+    user_interactions:
+      - Click Add Mistake button
+      - Fill mistake form (subject, topic, what went wrong, correct approach)
+      - Save mistake
+      - View list of mistakes
+      - Click mistake to expand detail
+      - Delete a mistake
+    api_calls:
+      - method: GET
+        endpoint: Supabase mistakes table
+      - method: POST
+        endpoint: Supabase mistakes insert
+      - method: DELETE
+        endpoint: Supabase mistakes delete
+    auth_required: true
+
+  - name: Problem Bank
+    description: Personal collection of problems with status tracking and solver integration
+    files:
+      - src/app/problems/page.jsx
+    entry_route: /problems
+    user_interactions:
+      - View stats (total, solved, need revisit, subjects)
+      - Click Add Problem button
+      - Fill problem form (title, subject, difficulty, source, statement)
+      - Save problem
+      - Search problems by title or topic
+      - Filter by subject and difficulty
+      - Click problem to view detail panel
+      - Click Solve with AI to launch solver
+      - Delete a problem
+    api_calls:
+      - method: GET
+        endpoint: Supabase problem_attempts
+      - method: POST
+        endpoint: Supabase problem_attempts insert
+      - method: DELETE
+        endpoint: Supabase problem_attempts delete
+    auth_required: true
+
+  - name: User Profile
+    description: View and update user info, exam selection, and account settings
+    files:
+      - src/app/profile/page.jsx
+    entry_route: /profile
+    user_interactions:
+      - View name and email
+      - Change target exam dropdown
+      - Save profile changes
+      - View session history
+    api_calls:
+      - method: GET
+        endpoint: Supabase profiles
+      - method: POST
+        endpoint: Supabase profiles upsert
+    auth_required: true
+
+  - name: Sidebar Navigation
+    description: Persistent sidebar with links to all main sections
+    files:
+      - src/components/layout/Sidebar.jsx
+    entry_route: /dashboard
+    user_interactions:
+      - Click Dashboard link
+      - Click Focus link
+      - Click Feynman link
+      - Click Solver link
+      - Click Mistakes link
+      - Click Problems link
+      - Click Profile link
+      - Click Sign Out button
+    api_calls: []
+    auth_required: true
+
+known_limitations:
+  - issue: Focus session requires PDF upload to proceed — no demo mode
+    location: src/app/focus/page.jsx
+    impact: Cannot test AI flashcard generation without a real PDF
+  - issue: Solver and Feynman require valid API key in env — AI responses may fail without it
+    location: src/app/api/solver/route.js
+    impact: Chat responses return error if GEMINI_API_KEY is not set
+  - issue: Auth-protected routes redirect to /login if unauthenticated via middleware
+    location: middleware.js
+    impact: Tests must be authenticated or test login flow first
