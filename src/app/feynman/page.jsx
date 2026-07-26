@@ -10,6 +10,7 @@ import Md from "@/components/ui/Md";
 import { createClient } from "@/lib/supabase/client";
 import { EXAM_CONFIG, DEFAULT_EXAM_KEY } from "@/lib/examConfig";
 import { Suspense } from "react";
+import { useVoiceInput } from "@/hooks/useVoiceInput";
 
 export default function FeynmanPage() {
   return (
@@ -107,6 +108,228 @@ function PdfMiniViewer({ file, highlightPageRange, onExtracted, style }) {
         );
       })}
     </div>
+  );
+}
+
+// ── Voice Input Panel ─────────────────────────────────────────────────────────
+function VoiceInputPanel({ onTranscriptLocked, TEXT, MUTED, BORDER }) {
+  const {
+    isRecording,
+    interimText,
+    finalText,
+    error: voiceError,
+    isSupported,
+    toggleRecording,
+    clearTranscript,
+  } = useVoiceInput();
+
+  // When recording stops and we have text, lock it to the textarea
+  const prevRecording = useRef(false);
+  useEffect(() => {
+    if (prevRecording.current && !isRecording && finalText.trim()) {
+      onTranscriptLocked(finalText.trim());
+    }
+    prevRecording.current = isRecording;
+  }, [isRecording]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const displayText = finalText + (interimText ? " " + interimText : "");
+  const hasContent = finalText || interimText;
+
+  return (
+    <div style={{ marginTop: 16 }}>
+      {/* Mic button row */}
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: hasContent ? 12 : 0 }}>
+        <button
+          id="mic-toggle-btn"
+          onClick={() => {
+            if (!isRecording && finalText) clearTranscript(); // fresh start each time
+            toggleRecording();
+          }}
+          title={isRecording ? "Stop recording" : "Start voice input"}
+          style={{
+            width: 44, height: 44,
+            borderRadius: "50%",
+            border: "none",
+            cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            background: isRecording
+              ? "rgba(239,68,68,0.18)"
+              : "rgba(255,255,255,0.07)",
+            boxShadow: isRecording ? "0 0 0 0 rgba(239,68,68,0.55)" : "none",
+            animation: isRecording ? "mic-pulse 1.4s cubic-bezier(.4,0,.6,1) infinite" : "none",
+            transition: "background .2s, box-shadow .2s",
+            flexShrink: 0,
+          }}
+          aria-label={isRecording ? "Stop recording" : "Start voice input"}
+          aria-pressed={isRecording}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke={isRecording ? "#ef4444" : MUTED}
+            strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+            <line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        </button>
+
+        <div>
+          <div style={{ fontSize: 12, fontWeight: 600, color: isRecording ? "#ef4444" : MUTED }}>
+            {!isSupported
+              ? "Voice input not supported"
+              : isRecording
+              ? "Recording… speak now"
+              : finalText
+              ? "Transcript locked — ready to submit"
+              : "Tap mic to dictate your explanation"}
+          </div>
+          {isRecording && (
+            <div style={{ fontSize: 11, color: MUTED, marginTop: 2 }}>
+              Click mic again to stop and lock transcript
+            </div>
+          )}
+        </div>
+
+        {finalText && !isRecording && (
+          <button
+            onClick={() => { clearTranscript(); onTranscriptLocked(""); }}
+            title="Clear transcript"
+            style={{ marginLeft: "auto", fontSize: 11, color: MUTED, background: "none", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "4px 10px", cursor: "pointer" }}
+          >
+            Clear
+          </button>
+        )}
+      </div>
+
+      {/* Live transcript area */}
+      {hasContent && (
+        <div style={{
+          background: "rgba(255,255,255,0.04)",
+          border: `1px solid ${isRecording ? "rgba(239,68,68,0.35)" : BORDER}`,
+          borderRadius: 12,
+          padding: "14px 16px",
+          fontSize: 13.5,
+          lineHeight: 1.75,
+          minHeight: 56,
+          color: TEXT,
+          transition: "border-color .2s",
+        }}>
+          <span style={{ color: TEXT }}>{finalText}</span>
+          {interimText && (
+            <span style={{ color: MUTED, opacity: 0.7 }}>
+              {finalText ? " " : ""}{interimText}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Voice errors */}
+      {voiceError && (
+        <div style={{
+          display: "flex", alignItems: "flex-start", gap: 8,
+          marginTop: 10, padding: "10px 14px",
+          background: "rgba(239,68,68,0.08)",
+          border: "1px solid rgba(239,68,68,0.25)",
+          borderRadius: 10, fontSize: 12.5, color: "#f87171", lineHeight: 1.5,
+        }}>
+          <span style={{ flexShrink: 0 }}>⚠</span>
+          {voiceError}
+        </div>
+      )}
+
+      {/* Keyframe for pulsing ring */}
+      <style>{`
+        @keyframes mic-pulse {
+          0%   { box-shadow: 0 0 0 0   rgba(239,68,68,0.55); }
+          60%  { box-shadow: 0 0 0 10px rgba(239,68,68,0);   }
+          100% { box-shadow: 0 0 0 0   rgba(239,68,68,0);    }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// ── Explain Stage (textarea + voice) ──────────────────────────────────────────
+function ExplainStage({ topic, attachedFile, pageRangeLabel, explanation, setExplanation, error, loading, evaluate, TEAL, CARD2, BORDER, TEXT, MUTED }) {
+  // When voice transcript is locked, append it to the textarea text
+  const handleTranscriptLocked = (text) => {
+    if (!text) return;
+    setExplanation(prev => {
+      const base = prev.trim();
+      return base ? base + " " + text : text;
+    });
+  };
+
+  return (
+    <>
+      <div style={{ marginBottom: 32 }}>
+        <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 20, flexWrap: "wrap" }}>
+          <span style={{ fontSize: 13, background: "#818cf815", color: "#818cf8", border: "1px solid #818cf830", borderRadius: 6, padding: "3px 10px", fontWeight: 600 }}>{topic}</span>
+          {attachedFile && (
+            <span style={{ fontSize: 12, color: TEAL, background: TEAL + "15", borderRadius: 6, padding: "2px 8px", display: "inline-flex", alignItems: "center", gap: 4 }}>
+              {pageRangeLabel || attachedFile.name}
+            </span>
+          )}
+          <span style={{ color: MUTED, fontSize: 13 }}>No notes, no looking back.</span>
+        </div>
+        <div style={{ padding: 20, background: "#818cf810", border: "1px solid #818cf830", borderRadius: 12, marginBottom: 4 }}>
+          <p style={{ color: "#c4b5fd", fontSize: 14, lineHeight: 1.7, margin: 0 }}>
+            Imagine you're explaining <strong>{topic}</strong> to a classmate who's never heard of it. Use your own words, examples, intuition.
+            {attachedFile && " Your source material is hidden — explain from memory."}
+          </p>
+        </div>
+      </div>
+
+      {/* Main text area — authoritative input */}
+      <textarea
+        value={explanation}
+        onChange={e => setExplanation(e.target.value)}
+        placeholder="Start typing your explanation here — or use the mic below to dictate…"
+        style={{
+          width: "100%", height: 260,
+          background: CARD2,
+          border: `1px solid ${explanation.length >= 100 ? "rgba(255,255,255,0.18)" : BORDER}`,
+          borderRadius: 14, padding: "18px 20px",
+          color: TEXT, fontSize: 14, lineHeight: 1.8,
+          resize: "vertical", outline: "none", boxSizing: "border-box",
+          transition: "border-color .2s",
+        }}
+      />
+
+      {/* Voice input panel */}
+      <VoiceInputPanel
+        onTranscriptLocked={handleTranscriptLocked}
+        TEXT={TEXT}
+        MUTED={MUTED}
+        BORDER={BORDER}
+      />
+
+      {error && <p style={{ color: "#f87171", fontSize: 13, marginTop: 10 }}>{error}</p>}
+
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 16 }}>
+        <span style={{ fontSize: 13, color: explanation.length < 100 ? "#fb923c" : MUTED }}>
+          {explanation.length < 100
+            ? `${explanation.length}/100 — write at least 100 characters`
+            : `${explanation.length} characters ✓`}
+        </span>
+        <button
+          onClick={evaluate}
+          disabled={explanation.length < 100 || loading}
+          style={{
+            padding: "13px 28px",
+            background: explanation.length >= 100 ? TEXT : "rgba(255,255,255,0.07)",
+            color: explanation.length >= 100 ? "#111" : MUTED,
+            border: "none", borderRadius: 12,
+            fontWeight: 700, fontSize: 14,
+            cursor: explanation.length >= 100 ? "pointer" : "not-allowed",
+            transition: "all .2s",
+            opacity: loading ? 0.7 : 1,
+          }}
+        >
+          {loading ? "Evaluating…" : "Submit for Evaluation →"}
+        </button>
+      </div>
+    </>
   );
 }
 
@@ -418,40 +641,17 @@ function FeynmanInner() {
 
         {/* ── Stage: Write explanation (PDF hidden) ── */}
         {stage === "explain" && (
-          <>
-            <div style={{ marginBottom: 32 }}>
-              <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 20, flexWrap: "wrap" }}>
-                <Badge color="#818cf8">{topic}</Badge>
-                {attachedFile && (
-                  <span style={{ fontSize: 12, color: TEAL, background: TEAL + "15", borderRadius: 6, padding: "2px 8px", display: "inline-flex", alignItems: "center", gap: 4 }}>
-                    <Icon name={attachedFile.type === "image" ? "image" : "upload"} color={TEAL} size={12} />
-                    {pageRangeLabel || attachedFile.name}
-                  </span>
-                )}
-                <span style={{ color: MUTED, fontSize: 13 }}>No notes, no looking back.</span>
-              </div>
-              <Card style={{ padding: 24, background: "#818cf810", border: "1px solid #818cf830" }}>
-                <p style={{ color: "#c4b5fd", fontSize: 14, lineHeight: 1.7, margin: 0 }}>
-                  Imagine you're explaining <strong>{topic}</strong> to a classmate who's never heard of it. Use your own words, examples, intuition.
-                  {attachedFile && " Your source material is hidden — explain from memory."}
-                </p>
-              </Card>
-            </div>
-            <textarea
-              value={explanation} onChange={e => setExplanation(e.target.value)}
-              placeholder="Start typing your explanation here..."
-              style={{ width: "100%", height: 260, background: CARD2, border: `1px solid ${BORDER}`, borderRadius: 14, padding: "18px 20px", color: TEXT, fontSize: 14, lineHeight: 1.8, resize: "vertical", outline: "none", boxSizing: "border-box" }}
-            />
-            {error && <p style={{ color: "#f87171", fontSize: 13, marginTop: 8 }}>{error}</p>}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 14 }}>
-              <span style={{ fontSize: 13, color: explanation.length < 100 ? "#fb923c" : MUTED }}>
-                {explanation.length < 100 ? `${explanation.length}/100 — write at least 100 characters` : `${explanation.length} characters`}
-              </span>
-              <Btn onClick={evaluate} disabled={explanation.length < 100} style={{ padding: "13px 28px", opacity: explanation.length < 100 ? 0.45 : 1 }}>
-                {loading ? "Evaluating..." : "Submit for Evaluation"}
-              </Btn>
-            </div>
-          </>
+          <ExplainStage
+            topic={topic}
+            attachedFile={attachedFile}
+            pageRangeLabel={pageRangeLabel}
+            explanation={explanation}
+            setExplanation={setExplanation}
+            error={error}
+            loading={loading}
+            evaluate={evaluate}
+            TEAL={TEAL} CARD2={CARD2} BORDER={BORDER} TEXT={TEXT} MUTED={MUTED}
+          />
         )}
 
         {/* ── Stage: Feedback (PDF shown again for verification) ── */}
