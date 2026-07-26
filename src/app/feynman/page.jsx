@@ -111,13 +111,10 @@ function PdfMiniViewer({ file, highlightPageRange, onExtracted, style }) {
   );
 }
 
-// ── Voice Input Panel ─────────────────────────────────────────────────────────
+// ── Voice Input Panel — Voice as primary medium ───────────────────────
 function VoiceInputPanel({ onTranscriptLocked, TEXT, MUTED, BORDER }) {
+  const INTER = "'Inter', system-ui, sans-serif";
   const {
-    isRecording,
-    interimText,
-    finalText,
-    error: voiceError,
     isSupported,
     toggleRecording,
     clearTranscript,
@@ -479,7 +476,14 @@ function FeynmanInner() {
   };
 
   return (
-    <div className="test-mode" style={{ minHeight: "100vh", background: BG, color: TEXT, position: "relative", overflow: "hidden" }}>
+    <div className="test-mode" style={{ minHeight: "100vh", background: BG, color: TEXT, position: "relative", overflow: "hidden", fontFamily: "'Inter', system-ui, sans-serif" }}>
+      <style>{`
+        @media (max-width: 768px) {
+          .feynman-header { padding: 10px 14px !important; padding-top: 60px !important; }
+          .feynman-content { padding: 28px 16px !important; }
+          .feynman-feedback-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
       <input ref={fileInputRef} type="file" accept="image/*,application/pdf" style={{ display: "none" }} onChange={handleFileSelect} />
 
       {/* Ambient orbs */}
@@ -488,8 +492,8 @@ function FeynmanInner() {
         <div style={{ position: "absolute", bottom: "10%", left: "-5%", width: 320, height: 320, background: "radial-gradient(ellipse, rgba(255,255,255,0.025) 0%, transparent 65%)", borderRadius: "50%" }} />
       </div>
 
-      {/* Header — serious, restrained, glass */}
-      <div style={{ padding: "14px 28px", borderBottom: `1px solid rgba(255,255,255,0.10)`, display: "flex", alignItems: "center", gap: 14, background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", position: "sticky", top: 0, zIndex: 10 }}>
+      {/* Header */}
+      <div className="feynman-header" style={{ padding: "14px 28px", borderBottom: "1px solid rgba(255,255,255,0.10)", display: "flex", alignItems: "center", gap: 14, background: "rgba(255,255,255,0.05)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", position: "sticky", top: 0, zIndex: 10 }}>
         <Btn context="test" variant="ghost" small onClick={() => router.push("/dashboard")} style={{ padding: "7px 12px" }}>← Back</Btn>
         <div style={{ width: 1, height: 24, background: "rgba(255,255,255,0.12)" }} />
         <div style={{ width: 34, height: 34, background: "rgba(255,255,255,0.08)", borderRadius: 9, display: "flex", alignItems: "center", justifyContent: "center", border: `1px solid rgba(255,255,255,0.12)` }}>
@@ -502,7 +506,7 @@ function FeynmanInner() {
         <div style={{ marginLeft: "auto" }}><Badge context="test">{examLabel}</Badge></div>
       </div>
 
-      <div style={{ maxWidth: 820, margin: "0 auto", padding: "48px 28px", position: "relative", zIndex: 1 }}>
+      <div className="feynman-content" style={{ maxWidth: 820, margin: "0 auto", padding: "48px 28px", position: "relative", zIndex: 1 }}>
 
         {/* Stage indicator */}
         {stage !== "pick" && (
@@ -684,7 +688,7 @@ function FeynmanInner() {
             </div>
 
             {/* What you nailed + Gaps */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
+            <div className="feynman-feedback-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
               <Card style={{ padding: 20, border: `1px solid ${TEAL}30` }}>
                 <div style={{ color: TEAL, fontWeight: 700, fontSize: 13, marginBottom: 12 }}>✓ What you nailed</div>
                 {feedback.strong?.map((s, i) => (
