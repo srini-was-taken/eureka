@@ -173,6 +173,7 @@ export default function FocusPage() {
       setPdfDoc(doc);
       setTotalPages(doc.numPages);
       const rendered = [];
+      let extractedText = "";
       for (let i = 1; i <= doc.numPages; i++) {
         const page = await doc.getPage(i);
         const viewport = page.getViewport({ scale: 1.4 });
@@ -180,9 +181,13 @@ export default function FocusPage() {
         canvas.width = viewport.width; canvas.height = viewport.height;
         const ctx = canvas.getContext("2d");
         await page.render({ canvasContext: ctx, viewport }).promise;
+        // Extract text from each page while we're at it
+        const tc = await page.getTextContent();
+        extractedText += tc.items.map(i => i.str).join(" ") + "\n";
         rendered.push({ canvas, pageNum: i, width: viewport.width, height: viewport.height });
       }
       setPages(rendered);
+      setPdfText(extractedText);  // for Generate Questions + Feynman It
     }
     loadPDF();
   }, [pdfFile, stage]);
@@ -193,16 +198,6 @@ export default function FocusPage() {
     setFileName(file.name);
     setStage("session");
 
-    // Extract text in background for Feynman + Generate Questions
-    try {
-      const form = new FormData();
-      form.append("file", file);
-      const extractRes = await fetch("/api/pdf/extract", { method: "POST", body: form });
-      if (extractRes.ok) {
-        const d = await extractRes.json();
-        setPdfText(d.text || "");
-      }
-    } catch { /* non-fatal */ }
 
     // Upload to Supabase in the background (non-blocking)
     if (userId) {
