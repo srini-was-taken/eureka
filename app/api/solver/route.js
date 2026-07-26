@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getExamConfig, DEFAULT_EXAM_KEY } from "@/lib/examConfig";
+import { checkRateLimit, trackUsage } from "@/lib/rateLimit";
 
 const SYSTEM_PROMPT = `You are a Socratic tutor for competitive exam preparation. Your ONLY job is to guide students to the answer themselves — you are FORBIDDEN from solving the problem for them.
 
@@ -59,20 +60,31 @@ export async function POST(req) {
   try {
     const { messages } = await req.json();
 
+    // ── Auth guard ────────────────────────────────────────────
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return Response.json({ error: "Please sign in to use the AI tutor." }, { status: 401 });
+    }
+
+    // ── Rate limit: 10 per day ────────────────────────────────
+    const rl = await checkRateLimit(supabase, user.id, "solver");
+    if (!rl.allowed) {
+      return Response.json(
+        { error: `Daily limit reached (${rl.used}/${rl.limit} messages). Come back tomorrow!` },
+        { status: 429 }
+      );
+    }
+
     // Fetch user's exam from Supabase to configure the AI
     let examKey = DEFAULT_EXAM_KEY;
     try {
-      const supabase = await createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("exam")
-          .eq("id", user.id)
-          .single();
-        if (profile?.exam) examKey = profile.exam;
-      }
-    } catch (_) { /* non-fatal — fall back to default */ }
+      const { data: profile } = await supabase.from("profiles").select("exam").eq("id", user.id).single();
+      if (profile?.exam) examKey = profile.exam;
+    } catch (_) { /* non-fatal */ }
+
+    // Track usage asynchronously
+    trackUsage(supabase, user.id, "solver");
 
     const examCfg = getExamConfig(examKey);
     const fullSystemPrompt = SYSTEM_PROMPT + examCfg.systemPromptSuffix;

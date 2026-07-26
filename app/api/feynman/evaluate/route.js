@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getExamConfig, DEFAULT_EXAM_KEY } from "@/lib/examConfig";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 const SYSTEM_PROMPT = `You are an expert evaluator assessing a student's depth of understanding of a concept, as if for a competitive entrance exam (JEE Advanced, JEE Mains, BITSAT, or NEET).
 
@@ -39,19 +40,30 @@ export async function POST(req) {
   try {
     const { topic, explanation, sourceMaterial = "", imageBase64 = null } = await req.json();
 
-    // Fetch user's exam from Supabase (non-fatal)
+    // ── Auth guard ────────────────────────────────────────────
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return Response.json({ error: "Sign in to use Feynman mode." }, { status: 401 });
+
+    // ── Rate limit: 10 evaluations per day ────────────────────
+    const rl = await checkRateLimit(supabase, user.id, "feynman");
+    if (!rl.allowed) {
+      return Response.json(
+        { error: `Daily limit reached (${rl.used}/${rl.limit} Feynman evaluations). Come back tomorrow!` },
+        { status: 429 }
+      );
+    }
+
+    // ── Input cap ─────────────────────────────────────────────
+    if (explanation && explanation.length > 2000) {
+      return Response.json({ error: "Explanation too long — keep it under 2000 characters." }, { status: 400 });
+    }
+
+    // Fetch user's exam config
     let examKey = DEFAULT_EXAM_KEY;
     try {
-      const supabase = await createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("exam")
-          .eq("id", user.id)
-          .single();
-        if (profile?.exam) examKey = profile.exam;
-      }
+      const { data: profile } = await supabase.from("profiles").select("exam").eq("id", user.id).single();
+      if (profile?.exam) examKey = profile.exam;
     } catch (_) { /* non-fatal */ }
 
     const examCfg = getExamConfig(examKey);
