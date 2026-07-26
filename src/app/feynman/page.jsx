@@ -115,12 +115,9 @@ function PdfMiniViewer({ file, highlightPageRange, onExtracted, style }) {
 function VoiceInputPanel({ onTranscriptLocked, TEXT, MUTED, BORDER }) {
   const INTER = "'Inter', system-ui, sans-serif";
   const {
-    isSupported,
-    toggleRecording,
-    clearTranscript,
+    isRecording, interimText, finalText, error: voiceError, isSupported, toggleRecording, clearTranscript,
   } = useVoiceInput();
 
-  // When recording stops and we have text, lock it to the textarea
   const prevRecording = useRef(false);
   useEffect(() => {
     if (prevRecording.current && !isRecording && finalText.trim()) {
@@ -129,200 +126,144 @@ function VoiceInputPanel({ onTranscriptLocked, TEXT, MUTED, BORDER }) {
     prevRecording.current = isRecording;
   }, [isRecording]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const displayText = finalText + (interimText ? " " + interimText : "");
   const hasContent = finalText || interimText;
 
   return (
-    <div style={{ marginTop: 16 }}>
-      {/* Mic button row */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: hasContent ? 12 : 0 }}>
-        <button
-          id="mic-toggle-btn"
-          onClick={() => {
-            if (!isRecording && finalText) clearTranscript(); // fresh start each time
-            toggleRecording();
-          }}
-          title={isRecording ? "Stop recording" : "Start voice input"}
-          style={{
-            width: 44, height: 44,
-            borderRadius: "50%",
-            border: "none",
-            cursor: "pointer",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            background: isRecording
-              ? "rgba(239,68,68,0.18)"
-              : "rgba(255,255,255,0.07)",
-            boxShadow: isRecording ? "0 0 0 0 rgba(239,68,68,0.55)" : "none",
-            animation: isRecording ? "mic-pulse 1.4s cubic-bezier(.4,0,.6,1) infinite" : "none",
-            transition: "background .2s, box-shadow .2s",
-            flexShrink: 0,
-          }}
-          aria-label={isRecording ? "Stop recording" : "Start voice input"}
-          aria-pressed={isRecording}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-            stroke={isRecording ? "#ef4444" : MUTED}
-            strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-            <line x1="12" y1="19" x2="12" y2="23"/>
-            <line x1="8" y1="23" x2="16" y2="23"/>
-          </svg>
-        </button>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0, width: "100%" }}>
+      {/* Large centered mic button */}
+      <button
+        id="mic-toggle-btn"
+        onClick={() => { if (!isRecording && finalText) clearTranscript(); toggleRecording(); }}
+        title={isRecording ? "Stop recording" : "Start voice input"}
+        style={{
+          width: 88, height: 88, borderRadius: "50%", border: "none",
+          cursor: isSupported ? "pointer" : "default",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          background: isRecording ? "rgba(239,68,68,0.18)" : "rgba(255,255,255,0.09)",
+          boxShadow: isRecording
+            ? "0 0 0 0 rgba(239,68,68,0.55), 0 8px 32px rgba(239,68,68,0.25)"
+            : "0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)",
+          animation: isRecording ? "mic-pulse 1.4s cubic-bezier(.4,0,.6,1) infinite" : "none",
+          transition: "background .2s, box-shadow .2s",
+        }}
+        aria-label={isRecording ? "Stop recording" : "Start voice input"}
+        aria-pressed={isRecording}
+      >
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none"
+          stroke={isRecording ? "#ef4444" : MUTED}
+          strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+      </button>
 
-        <div>
-          <div style={{ fontSize: 12, fontWeight: 600, color: isRecording ? "#ef4444" : MUTED }}>
-            {!isSupported
-              ? "Voice input not supported"
-              : isRecording
-              ? "Recording… speak now"
-              : finalText
-              ? "Transcript locked — ready to submit"
-              : "Tap mic to dictate your explanation"}
-          </div>
-          {isRecording && (
-            <div style={{ fontSize: 11, color: MUTED, marginTop: 2 }}>
-              Click mic again to stop and lock transcript
-            </div>
-          )}
-        </div>
-
-        {finalText && !isRecording && (
-          <button
-            onClick={() => { clearTranscript(); onTranscriptLocked(""); }}
-            title="Clear transcript"
-            style={{ marginLeft: "auto", fontSize: 11, color: MUTED, background: "none", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "4px 10px", cursor: "pointer" }}
-          >
-            Clear
-          </button>
-        )}
+      {/* Status label */}
+      <div style={{ marginTop: 14, fontFamily: INTER, fontSize: 13, fontWeight: 600, color: isRecording ? "#ef4444" : MUTED, textAlign: "center", minHeight: 18 }}>
+        {!isSupported ? "Voice not supported in this browser"
+          : isRecording ? "Recording… tap again to stop"
+          : finalText ? "Transcript ready—review below"
+          : "Tap to start speaking"}
       </div>
 
-      {/* Live transcript area */}
+      {/* Live transcript */}
       {hasContent && (
-        <div style={{
-          background: "rgba(255,255,255,0.04)",
-          border: `1px solid ${isRecording ? "rgba(239,68,68,0.35)" : BORDER}`,
-          borderRadius: 12,
-          padding: "14px 16px",
-          fontSize: 13.5,
-          lineHeight: 1.75,
-          minHeight: 56,
-          color: TEXT,
-          transition: "border-color .2s",
-        }}>
+        <div style={{ marginTop: 16, width: "100%", background: "rgba(255,255,255,0.04)", border: `1px solid ${isRecording ? "rgba(239,68,68,0.35)" : BORDER}`, borderRadius: 12, padding: "14px 18px", fontSize: 14, lineHeight: 1.8, color: TEXT, transition: "border-color .2s", fontFamily: INTER, minHeight: 56 }}>
           <span style={{ color: TEXT }}>{finalText}</span>
-          {interimText && (
-            <span style={{ color: MUTED, opacity: 0.7 }}>
-              {finalText ? " " : ""}{interimText}
-            </span>
-          )}
+          {interimText && <span style={{ color: MUTED, opacity: 0.7 }}>{finalText ? " " : ""}{interimText}</span>}
         </div>
       )}
 
-      {/* Voice errors */}
+      {/* Clear + Use this buttons */}
+      {finalText && !isRecording && (
+        <div style={{ display: "flex", gap: 10, marginTop: 14, width: "100%" }}>
+          <button onClick={() => { clearTranscript(); onTranscriptLocked(""); }}
+            style={{ flex: 1, fontSize: 13, fontFamily: INTER, fontWeight: 600, color: MUTED, background: "rgba(255,255,255,0.05)", border: `1px solid ${BORDER}`, borderRadius: 9, padding: "9px", cursor: "pointer" }}>
+            Clear
+          </button>
+          <button onClick={() => onTranscriptLocked(finalText.trim())}
+            style={{ flex: 2, fontSize: 13, fontFamily: INTER, fontWeight: 700, color: "#111", background: TEXT, border: "none", borderRadius: 9, padding: "9px", cursor: "pointer" }}>
+            Use this transcript →
+          </button>
+        </div>
+      )}
+
       {voiceError && (
-        <div style={{
-          display: "flex", alignItems: "flex-start", gap: 8,
-          marginTop: 10, padding: "10px 14px",
-          background: "rgba(239,68,68,0.08)",
-          border: "1px solid rgba(239,68,68,0.25)",
-          borderRadius: 10, fontSize: 12.5, color: "#f87171", lineHeight: 1.5,
-        }}>
-          <span style={{ flexShrink: 0 }}>⚠</span>
-          {voiceError}
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 8, marginTop: 12, padding: "10px 14px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 10, fontSize: 12.5, color: "#f87171", lineHeight: 1.5, width: "100%", boxSizing: "border-box", fontFamily: INTER }}>
+          <span style={{ flexShrink: 0 }}>⚠</span>{voiceError}
         </div>
       )}
 
-      {/* Keyframe for pulsing ring */}
       <style>{`
         @keyframes mic-pulse {
-          0%   { box-shadow: 0 0 0 0   rgba(239,68,68,0.55); }
-          60%  { box-shadow: 0 0 0 10px rgba(239,68,68,0);   }
-          100% { box-shadow: 0 0 0 0   rgba(239,68,68,0);    }
+          0%   { box-shadow: 0 0 0 0   rgba(239,68,68,0.55), 0 8px 32px rgba(239,68,68,0.25); }
+          60%  { box-shadow: 0 0 0 18px rgba(239,68,68,0),   0 8px 32px rgba(239,68,68,0.15); }
+          100% { box-shadow: 0 0 0 0   rgba(239,68,68,0),   0 8px 32px rgba(239,68,68,0.25); }
         }
       `}</style>
     </div>
   );
 }
 
-// ── Explain Stage (textarea + voice) ──────────────────────────────────────────
+// ── Explain Stage — voice-primary ───────────────────────────────────────
 function ExplainStage({ topic, attachedFile, pageRangeLabel, explanation, setExplanation, error, loading, evaluate, TEAL, CARD2, BORDER, TEXT, MUTED }) {
-  // When voice transcript is locked, append it to the textarea text
+  const INTER = "'Inter', system-ui, sans-serif";
+  const [showTextInput, setShowTextInput] = useState(false);
+
   const handleTranscriptLocked = (text) => {
     if (!text) return;
-    setExplanation(prev => {
-      const base = prev.trim();
-      return base ? base + " " + text : text;
-    });
+    setExplanation(prev => { const base = prev.trim(); return base ? base + " " + text : text; });
   };
 
   return (
     <>
-      <div style={{ marginBottom: 32 }}>
-        <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 20, flexWrap: "wrap" }}>
-          <span style={{ fontSize: 13, background: "#818cf815", color: "#818cf8", border: "1px solid #818cf830", borderRadius: 6, padding: "3px 10px", fontWeight: 600 }}>{topic}</span>
-          {attachedFile && (
-            <span style={{ fontSize: 12, color: TEAL, background: TEAL + "15", borderRadius: 6, padding: "2px 8px", display: "inline-flex", alignItems: "center", gap: 4 }}>
-              {pageRangeLabel || attachedFile.name}
-            </span>
-          )}
-          <span style={{ color: MUTED, fontSize: 13 }}>No notes, no looking back.</span>
-        </div>
-        <div style={{ padding: 20, background: "#818cf810", border: "1px solid #818cf830", borderRadius: 12, marginBottom: 4 }}>
-          <p style={{ color: "#c4b5fd", fontSize: 14, lineHeight: 1.7, margin: 0 }}>
-            Imagine you're explaining <strong>{topic}</strong> to a classmate who's never heard of it. Use your own words, examples, intuition.
-            {attachedFile && " Your source material is hidden — explain from memory."}
-          </p>
-        </div>
+      {/* Context chips */}
+      <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 24, flexWrap: "wrap", justifyContent: "center" }}>
+        <span style={{ fontSize: 13, background: "#818cf815", color: "#818cf8", border: "1px solid #818cf830", borderRadius: 6, padding: "3px 10px", fontWeight: 600, fontFamily: INTER }}>{topic}</span>
+        {attachedFile && (
+          <span style={{ fontSize: 12, color: TEAL, background: TEAL + "15", borderRadius: 6, padding: "2px 8px", fontFamily: INTER }}>{pageRangeLabel || attachedFile.name}</span>
+        )}
       </div>
 
-      {/* Main text area — authoritative input */}
-      <textarea
-        value={explanation}
-        onChange={e => setExplanation(e.target.value)}
-        placeholder="Start typing your explanation here — or use the mic below to dictate…"
-        style={{
-          width: "100%", height: 260,
-          background: CARD2,
-          border: `1px solid ${explanation.length >= 100 ? "rgba(255,255,255,0.18)" : BORDER}`,
-          borderRadius: 14, padding: "18px 20px",
-          color: TEXT, fontSize: 14, lineHeight: 1.8,
-          resize: "vertical", outline: "none", boxSizing: "border-box",
-          transition: "border-color .2s",
-        }}
-      />
+      {/* Prompt */}
+      <div style={{ padding: "18px 22px", background: "#818cf810", border: "1px solid #818cf830", borderRadius: 14, marginBottom: 36, textAlign: "center" }}>
+        <p style={{ color: "#c4b5fd", fontSize: 14, lineHeight: 1.7, margin: 0, fontFamily: INTER }}>
+          Explain <strong>{topic}</strong> to a classmate who’s never heard of it. Use your own words, examples, intuition.
+          {attachedFile && " Your source material is hidden — explain from memory."}
+        </p>
+      </div>
 
-      {/* Voice input panel */}
-      <VoiceInputPanel
-        onTranscriptLocked={handleTranscriptLocked}
-        TEXT={TEXT}
-        MUTED={MUTED}
-        BORDER={BORDER}
-      />
+      {/* Large mic — hero */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 28 }}>
+        <VoiceInputPanel onTranscriptLocked={handleTranscriptLocked} TEXT={TEXT} MUTED={MUTED} BORDER={BORDER} />
+      </div>
 
-      {error && <p style={{ color: "#f87171", fontSize: 13, marginTop: 10 }}>{error}</p>}
-
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 16 }}>
-        <span style={{ fontSize: 13, color: explanation.length < 100 ? "#fb923c" : MUTED }}>
-          {explanation.length < 100
-            ? `${explanation.length}/100 — write at least 100 characters`
-            : `${explanation.length} characters ✓`}
+      {/* Or type toggle */}
+      <div style={{ textAlign: "center", marginBottom: showTextInput ? 12 : 0 }}>
+        <span onClick={() => setShowTextInput(s => !s)}
+          style={{ fontFamily: INTER, fontSize: 12.5, color: MUTED, cursor: "pointer", textDecoration: "underline", textUnderlineOffset: 3 }}>
+          {showTextInput ? "Hide text input" : "Or type instead"}
         </span>
-        <button
-          onClick={evaluate}
-          disabled={explanation.length < 100 || loading}
-          style={{
-            padding: "13px 28px",
-            background: explanation.length >= 100 ? TEXT : "rgba(255,255,255,0.07)",
-            color: explanation.length >= 100 ? "#111" : MUTED,
-            border: "none", borderRadius: 12,
-            fontWeight: 700, fontSize: 14,
-            cursor: explanation.length >= 100 ? "pointer" : "not-allowed",
-            transition: "all .2s",
-            opacity: loading ? 0.7 : 1,
-          }}
-        >
+      </div>
+
+      {showTextInput && (
+        <textarea
+          value={explanation}
+          onChange={e => setExplanation(e.target.value)}
+          placeholder="Type your explanation here..."
+          style={{ width: "100%", height: 200, background: CARD2, border: `1px solid ${explanation.length >= 100 ? "rgba(255,255,255,0.18)" : BORDER}`, borderRadius: 14, padding: "16px 18px", color: TEXT, fontSize: 14, lineHeight: 1.8, resize: "vertical", outline: "none", boxSizing: "border-box", transition: "border-color .2s", fontFamily: INTER }}
+        />
+      )}
+
+      {error && <p style={{ color: "#f87171", fontSize: 13, marginTop: 10, fontFamily: INTER, textAlign: "center" }}>{error}</p>}
+
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 20 }}>
+        <span style={{ fontSize: 13, color: explanation.length < 100 ? "#fb923c" : MUTED, fontFamily: INTER }}>
+          {explanation.length < 100 ? `${explanation.length}/100 chars` : `${explanation.length} chars ✓`}
+        </span>
+        <button onClick={evaluate} disabled={explanation.length < 100 || loading}
+          style={{ padding: "13px 28px", background: explanation.length >= 100 ? TEXT : "rgba(255,255,255,0.07)", color: explanation.length >= 100 ? "#111" : MUTED, border: "none", borderRadius: 12, fontWeight: 700, fontSize: 14, fontFamily: INTER, cursor: explanation.length >= 100 ? "pointer" : "not-allowed", transition: "all .2s", opacity: loading ? 0.7 : 1 }}>
           {loading ? "Evaluating…" : "Submit for Evaluation →"}
         </button>
       </div>
