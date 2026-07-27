@@ -18,7 +18,7 @@ function FlashcardModal({ onSave, onClose }) {
   const inputStyle = { width: "100%", background: "#0F1A14", border: `1px solid ${BORDER}`, borderRadius: 10, padding: "12px 14px", color: TEXT, fontSize: 14, outline: "none", fontFamily: INTER, boxSizing: "border-box", resize: "none" };
   return (
     <div style={{ position: "fixed", inset: 0, background: "#00000080", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 18, padding: 32, width: 460, boxShadow: "0 0 60px #00000080" }}>
+      <div style={{ background: "#0F0F0F", border: `1px solid ${BORDER}`, borderRadius: 18, padding: 32, width: 460, boxShadow: "0 0 60px #00000080" }}>
         <h3 style={{ fontWeight: 800, fontSize: 18, marginBottom: 24, letterSpacing: -0.5, fontFamily: INTER }}>Create Flashcard</h3>
         <div style={{ marginBottom: 16 }}>
           <div style={{ fontSize: 12, color: MUTED, fontWeight: 600, marginBottom: 7, letterSpacing: 0.4, fontFamily: INTER }}>FRONT (question / term)</div>

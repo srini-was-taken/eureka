@@ -46,7 +46,7 @@ function AddProblemModal({ onSave, onClose, subjects = ["Physics", "Chemistry", 
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "#00000080", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, padding: 36, width: 560, boxShadow: "0 0 60px #00000080", maxHeight: "90vh", overflowY: "auto" }}>
+      <div style={{ background: "#0F0F0F", border: `1px solid ${BORDER}`, borderRadius: 20, padding: 36, width: 560, boxShadow: "0 0 60px #00000080", maxHeight: "90vh", overflowY: "auto" }}>
         <h3 style={{ fontWeight: 800, fontSize: 20, marginBottom: 24, letterSpacing: -0.5 }}>Add to Problem Bank</h3>
 
         {error && <div style={{ background: "#f871711a", border: "1px solid #f8717140", color: "#f87171", borderRadius: 10, padding: "10px 14px", fontSize: 13, marginBottom: 16 }}>{error}</div>}
