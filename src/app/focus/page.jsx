@@ -561,34 +561,36 @@ export default function FocusPage() {
         </div>
 
         {/* Floating Action Bar */}
-        <div style={{
-          position: "fixed", bottom: 32, right: 32, zIndex: 100,
-          display: "flex", alignItems: "center", gap: 20, padding: "14px 28px",
-          background: "rgba(10, 15, 12, 0.75)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
-          border: `1px solid rgba(255,255,255,0.08)`, borderRadius: 999, boxShadow: "0 20px 60px rgba(0,0,0,0.6)"
-        }}>
-          <div onClick={() => setMode(m => m === "highlight" ? null : "highlight")}
-            style={{ cursor: "pointer", fontSize: 13.5, fontWeight: 600, fontFamily: INTER, color: TEAL, opacity: mode === "highlight" ? 1 : 0.6, transition: "opacity .15s" }}>
-            Highlight
-          </div>
-          <div onClick={() => setMode(m => m === "note" ? null : "note")}
-            style={{ cursor: "pointer", fontSize: 13.5, fontWeight: 600, fontFamily: INTER, color: TEAL, opacity: mode === "note" ? 1 : 0.6, transition: "opacity .15s" }}>
-            Annotate
-          </div>
+        {activeTab === "note" && (
+          <div style={{
+            position: "fixed", bottom: 32, right: 32, zIndex: 100,
+            display: "flex", alignItems: "center", gap: 20, padding: "14px 28px",
+            background: "rgba(10, 15, 12, 0.75)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
+            border: `1px solid rgba(255,255,255,0.08)`, borderRadius: 999, boxShadow: "0 20px 60px rgba(0,0,0,0.6)"
+          }}>
+            <div onClick={() => setMode(m => m === "highlight" ? null : "highlight")}
+              style={{ cursor: "pointer", fontSize: 13.5, fontWeight: 600, fontFamily: INTER, color: TEAL, opacity: mode === "highlight" ? 1 : 0.6, transition: "opacity .15s" }}>
+              Highlight
+            </div>
+            <div onClick={() => setMode(m => m === "note" ? null : "note")}
+              style={{ cursor: "pointer", fontSize: 13.5, fontWeight: 600, fontFamily: INTER, color: TEAL, opacity: mode === "note" ? 1 : 0.6, transition: "opacity .15s" }}>
+              Annotate
+            </div>
 
-          <div style={{ width: 1, height: 18, background: "rgba(255,255,255,0.1)", margin: "0 4px" }} />
+            <div style={{ width: 1, height: 18, background: "rgba(255,255,255,0.1)", margin: "0 4px" }} />
 
-          <div onClick={() => setShowFlashcardModal(true)}
-            style={{ cursor: "pointer", fontSize: 13.5, fontWeight: 600, fontFamily: INTER, color: TEAL, opacity: 0.8, transition: "opacity .15s" }}
-            onMouseEnter={e => e.currentTarget.style.opacity = "1"} onMouseLeave={e => e.currentTarget.style.opacity = "0.8"}>
-            + Card
+            <div onClick={() => setShowFlashcardModal(true)}
+              style={{ cursor: "pointer", fontSize: 13.5, fontWeight: 600, fontFamily: INTER, color: TEAL, opacity: 0.8, transition: "opacity .15s" }}
+              onMouseEnter={e => e.currentTarget.style.opacity = "1"} onMouseLeave={e => e.currentTarget.style.opacity = "0.8"}>
+              + Card
+            </div>
+            <div onClick={() => { const params = new URLSearchParams(); if (pdfText) params.set("pdfText", pdfText.slice(0, 8000)); router.push(`/feynman?${params.toString()}`); }}
+              style={{ cursor: "pointer", fontSize: 13.5, fontWeight: 600, fontFamily: INTER, color: TEAL, opacity: 0.8, transition: "opacity .15s" }}
+              onMouseEnter={e => e.currentTarget.style.opacity = "1"} onMouseLeave={e => e.currentTarget.style.opacity = "0.8"}>
+              Feynman It
+            </div>
           </div>
-          <div onClick={() => { const params = new URLSearchParams(); if (pdfText) params.set("pdfText", pdfText.slice(0, 8000)); router.push(`/feynman?${params.toString()}`); }}
-            style={{ cursor: "pointer", fontSize: 13.5, fontWeight: 600, fontFamily: INTER, color: TEAL, opacity: 0.8, transition: "opacity .15s" }}
-            onMouseEnter={e => e.currentTarget.style.opacity = "1"} onMouseLeave={e => e.currentTarget.style.opacity = "0.8"}>
-            Feynman It
-          </div>
-        </div>
+        )}
 
       </div>
     </div>
