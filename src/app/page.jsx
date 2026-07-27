@@ -349,9 +349,22 @@ export default function LandingPage() {
           .bento-grid  { grid-template-columns: 1fr !important; grid-template-rows: auto !important; }
           .bento-grid > * { grid-column: 1 !important; grid-row: auto !important; }
           .steps-grid  { grid-template-columns: 1fr !important; }
-          .steps-grid > div { border-right: none !important; padding-left: 0 !important; padding-right: 0 !important; border-bottom: 1px solid ${T.border}; }
+          .steps-grid > div { border-right: none !important; padding-left: 0 !important; padding-right: 0 !important; border-bottom: 1px solid ${T.border}; padding-top: 32px; padding-bottom: 32px; }
+          .steps-grid > div:last-child { border-bottom: none !important; }
           .stats-grid  { grid-template-columns: 1fr !important; }
-          .stats-grid > div { border-right: none !important; padding-left: 0 !important; padding-right: 0 !important; border-bottom: 1px solid ${T.border}; }
+          .stats-grid > div { border-right: none !important; padding-left: 0 !important; padding-right: 0 !important; border-bottom: 1px solid ${T.border}; padding-top: 32px; padding-bottom: 32px; }
+          .stats-grid > div:last-child { border-bottom: none !important; }
+
+          /* Layout padding */
+          .nav-container { padding: 0 20px !important; }
+          .nav-links { display: none !important; }
+          .section-hero { padding: 40px 20px 50px !important; }
+          .section-std { padding: 48px 20px !important; }
+
+          /* Cards & Heights */
+          .hero-right-box { height: auto !important; min-height: 380px !important; margin-top: 30px; }
+          .feynman-card { flex-direction: column !important; }
+          .feynman-gif { width: 100% !important; }
         }
       `}</style>
 
@@ -364,7 +377,7 @@ export default function LandingPage() {
         borderBottom: scrolled ? `1px solid ${T.border}` : "1px solid transparent",
         transition: "all .3s cubic-bezier(.22,1,.36,1)",
       }}>
-        <div style={{ maxWidth: 1120, margin: "0 auto", padding: "0 36px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div className="nav-container" style={{ maxWidth: 1120, margin: "0 auto", padding: "0 36px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div style={{ width: 34, height: 34, borderRadius: 10, background: T.accent, display: "flex", alignItems: "center", justifyContent: "center", transition: "transform .2s", cursor: "pointer", boxShadow: `0 2px 10px ${T.accent}40` }}
               onMouseEnter={e => e.currentTarget.style.transform = "rotate(12deg) scale(1.08)"}
@@ -374,7 +387,7 @@ export default function LandingPage() {
             <span style={{ fontFamily: INTER, fontWeight: 900, fontSize: 18, letterSpacing: "-0.03em", color: T.text }}>EurekaAI</span>
           </div>
 
-          <div style={{ display: "flex", gap: 28, alignItems: "center" }}>
+          <div className="nav-links" style={{ display: "flex", gap: 28, alignItems: "center" }}>
             {[["#features", "Features"], ["#how-it-works", "How it works"], ["#faq", "FAQ"]].map(([href, label]) => (
               <a key={href} href={href} className="nl" style={{ fontSize: 13, fontWeight: 500, color: T.muted, fontFamily: INTER }}>{label}</a>
             ))}
@@ -396,7 +409,7 @@ export default function LandingPage() {
       </nav>
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
-      <section style={{ padding: "60px 36px 80px", position: "relative", overflow: "hidden" }}>
+      <section className="section-hero" style={{ padding: "60px 36px 80px", position: "relative", overflow: "hidden" }}>
         {/* Soft parallax blob */}
         <div ref={heroBlobRef} style={{
           position: "absolute", top: "-15%", right: "-8%", width: 520, height: 520,
@@ -442,7 +455,7 @@ export default function LandingPage() {
           </div>
 
           {/* Hero right — mini feature preview cards */}
-          <div style={{ position: "relative", height: 420 }}>
+          <div className="hero-right-box" style={{ position: "relative", height: 420 }}>
             {/* Back card */}
             <div style={{
               position: "absolute", top: 20, left: 8, width: "87%",
@@ -483,7 +496,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── PROBLEM / STATS ────────────────────────────────────────────────── */}
-      <section style={{ background: T.bg2, padding: "72px 36px" }}>
+      <section className="section-std" style={{ background: T.bg2, padding: "72px 36px" }}>
         <div style={{ maxWidth: 1120, margin: "0 auto" }}>
           <div className="reveal" style={{ marginBottom: 48 }}>
             <p style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: T.muted, marginBottom: 10, fontFamily: INTER }}>The problem</p>
@@ -509,7 +522,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── BENTO FEATURES SECTION ─────────────────────────────────────────── */}
-      <section id="features" style={{ background: T.dk, padding: "88px 36px" }}>
+      <section id="features" className="section-std" style={{ background: T.dk, padding: "88px 36px" }}>
         <div style={{ maxWidth: 1120, margin: "0 auto" }}>
           <div className="reveal" style={{ marginBottom: 56, textAlign: "center" }}>
             <p style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: 12, fontFamily: INTER }}>Everything you need</p>
@@ -547,7 +560,7 @@ export default function LandingPage() {
             </BentoCard>
 
             {/* Feynman Explainer — wide top right */}
-            <BentoCard className="sc bento-hover" style={{ gridColumn: "2 / 4", gridRow: "1", flexDirection: "row", alignItems: "flex-start", gap: 24 }}>
+            <BentoCard className="sc bento-hover feynman-card" style={{ gridColumn: "2 / 4", gridRow: "1", flexDirection: "row", alignItems: "flex-start", gap: 24 }}>
               <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 14 }}>
                 <CardTag color="#818cf8">Feynman Explainer</CardTag>
                 <div>
@@ -559,7 +572,9 @@ export default function LandingPage() {
                   </p>
                 </div>
               </div>
-              <GifPlaceholder label="Feynman · GIF" aspect="4/3" style={{ width: "46%", flexShrink: 0 }} />
+              <div className="feynman-gif" style={{ width: "46%", flexShrink: 0 }}>
+                <GifPlaceholder label="Feynman · GIF" aspect="4/3" style={{ width: "100%", height: "100%" }} />
+              </div>
             </BentoCard>
 
             {/* Mistake Journal */}
@@ -580,7 +595,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── HOW IT WORKS ──────────────────────────────────────────────────── */}
-      <section id="how-it-works" style={{ background: T.bg, padding: "72px 36px" }}>
+      <section id="how-it-works" className="section-std" style={{ background: T.bg, padding: "72px 36px" }}>
         <div style={{ maxWidth: 1120, margin: "0 auto" }}>
           <div className="reveal" style={{ marginBottom: 60 }}>
             <p style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: T.muted, marginBottom: 10, fontFamily: INTER }}>How it works</p>
