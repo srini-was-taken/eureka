@@ -456,9 +456,10 @@ function FeynmanInner() {
               <div key={s} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <div style={{
                   width: 24, height: 24, borderRadius: "50%",
-                  background: stage === s ? TEXT : (i < ["pick","explain","feedback"].indexOf(stage) ? TEXT + "60" : BORDER),
-                  color: "#fff", display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 10, fontWeight: 800,
+                  background: stage === s ? "transparent" : (i < ["pick","explain","feedback"].indexOf(stage) ? TEAL + "40" : BORDER),
+                  border: stage === s ? `2px solid ${TEAL}` : "2px solid transparent",
+                  color: stage === s ? TEAL : "#fff", display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 10, fontWeight: 800, boxSizing: "border-box"
                 }}>{i + 1}</div>
                 <span style={{ fontSize: 11, color: stage === s ? TEXT : MUTED, fontWeight: stage === s ? 700 : 400 }}>
                   {s === "pick" ? "Choose topic" : s === "explain" ? "Explain" : "Review"}
@@ -629,7 +630,7 @@ function FeynmanInner() {
             </div>
 
             {/* What you nailed + Gaps */}
-            <div className="feynman-feedback-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
+            <div className="feynman-feedback-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20, fontFamily: "var(--font-syne, inherit)" }}>
               <Card style={{ padding: 20, border: `1px solid ${TEAL}30` }}>
                 <div style={{ color: TEAL, fontWeight: 700, fontSize: 13, marginBottom: 12 }}>✓ What you nailed</div>
                 {feedback.strong?.map((s, i) => (
