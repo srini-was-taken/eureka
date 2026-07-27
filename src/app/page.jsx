@@ -11,9 +11,9 @@ const T = {
   border:  "#E4E4E4",
   text:    "#0A0A0A",
   muted:   "#6B6B6B",
-  accent:  "#14B8A6",
-  accentL: "#F0FDFA",
-  accentB: "#CCFBF1",
+  accent:  "#627254",
+  accentL: "#F5F7F2",
+  accentB: "#E1E6DC",
   // dark section tokens
   dk:      "#0A0A0A",
   dkSurf:  "rgba(255,255,255,0.05)",
@@ -166,7 +166,7 @@ function SocraticBentoCard() {
   return (
     <BentoCard className="sc" style={{ gridColumn: "1", gridRow: "1 / 3" }}>
       <div>
-        <CardTag color="#14B8A6">Socratic Solver</CardTag>
+        <CardTag color="#627254">Socratic Solver</CardTag>
       </div>
       <div>
         <div style={{ fontSize: 20, fontWeight: 700, color: T.dkText, fontFamily: INTER, lineHeight: 1.25, marginBottom: 8 }}>
@@ -323,7 +323,7 @@ export default function LandingPage() {
         }
         .cta:hover::after { opacity: 1; animation: shimmer .65s ease; }
         @keyframes shimmer { from { background-position: -200% center; } to { background-position: 200% center; } }
-        .cta:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(20,184,166,.4); }
+        .cta:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(98,114,84,.4); }
         .cta:active { transform: none; }
 
         /* ── Nav link underline ── */
@@ -365,13 +365,13 @@ export default function LandingPage() {
         transition: "all .3s cubic-bezier(.22,1,.36,1)",
       }}>
         <div style={{ maxWidth: 1120, margin: "0 auto", padding: "0 36px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-            <div style={{ width: 28, height: 28, borderRadius: 8, background: T.accent, display: "flex", alignItems: "center", justifyContent: "center", transition: "transform .2s", cursor: "pointer" }}
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ width: 34, height: 34, borderRadius: 10, background: T.accent, display: "flex", alignItems: "center", justifyContent: "center", transition: "transform .2s", cursor: "pointer", boxShadow: `0 2px 10px ${T.accent}40` }}
               onMouseEnter={e => e.currentTarget.style.transform = "rotate(12deg) scale(1.08)"}
               onMouseLeave={e => e.currentTarget.style.transform = ""}>
-              <Icon name="brain" size={16} color="#fff" />
+              <Icon name="brain" size={20} color="#fff" />
             </div>
-            <span style={{ fontFamily: INTER, fontWeight: 800, fontSize: 15, letterSpacing: "-0.02em", color: T.text }}>EurekaAI</span>
+            <span style={{ fontFamily: INTER, fontWeight: 900, fontSize: 18, letterSpacing: "-0.03em", color: T.text }}>EurekaAI</span>
           </div>
 
           <div style={{ display: "flex", gap: 28, alignItems: "center" }}>
