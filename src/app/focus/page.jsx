@@ -409,19 +409,21 @@ export default function FocusPage() {
                         <div style={{ position: "absolute", left: `${draggingHighlight.x * 100}%`, top: `${draggingHighlight.y * 100}%`, width: `${draggingHighlight.w * 100}%`, height: `${draggingHighlight.h * 100}%`, background: "#fef08a40", border: "2px dashed #fef08a", borderRadius: 2, pointerEvents: "none" }} />
                       )}
                       {pageNotes.map(n => (
-                        <div key={n.id} onClick={e => { e.stopPropagation(); setActiveNote(activeNote?.id === n.id ? null : n); }}
-                          style={{ position: "absolute", left: `calc(${n.x * 100}% - 12px)`, top: `calc(${n.y * 100}% - 12px)`, width: 24, height: 24, background: TEAL, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, cursor: "pointer", boxShadow: `0 2px 8px ${TEAL}60`, zIndex: 10 }} title={n.text}>🗒</div>
+                        <div key={n.id} style={{ position: "absolute", left: `calc(${n.x * 100}% - 12px)`, top: `calc(${n.y * 100}% - 12px)`, zIndex: activeNote?.id === n.id ? 50 : 10 }}>
+                          <div onClick={e => { e.stopPropagation(); setActiveNote(activeNote?.id === n.id ? null : n); }}
+                            style={{ width: 24, height: 24, background: TEAL, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, cursor: "pointer", boxShadow: `0 2px 8px ${TEAL}60` }} title={n.text}>🗒</div>
+                          {activeNote?.id === n.id && (
+                            <div onClick={e => e.stopPropagation()} style={{ position: "absolute", bottom: "100%", left: "50%", transform: "translateX(-50%)", marginBottom: 12, zIndex: 100 }}>
+                              <NotePopup note={activeNote} onClose={() => setActiveNote(null)} onDelete={() => { setNotes(ns => ns.filter(x => x.id !== activeNote.id)); setActiveNote(null); }} style={{}} />
+                            </div>
+                          )}
+                        </div>
                       ))}
                     </div>
                     <div style={{ position: "absolute", bottom: -22, left: 0, right: 0, textAlign: "center", fontSize: 11, color: MUTED, fontFamily: INTER }}>Page {pageNum} of {totalPages}</div>
                   </div>
                 );
               })}
-              {activeNote && (
-                <div style={{ position: "fixed", bottom: 80, right: 32, zIndex: 100 }}>
-                  <NotePopup note={activeNote} onClose={() => setActiveNote(null)} onDelete={() => { setNotes(ns => ns.filter(n => n.id !== activeNote.id)); setActiveNote(null); }} style={{}} />
-                </div>
-              )}
             </div>
           )}
 
@@ -566,28 +568,24 @@ export default function FocusPage() {
           border: `1px solid rgba(255,255,255,0.08)`, borderRadius: 999, boxShadow: "0 20px 60px rgba(0,0,0,0.6)"
         }}>
           <div onClick={() => setMode(m => m === "highlight" ? null : "highlight")}
-            style={{ cursor: "pointer", fontSize: 13.5, fontWeight: 600, fontFamily: INTER, color: mode === "highlight" ? "#fef08a" : MUTED, transition: "color .15s" }}>
+            style={{ cursor: "pointer", fontSize: 13.5, fontWeight: 600, fontFamily: INTER, color: TEAL, opacity: mode === "highlight" ? 1 : 0.6, transition: "opacity .15s" }}>
             Highlight
           </div>
           <div onClick={() => setMode(m => m === "note" ? null : "note")}
-            style={{ cursor: "pointer", fontSize: 13.5, fontWeight: 600, fontFamily: INTER, color: mode === "note" ? TEAL : MUTED, transition: "color .15s" }}>
-            Note
+            style={{ cursor: "pointer", fontSize: 13.5, fontWeight: 600, fontFamily: INTER, color: TEAL, opacity: mode === "note" ? 1 : 0.6, transition: "opacity .15s" }}>
+            Annotate
           </div>
 
           <div style={{ width: 1, height: 18, background: "rgba(255,255,255,0.1)", margin: "0 4px" }} />
 
-          <div onClick={generateQuestions}
-            style={{ cursor: pdfText && !genQLoading ? "pointer" : "default", fontSize: 13.5, fontWeight: 600, fontFamily: INTER, color: TEAL, opacity: pdfText ? 1 : 0.4, transition: "opacity .15s" }}>
-            {genQLoading ? "Generating…" : "Generate Quiz"}
-          </div>
           <div onClick={() => setShowFlashcardModal(true)}
-            style={{ cursor: "pointer", fontSize: 13.5, fontWeight: 600, fontFamily: INTER, color: "#818cf8", transition: "opacity .15s" }}
-            onMouseEnter={e => e.currentTarget.style.opacity = "0.8"} onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
+            style={{ cursor: "pointer", fontSize: 13.5, fontWeight: 600, fontFamily: INTER, color: TEAL, opacity: 0.8, transition: "opacity .15s" }}
+            onMouseEnter={e => e.currentTarget.style.opacity = "1"} onMouseLeave={e => e.currentTarget.style.opacity = "0.8"}>
             + Card
           </div>
           <div onClick={() => { const params = new URLSearchParams(); if (pdfText) params.set("pdfText", pdfText.slice(0, 8000)); router.push(`/feynman?${params.toString()}`); }}
-            style={{ cursor: "pointer", fontSize: 13.5, fontWeight: 600, fontFamily: INTER, color: "#e879f9", transition: "opacity .15s" }}
-            onMouseEnter={e => e.currentTarget.style.opacity = "0.8"} onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
+            style={{ cursor: "pointer", fontSize: 13.5, fontWeight: 600, fontFamily: INTER, color: TEAL, opacity: 0.8, transition: "opacity .15s" }}
+            onMouseEnter={e => e.currentTarget.style.opacity = "1"} onMouseLeave={e => e.currentTarget.style.opacity = "0.8"}>
             Feynman It
           </div>
         </div>
