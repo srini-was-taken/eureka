@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Icon from "@/components/ui/Icon";
 
 // ─── Tokens — clean white aesthetic ──────────────────────────────────────────
 const T = {
@@ -10,9 +11,9 @@ const T = {
   border:  "#E4E4E4",
   text:    "#0A0A0A",
   muted:   "#6B6B6B",
-  accent:  "#E8610A",
-  accentL: "#FDF0E8",
-  accentB: "#FBDECA",
+  accent:  "#14B8A6",
+  accentL: "#F0FDFA",
+  accentB: "#CCFBF1",
   // dark section tokens
   dk:      "#0A0A0A",
   dkSurf:  "rgba(255,255,255,0.05)",
@@ -165,7 +166,7 @@ function SocraticBentoCard() {
   return (
     <BentoCard className="sc" style={{ gridColumn: "1", gridRow: "1 / 3" }}>
       <div>
-        <CardTag color="#E8610A">Socratic Solver</CardTag>
+        <CardTag color="#14B8A6">Socratic Solver</CardTag>
       </div>
       <div>
         <div style={{ fontSize: 20, fontWeight: 700, color: T.dkText, fontFamily: INTER, lineHeight: 1.25, marginBottom: 8 }}>
@@ -322,7 +323,7 @@ export default function LandingPage() {
         }
         .cta:hover::after { opacity: 1; animation: shimmer .65s ease; }
         @keyframes shimmer { from { background-position: -200% center; } to { background-position: 200% center; } }
-        .cta:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(232,97,10,.4); }
+        .cta:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(20,184,166,.4); }
         .cta:active { transform: none; }
 
         /* ── Nav link underline ── */
@@ -368,7 +369,7 @@ export default function LandingPage() {
             <div style={{ width: 28, height: 28, borderRadius: 8, background: T.accent, display: "flex", alignItems: "center", justifyContent: "center", transition: "transform .2s", cursor: "pointer" }}
               onMouseEnter={e => e.currentTarget.style.transform = "rotate(12deg) scale(1.08)"}
               onMouseLeave={e => e.currentTarget.style.transform = ""}>
-              <span style={{ color: "#fff", fontWeight: 900, fontSize: 12 }}>✦</span>
+              <Icon name="brain" size={16} color="#fff" />
             </div>
             <span style={{ fontFamily: INTER, fontWeight: 800, fontSize: 15, letterSpacing: "-0.02em", color: T.text }}>EurekaAI</span>
           </div>
@@ -408,12 +409,12 @@ export default function LandingPage() {
           <div>
             <div className="he he1" style={{ display: "inline-flex", alignItems: "center", gap: 7, marginBottom: 22, padding: "5px 13px 5px 7px", background: T.surface, border: `1px solid ${T.border}`, borderRadius: 999, boxShadow: "0 1px 4px rgba(10,10,10,.06)" }}>
               <div style={{ width: 18, height: 18, borderRadius: "50%", background: T.accent, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <span style={{ color: "#fff", fontSize: 8, fontWeight: 900 }}>✦</span>
+                <Icon name="brain" size={10} color="#fff" />
               </div>
               <span style={{ fontSize: 11.5, fontWeight: 600, color: T.muted, fontFamily: INTER }}>The anti-cheat study tool</span>
             </div>
 
-            <h1 className="he he2" style={{ fontFamily: INTER, fontSize: "clamp(34px, 3.8vw, 52px)", fontWeight: 900, lineHeight: 1.06, letterSpacing: "-0.03em", color: T.text, marginBottom: 20 }}>
+            <h1 className="he he2" style={{ fontFamily: INTER, fontSize: "clamp(42px, 5.5vw, 68px)", fontWeight: 900, lineHeight: 1.06, letterSpacing: "-0.03em", color: T.text, marginBottom: 20 }}>
               Stop getting<br />answers. Start<br />
               <span style={{ color: T.accent }}>understanding.</span>
             </h1>
@@ -424,8 +425,8 @@ export default function LandingPage() {
 
             <div className="he he4" style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               <button onClick={() => router.push("/login")} className="cta"
-                style={{ fontSize: 14, fontWeight: 700, color: "#fff", background: T.accent, border: "none", borderRadius: 10, padding: "13px 28px", cursor: "pointer", fontFamily: INTER }}>
-                Start for free ✦
+                style={{ fontSize: 14, fontWeight: 700, color: "#fff", background: T.accent, border: "none", borderRadius: 10, padding: "13px 28px", cursor: "pointer", fontFamily: INTER, display: "flex", alignItems: "center", gap: 6 }}>
+                Start for free <Icon name="brain" size={14} color="#fff" />
               </button>
               <a href="#how-it-works" style={{
                 fontSize: 14, fontWeight: 600, color: T.text, background: T.surface,
@@ -453,7 +454,7 @@ export default function LandingPage() {
               <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
                 {["#FF5F57","#FEBC2E","#28C840"].map(c => <div key={c} style={{ width: 9, height: 9, borderRadius: "50%", background: c }} />)}
               </div>
-              <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#818CF8", marginBottom: 10, fontFamily: MONO }}>✦ Feynman Explainer</p>
+              <p style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#818CF8", marginBottom: 10, fontFamily: MONO }}><Icon name="brain" size={10} color="#818CF8" /> Feynman Explainer</p>
               <div style={{ background: "#F0EFFF", borderRadius: 8, padding: "10px 12px", marginBottom: 10, border: "1px solid #C7D2FE" }}>
                 <p style={{ fontSize: 11, color: "#3730A3", lineHeight: 1.7, fontStyle: "italic", margin: 0, fontFamily: INTER }}>"Explain Gauss's Law like I'm 15, using only everyday objects."</p>
               </div>
@@ -471,7 +472,7 @@ export default function LandingPage() {
               <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
                 {["#FF5F57","#FEBC2E","#28C840"].map(c => <div key={c} style={{ width: 9, height: 9, borderRadius: "50%", background: c }} />)}
               </div>
-              <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: T.accent, marginBottom: 10, fontFamily: MONO }}>✦ Socratic Solver</p>
+              <p style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 9, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: T.accent, marginBottom: 10, fontFamily: MONO }}><Icon name="brain" size={10} color={T.accent} /> Socratic Solver</p>
               <div style={{ fontFamily: MONO, fontSize: 11, background: "#FAF9F7", borderRadius: 8, padding: "10px 12px", marginBottom: 10, border: `1px solid ${T.border}`, lineHeight: 1.75, color: T.text }}>
                 A block of mass <em>m</em> on a rough inclined plane at angle θ — find the minimum force to prevent sliding.
               </div>
