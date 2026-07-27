@@ -358,7 +358,7 @@ export default function FocusPage() {
       <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
 
         {/* Full-width tab bar */}
-        <div style={{ display: "flex", borderBottom: `1px solid ${BORDER}`, background: CARD, flexShrink: 0, overflowX: "auto" }}>
+        <div style={{ display: "flex", justifyContent: "center", borderBottom: `1px solid ${BORDER}`, background: CARD, flexShrink: 0, overflowX: "auto" }}>
           {[
             { key: "note",       label: "Note"       },
             { key: "quiz",       label: "Quiz",       badge: questions.length || null },
@@ -368,8 +368,8 @@ export default function FocusPage() {
             return (
               <div key={tab.key} onClick={() => setActiveTab(tab.key)}
                 style={{
-                  padding: "16px 28px", display: "flex", alignItems: "center", gap: 10, cursor: "pointer",
-                  fontFamily: INTER, fontSize: 13, fontWeight: isActive ? 600 : 500,
+                  padding: "16px 32px", display: "flex", alignItems: "center", gap: 10, cursor: "pointer",
+                  fontFamily: "var(--font-syne, inherit)", fontSize: 15, fontWeight: isActive ? 700 : 600,
                   color: isActive ? TEAL : MUTED,
                   background: isActive ? TEAL + "08" : "transparent",
                   borderBottom: `2px solid ${isActive ? TEAL : "transparent"}`,
@@ -380,35 +380,6 @@ export default function FocusPage() {
               </div>
             );
           })}
-
-          {/* Tool buttons in tab bar right */}
-          <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 20, padding: "0 28px", flexShrink: 0 }}>
-            <div onClick={() => setMode(m => m === "highlight" ? null : "highlight")}
-              style={{ cursor: "pointer", fontSize: 13, fontWeight: 500, fontFamily: INTER, color: mode === "highlight" ? "#fef08a" : MUTED, transition: "color .15s" }}>
-              Highlight
-            </div>
-            <div onClick={() => setMode(m => m === "note" ? null : "note")}
-              style={{ cursor: "pointer", fontSize: 13, fontWeight: 500, fontFamily: INTER, color: mode === "note" ? TEAL : MUTED, transition: "color .15s" }}>
-              Note
-            </div>
-
-            <div style={{ width: 1, height: 16, background: BORDER, margin: "0 4px" }} />
-
-            <div onClick={generateQuestions}
-              style={{ cursor: pdfText && !genQLoading ? "pointer" : "default", fontSize: 13, fontWeight: 500, fontFamily: INTER, color: TEAL, opacity: pdfText ? 1 : 0.4, transition: "opacity .15s" }}>
-              {genQLoading ? "Generating…" : "Generate Quiz"}
-            </div>
-            <div onClick={() => setShowFlashcardModal(true)}
-              style={{ cursor: "pointer", fontSize: 13, fontWeight: 500, fontFamily: INTER, color: "#818cf8", transition: "opacity .15s" }}
-              onMouseEnter={e => e.currentTarget.style.opacity = "0.8"} onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
-              + Card
-            </div>
-            <div onClick={() => { const params = new URLSearchParams(); if (pdfText) params.set("pdfText", pdfText.slice(0, 8000)); router.push(`/feynman?${params.toString()}`); }}
-              style={{ cursor: "pointer", fontSize: 13, fontWeight: 500, fontFamily: INTER, color: "#e879f9", transition: "opacity .15s" }}
-              onMouseEnter={e => e.currentTarget.style.opacity = "0.8"} onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
-              Feynman It
-            </div>
-          </div>
         </div>
 
         {/* Tab content area */}
@@ -584,9 +555,42 @@ export default function FocusPage() {
                 );
               })()}
             </div>
-          )}
-
         </div>
+
+        {/* Floating Action Bar */}
+        <div style={{
+          position: "fixed", bottom: 32, right: 32, zIndex: 100,
+          display: "flex", alignItems: "center", gap: 20, padding: "14px 28px",
+          background: "rgba(10, 15, 12, 0.75)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
+          border: `1px solid rgba(255,255,255,0.08)`, borderRadius: 999, boxShadow: "0 20px 60px rgba(0,0,0,0.6)"
+        }}>
+          <div onClick={() => setMode(m => m === "highlight" ? null : "highlight")}
+            style={{ cursor: "pointer", fontSize: 13.5, fontWeight: 600, fontFamily: INTER, color: mode === "highlight" ? "#fef08a" : MUTED, transition: "color .15s" }}>
+            Highlight
+          </div>
+          <div onClick={() => setMode(m => m === "note" ? null : "note")}
+            style={{ cursor: "pointer", fontSize: 13.5, fontWeight: 600, fontFamily: INTER, color: mode === "note" ? TEAL : MUTED, transition: "color .15s" }}>
+            Note
+          </div>
+
+          <div style={{ width: 1, height: 18, background: "rgba(255,255,255,0.1)", margin: "0 4px" }} />
+
+          <div onClick={generateQuestions}
+            style={{ cursor: pdfText && !genQLoading ? "pointer" : "default", fontSize: 13.5, fontWeight: 600, fontFamily: INTER, color: TEAL, opacity: pdfText ? 1 : 0.4, transition: "opacity .15s" }}>
+            {genQLoading ? "Generating…" : "Generate Quiz"}
+          </div>
+          <div onClick={() => setShowFlashcardModal(true)}
+            style={{ cursor: "pointer", fontSize: 13.5, fontWeight: 600, fontFamily: INTER, color: "#818cf8", transition: "opacity .15s" }}
+            onMouseEnter={e => e.currentTarget.style.opacity = "0.8"} onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
+            + Card
+          </div>
+          <div onClick={() => { const params = new URLSearchParams(); if (pdfText) params.set("pdfText", pdfText.slice(0, 8000)); router.push(`/feynman?${params.toString()}`); }}
+            style={{ cursor: "pointer", fontSize: 13.5, fontWeight: 600, fontFamily: INTER, color: "#e879f9", transition: "opacity .15s" }}
+            onMouseEnter={e => e.currentTarget.style.opacity = "0.8"} onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
+            Feynman It
+          </div>
+        </div>
+
       </div>
     </div>
   );
