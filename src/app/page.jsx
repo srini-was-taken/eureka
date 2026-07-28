@@ -651,7 +651,7 @@ export default function LandingPage() {
             Stop consuming solutions. Start building the kind of understanding that survives exam day.
           </p>
           <button onClick={() => router.push("/login")} className="cta"
-            style={{ fontSize: 14, fontWeight: 700, color: "#fff", background: T.accent, border: "none", borderRadius: 11, padding: "14px 34px", cursor: "pointer", fontFamily: INTER, display: "flex", alignItems: "center", gap: 8 }}>
+            style={{ fontSize: 14, fontWeight: 700, color: "#fff", background: T.accent, border: "none", borderRadius: 11, padding: "14px 34px", cursor: "pointer", fontFamily: INTER, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8, margin: "0 auto" }}>
             Start for free <Icon name="brain" size={14} color="#fff" />
           </button>
         </div>
