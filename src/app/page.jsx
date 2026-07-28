@@ -433,7 +433,7 @@ export default function LandingPage() {
             </h1>
 
             <p className="he he3" style={{ fontSize: 15.5, color: T.muted, lineHeight: 1.75, maxWidth: 440, marginBottom: 28, fontWeight: 400, fontFamily: INTER }}>
-              EurekaAI uses the Socratic method and Feynman technique — the same systems used by Nobel laureates — to help JEE Advanced aspirants actually understand physics, chemistry, and math.
+              EurekaAI uses the Socratic method and Feynman technique — the same systems used by Nobel laureates — to help students master complex subjects globally, from University STEM and APs, to its rigorous origins in JEE Advanced.
             </p>
 
             <div className="he he4" style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
@@ -552,7 +552,7 @@ export default function LandingPage() {
                   Questions that force you to think.
                 </div>
                 <p style={{ fontSize: 13, color: T.dkMuted, lineHeight: 1.7, fontFamily: INTER }}>
-                  Upload any JEE Advanced problem. EurekaAI asks targeted questions that expose exactly where your reasoning breaks down — never just giving the answer.
+                  Upload any complex problem. EurekaAI asks targeted questions that expose exactly where your reasoning breaks down — never just giving the answer.
                 </p>
               </div>
               {/* GIF placeholder — tall */}

@@ -11,14 +11,14 @@ import Icon from "@/components/ui/Icon";
 const EXAM_ACCENTS = {
     jee_adv: { color: "#818cf8", gradient: "linear-gradient(135deg, #818cf8, #6d5fe6)", icon: "⚡" },
     jee_mains: { color: "#fb923c", gradient: "linear-gradient(135deg, #fb923c, #f97316)", icon: "🎯" },
-    bitsat: { color: "#34d399", gradient: "linear-gradient(135deg, #34d399, #10b981)", icon: "🧠" },
+    general: { color: "#34d399", gradient: "linear-gradient(135deg, #34d399, #10b981)", icon: "🌍" },
     neet: { color: "#f472b6", gradient: "linear-gradient(135deg, #f472b6, #ec4899)", icon: "🔬" },
 };
 
 const EXAM_DESCRIPTIONS = {
     jee_adv: "The hardest engineering entrance in India. Deep conceptual problems and multi-step reasoning across PCM.",
     jee_mains: "The gateway to NITs and IIITs. Formula-based, time-pressured PCM problems.",
-    bitsat: "BITS entrance with PCM, Aptitude, and English. Tricky problems at speed.",
+    general: "Perfect for AP exams, University courses, or rigorous standard testing in any subject.",
     neet: "Medical entrance covering Physics, Chemistry, and Biology — NCERT-grounded.",
 };
 
@@ -214,7 +214,7 @@ export default function ProfilePage() {
                                 ["Socratic Solver", "AI uses your exam's subjects and hints tuned to that exam's style."],
                                 ["Feynman Mode", "Evaluations consider subject context relevant to your exam."],
                                 ["Problem Bank", "Subject filter chips match your exam's subjects (e.g. Biology for NEET)."],
-                                ["Mistake Journal", "Subject filters adapt — Aptitude & English appear for BITSAT."],
+                                ["Mistake Journal", "Subject filters adapt to your selected exam configuration."],
                                 ["Sidebar", "Your active exam is shown in the profile card."],
                             ].map(([title, desc]) => (
                                 <div key={title} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
