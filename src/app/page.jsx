@@ -195,7 +195,7 @@ function FeynmanBentoCard() {
             If you can't explain it simply, you don't know it.
           </div>
           <p style={{ fontSize: 13, color: T.dkMuted, lineHeight: 1.7, fontFamily: INTER }}>
-            Explain a concept out loud or in text. AI pinpoints exactly which part of your reasoning is missing.
+            You become the teacher. Explain a concept in your own words, and the AI will test your mastery to pinpoint any blind spots.
           </p>
         </div>
         <GifPlaceholder label="Feynman Demo" aspect="4/3" style={{ width: "48%", flexShrink: 0 }} />
