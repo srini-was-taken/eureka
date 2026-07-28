@@ -89,7 +89,7 @@ export default function ProfilePage() {
                                 display: "flex", alignItems: "center", justifyContent: "center",
                                 boxShadow: `0 4px 12px ${TEAL}40`, fontSize: 18
                             }}>
-                                ✦
+                                <Icon name="brain" size={20} color="#fff" />
                             </div>
                             <div>
                                 <h1 style={{ fontSize: 24, fontWeight: 800, margin: 0, letterSpacing: -0.5 }}>Your Profile</h1>
@@ -206,8 +206,8 @@ export default function ProfilePage() {
 
                     {/* What changes section */}
                     <div style={{ background: `${TEAL}08`, border: `1px solid ${TEAL}25`, borderRadius: 14, padding: "18px 24px", marginBottom: 32 }}>
-                        <div style={{ fontSize: 13, fontWeight: 700, color: TEAL, marginBottom: 10 }}>
-                            ✦ What changes when you switch exams?
+                        <div style={{ fontSize: 13, fontWeight: 700, color: TEAL, marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
+                            <Icon name="brain" size={14} color={TEAL} /> What changes when you switch exams?
                         </div>
                         <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
                             {[

@@ -64,7 +64,7 @@ export default function Sidebar() {
         onMouseEnter={e => e.currentTarget.style.background = D_ACCENT + "0D"}
         onMouseLeave={e => e.currentTarget.style.background = "transparent"}
       >
-        <div style={{ width: 30, height: 30, background: "linear-gradient(135deg, #E8610A, #F4874A)", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: "#fff", fontWeight: 800, boxShadow: "0 3px 10px #E8610A30" }}>✦</div>
+        <div style={{ width: 30, height: 30, background: `linear-gradient(135deg, ${D_ACCENT}, ${D_ACCENT2})`, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 3px 10px ${D_ACCENT}30` }}><Icon name="brain" size={16} color="#fff" /></div>
         <span style={{ fontWeight: 800, fontSize: 16, color: D_TEXT, fontFamily: INTER, letterSpacing: -0.3 }}>EurekaAI</span>
       </div>
 

@@ -86,7 +86,7 @@ function AddProblemModal({ onSave, onClose, subjects = ["Physics", "Chemistry", 
 
         <div style={{ display: "flex", gap: 10, marginTop: 24 }}>
           <Btn onClick={handleSave} style={{ flex: 1, justifyContent: "center", opacity: saving ? 0.7 : 1 }}>
-            {saving ? "Saving..." : "Add to Bank ✦"}
+            {saving ? "Saving..." : <>Add to Bank <Icon name="brain" size={14} /></>}
           </Btn>
           <Btn variant="ghost" onClick={onClose}>Cancel</Btn>
         </div>
