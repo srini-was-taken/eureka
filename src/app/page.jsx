@@ -254,9 +254,9 @@ const faqs = [
 ];
 
 const steps = [
-  { n: "01", title: "Pick a problem", body: "From the 20-year JEE Advanced archive, or paste anything you're stuck on. Physics, Chemistry, Math — any chapter." },
-  { n: "02", title: "Work through it", body: "EurekaAI questions your reasoning, not your answer. Every hint must be earned. No shortcuts." },
-  { n: "03", title: "Know it cold", body: "Concepts get reinforced until they're automatic. The Mistake Journal surfaces your blind spots at the right moment." },
+  { n: "01", title: "Socratic Solver", body: "Upload any complex problem. The AI acts as your tutor, asking guided questions to lead you to the answer instead of just giving it to you." },
+  { n: "02", title: "Focus Mode", body: "Upload your notes or textbooks into a distraction-free, timer-locked environment with built-in flashcard and quiz generation." },
+  { n: "03", title: "Feynman Explainer", body: "Test your mastery by explaining concepts in your own words. The AI pinpoints the exact gaps in your reasoning." },
 ];
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
@@ -600,7 +600,7 @@ export default function LandingPage() {
           <div className="reveal" style={{ marginBottom: 60 }}>
             <p style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: T.muted, marginBottom: 10, fontFamily: INTER }}>How it works</p>
             <h2 style={{ fontFamily: INTER, fontSize: "clamp(24px, 3vw, 38px)", fontWeight: 800, letterSpacing: "-0.025em", lineHeight: 1.12, color: T.text }}>
-              Three steps to knowing it cold.
+              Three core study modes.
             </h2>
           </div>
 
