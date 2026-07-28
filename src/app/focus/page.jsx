@@ -189,7 +189,7 @@ export default function FocusPage() {
     if (!file || file.type !== "application/pdf") return;
     setPdfFile(file);
     setFileName(file.name);
-    setStage("session");
+    setStage("setup");
     if (userId) {
       try {
         const form = new FormData();
@@ -374,6 +374,7 @@ export default function FocusPage() {
         @media (max-width: 768px) {
           .focus-topbar { padding: 8px 12px !important; flex-wrap: wrap !important; }
           .focus-fname { display: none !important; }
+          .focus-topbar-right { display: none !important; }
         }
       `}</style>
 
@@ -401,10 +402,12 @@ export default function FocusPage() {
       )}
 
       {/* Top bar */}
-      <div className="focus-topbar" style={{ padding: "10px 24px", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", gap: 12, background: CARD, flexShrink: 0 }}>
-        <Btn context="focus" variant="ghost" small onClick={exitSession} style={{ padding: "6px 12px", opacity: 0.6 }}>← Exit</Btn>
-        <span className="focus-fname" style={{ fontSize: 11.5, color: MUTED, maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{fileName}</span>
-        <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center", gap: 12 }}>
+      <div className="focus-topbar" style={{ padding: "10px 24px", borderBottom: `1px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "space-between", background: CARD, flexShrink: 0 }}>
+        <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 12 }}>
+          <Btn context="focus" variant="ghost" small onClick={exitSession} style={{ padding: "6px 12px", opacity: 0.6 }}>← Exit</Btn>
+          <span className="focus-fname" style={{ fontSize: 11.5, color: MUTED, maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{fileName}</span>
+        </div>
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 12 }}>
           <div style={{ position: "relative", width: 44, height: 44 }}>
             <svg width="44" height="44" style={{ transform: "rotate(-90deg)" }}>
               <circle cx="22" cy="22" r="18" fill="none" stroke={BORDER} strokeWidth="3" />
@@ -422,6 +425,7 @@ export default function FocusPage() {
           <Btn context="focus" small variant={running ? "ghost" : "primary"} onClick={() => setRunning(r => !r)}>{running ? "⏸" : "▶ Start"}</Btn>
           <Btn context="focus" small variant="ghost" onClick={() => { setTimer(25 * 60); setRunning(false); }}>↺</Btn>
         </div>
+        <div style={{ flex: 1 }} className="focus-topbar-right"></div>
       </div>
 
       {mode && (
