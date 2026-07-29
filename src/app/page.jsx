@@ -97,23 +97,41 @@ function FaqItem({ q, a, open, onToggle }) {
   );
 }
 
-// ─── GIF Placeholder ──────────────────────────────────────────────────────────
-function GifPlaceholder({ label = "GIF", aspect = "16/9", style = {} }) {
+function GifPlaceholder({ label = "GIF", aspect = "16/9", style = {}, gifSrc = "", staticSrc = "" }) {
+  const [hovered, setHovered] = useState(false);
+
   return (
-    <div style={{
-      aspectRatio: aspect,
-      background: "rgba(255,255,255,0.03)",
-      border: "1.5px dashed rgba(255,255,255,0.18)",
-      borderRadius: 10,
-      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8,
-      ...style,
-    }}>
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5">
-        <rect x="2" y="2" width="20" height="20" rx="3" />
-        <circle cx="8.5" cy="8.5" r="1.5" />
-        <path d="m21 15-5-5L5 21" />
-      </svg>
-      <span style={{ fontSize: 10, fontFamily: MONO, color: "rgba(255,255,255,0.22)", letterSpacing: "0.12em", textTransform: "uppercase" }}>{label}</span>
+    <div 
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        aspectRatio: aspect,
+        background: "rgba(255,255,255,0.03)",
+        border: gifSrc ? "none" : "1.5px dashed rgba(255,255,255,0.18)",
+        borderRadius: 10,
+        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8,
+        position: "relative", overflow: "hidden",
+        ...style,
+      }}
+    >
+      {gifSrc ? (
+        <img 
+          src={hovered ? gifSrc : (staticSrc || gifSrc)} 
+          alt={label}
+          style={{ width: "100%", height: "100%", objectFit: "cover" }} 
+        />
+      ) : (
+        <>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5">
+            <rect x="2" y="2" width="20" height="20" rx="3" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <path d="m21 15-5-5L5 21" />
+          </svg>
+          <span style={{ fontSize: 10, fontFamily: MONO, color: "rgba(255,255,255,0.22)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+            {hovered ? "Play GIF" : label}
+          </span>
+        </>
+      )}
     </div>
   );
 }
