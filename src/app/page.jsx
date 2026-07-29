@@ -241,7 +241,7 @@ function FocusBentoCard() {
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const stats = [
-  { n: "87%", body: "of JEE aspirants who fail say they understood the concept before the exam." },
+  { n: "98th", body: "percentile performance is reached by students who receive personalized 1-on-1 tutoring.", cite: "Bloom, 1984 — 2 Sigma Problem" },
   { n: "2.4×", body: "more likely to retain knowledge through active recall vs passive reading.", cite: "Karpicke & Roediger, 2008 — Science" },
   { n: "0", body: "marks awarded for incorrect or partial understanding in competitive exams." },
 ];
