@@ -433,7 +433,7 @@ export default function LandingPage() {
             </h1>
 
             <p className="he he3" style={{ fontSize: 15.5, color: T.muted, lineHeight: 1.75, maxWidth: 440, marginBottom: 28, fontWeight: 400, fontFamily: INTER }}>
-              EurekaAI uses the Socratic method and Feynman technique — the same systems used by Nobel laureates — to help students master complex subjects globally, from University STEM and APs, to its rigorous origins in JEE Advanced.
+              EurekaAI uses the Socratic method and Feynman technique; systems used by Nobel laureates; to help students master complex subjects globally, from University STEM and APs, and to competitive exams with millions of takers such as the JEE Advanced and the SATs.
             </p>
 
             <div className="he he4" style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
