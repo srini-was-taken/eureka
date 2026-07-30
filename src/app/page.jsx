@@ -591,8 +591,8 @@ export default function LandingPage() {
                   Upload any complex problem. EurekaAI asks targeted questions that expose exactly where your reasoning breaks down — never just giving the answer.
                 </p>
               </div>
-              {/* GIF placeholder — tall */}
-              <GifPlaceholder label="Socratic Solver · GIF" aspect="3/4" style={{ width: "100%", minHeight: 240 }} />
+              {/* GIF placeholder — 16:9 format snapped to bottom */}
+              <GifPlaceholder label="Socratic Solver · GIF" aspect="16/9" style={{ width: "100%", marginTop: "auto" }} />
             </BentoCard>
 
             {/* Feynman Explainer — wide top right */}
@@ -609,22 +609,26 @@ export default function LandingPage() {
                 </div>
               </div>
               <div className="feynman-gif" style={{ width: "46%", flexShrink: 0 }}>
-                <GifPlaceholder label="Feynman · GIF" aspect="4/3" style={{ width: "100%", height: "100%" }} />
+                <GifPlaceholder label="Feynman · GIF" aspect="16/9" style={{ width: "100%", height: "auto" }} />
               </div>
             </BentoCard>
 
             {/* Mistake Journal */}
             <BentoCard className="sc bento-hover" style={{ gridColumn: "2", gridRow: "2", gap: 16 }}>
               <CardTag color="#4ade80">Mistake Journal</CardTag>
-              <div style={{ fontSize: 15, fontWeight: 800, color: T.dkText, fontFamily: INTER, lineHeight: 1.25 }}>Every error, tracked & resurface.</div>
-              <GifPlaceholder label="Mistake Journal · GIF" aspect="16/9" />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 15, fontWeight: 800, color: T.dkText, fontFamily: INTER, lineHeight: 1.25 }}>Every error, tracked & resurface.</div>
+              </div>
+              <GifPlaceholder label="Mistake Journal · GIF" aspect="16/9" style={{ width: "100%", marginTop: "auto" }} />
             </BentoCard>
 
             {/* Focus Mode */}
             <BentoCard className="sc bento-hover" style={{ gridColumn: "3", gridRow: "2", gap: 16 }}>
               <CardTag color="#fb923c">Focus Mode</CardTag>
-              <div style={{ fontSize: 15, fontWeight: 800, color: T.dkText, fontFamily: INTER, lineHeight: 1.25 }}>Timed. Locked. No shortcuts.</div>
-              <GifPlaceholder label="Focus Mode · GIF" aspect="16/9" />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 15, fontWeight: 800, color: T.dkText, fontFamily: INTER, lineHeight: 1.25 }}>Timed. Locked. No shortcuts.</div>
+              </div>
+              <GifPlaceholder label="Focus Mode · GIF" aspect="16/9" style={{ width: "100%", marginTop: "auto" }} />
             </BentoCard>
           </div>
         </div>
