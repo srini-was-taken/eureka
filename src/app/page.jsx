@@ -97,57 +97,37 @@ function FaqItem({ q, a, open, onToggle }) {
   );
 }
 
-// ─── GIF Placeholder ──────────────────────────────────────────────────────────
-function GifPlaceholder({ label = "GIF", aspect = "16/9", style = {}, gifSrc = "", staticSrc = "" }) {
+// ─── Image Placeholder ────────────────────────────────────────────────────────
+function ImagePlaceholder({ label = "Image", aspect = "16/9", style = {}, imgSrc = "" }) {
   return (
     <div 
       style={{
         aspectRatio: aspect,
         background: "rgba(255,255,255,0.03)",
-        border: gifSrc ? "none" : "1.5px dashed rgba(255,255,255,0.18)",
+        border: imgSrc ? "none" : "1.5px dashed rgba(255,255,255,0.18)",
         borderRadius: 10,
         display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8,
         position: "relative", overflow: "hidden",
         ...style,
       }}
     >
-      {gifSrc ? (
-        <>
-          <img 
-            className="gif-static-view"
-            src={staticSrc || gifSrc} 
-            alt={label}
-            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} 
-          />
-          <img 
-            className="gif-animated-view"
-            src={gifSrc} 
-            alt={label}
-            style={{ width: "100%", height: "100%", objectFit: "cover", display: "none" }} 
-          />
-        </>
+      {imgSrc ? (
+        <img 
+          src={imgSrc} 
+          alt={label}
+          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} 
+        />
       ) : (
-        <>
-          <div className="gif-static-view" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5">
-              <rect x="2" y="2" width="20" height="20" rx="3" />
-              <circle cx="8.5" cy="8.5" r="1.5" />
-              <path d="m21 15-5-5L5 21" />
-            </svg>
-            <span style={{ fontSize: 10, fontFamily: MONO, color: "rgba(255,255,255,0.22)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
-              {label}
-            </span>
-          </div>
-          <div className="gif-animated-view" style={{ display: "none", flexDirection: "column", alignItems: "center", gap: 8 }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="1.5">
-              <rect x="2" y="2" width="20" height="20" rx="3" />
-              <polygon points="10 8 16 12 10 16 10 8" fill="rgba(255,255,255,0.6)" />
-            </svg>
-            <span style={{ fontSize: 10, fontFamily: MONO, color: "rgba(255,255,255,0.5)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
-              Play GIF
-            </span>
-          </div>
-        </>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.5">
+            <rect x="2" y="2" width="20" height="20" rx="3" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <path d="m21 15-5-5L5 21" />
+          </svg>
+          <span style={{ fontSize: 10, fontFamily: MONO, color: "rgba(255,255,255,0.22)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+            {label}
+          </span>
+        </div>
       )}
     </div>
   );
@@ -313,7 +293,7 @@ export default function LandingPage() {
   return (
     <div style={{ minHeight: "100vh", background: T.bg, color: T.text, overflowX: "hidden", fontFamily: INTER }}>
 
-      <style>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         /* ── Reveal ── */
         .reveal {
           opacity: 0; transform: translateY(28px);
@@ -371,7 +351,7 @@ export default function LandingPage() {
         .bento-hover {
           transition: transform .22s cubic-bezier(.22,1,.36,1), box-shadow .22s ease;
         }
-        .bento-hover:hover { transform: translateY(-3px); box-shadow: 0 20px 60px rgba(0,0,0,0.45); }
+        .bento-hover:hover { transform: scale(1.3) translateY(-10px); box-shadow: 0 40px 120px rgba(0,0,0,0.8); z-index: 50; }
 
         /* ── Stat pop ── */
         @keyframes stat-pop {
@@ -401,7 +381,7 @@ export default function LandingPage() {
           .feynman-card { flex-direction: column !important; }
           .feynman-gif { width: 100% !important; }
         }
-      `}</style>
+      `}} />
 
       {/* ── NAV ───────────────────────────────────────────────────────────── */}
       <nav style={{
@@ -601,8 +581,8 @@ export default function LandingPage() {
                   ))}
                 </ul>
               </div>
-              {/* GIF placeholder — 16:9 format snapped to bottom */}
-              <GifPlaceholder label="Socratic Solver · GIF" aspect="16/9" style={{ width: "100%", marginTop: "auto" }} />
+              {/* Image placeholder — 16:9 format snapped to bottom */}
+              <ImagePlaceholder label="Socratic Solver" aspect="16/9" style={{ width: "100%", marginTop: "auto" }} imgSrc="/solver.png" />
             </BentoCard>
 
             {/* Feynman Explainer — wide top right */}
@@ -619,7 +599,7 @@ export default function LandingPage() {
                 </div>
               </div>
               <div className="feynman-gif" style={{ width: "46%", flexShrink: 0 }}>
-                <GifPlaceholder label="Feynman · GIF" aspect="16/9" style={{ width: "100%", height: "auto" }} />
+                <ImagePlaceholder label="Feynman" aspect="16/9" style={{ width: "100%", height: "auto" }} imgSrc="/feynman.png" />
               </div>
             </BentoCard>
 
@@ -629,7 +609,7 @@ export default function LandingPage() {
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 15, fontWeight: 800, color: T.dkText, fontFamily: INTER, lineHeight: 1.25 }}>Every error, tracked & resurface.</div>
               </div>
-              <GifPlaceholder label="Mistake Journal · GIF" aspect="16/9" style={{ width: "100%", marginTop: "auto" }} />
+              <ImagePlaceholder label="Mistake Journal" aspect="16/9" style={{ width: "100%", marginTop: "auto" }} imgSrc="/mistake.png" />
             </BentoCard>
 
             {/* Focus Mode */}
@@ -638,7 +618,7 @@ export default function LandingPage() {
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 15, fontWeight: 800, color: T.dkText, fontFamily: INTER, lineHeight: 1.25 }}>Timed. Locked. No shortcuts.</div>
               </div>
-              <GifPlaceholder label="Focus Mode · GIF" aspect="16/9" style={{ width: "100%", marginTop: "auto" }} />
+              <ImagePlaceholder label="Focus Mode" aspect="16/9" style={{ width: "100%", marginTop: "auto" }} imgSrc="/focus.png" />
             </BentoCard>
           </div>
         </div>
