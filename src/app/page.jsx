@@ -584,12 +584,22 @@ export default function LandingPage() {
             <BentoCard className="sc bento-hover" style={{ gridColumn: "1", gridRow: "1 / 3", gap: 22, height: "100%" }}>
               <CardTag color="#E8610A">Socratic Solver</CardTag>
               <div>
-                <div style={{ fontSize: 21, fontWeight: 800, color: T.dkText, fontFamily: INTER, lineHeight: 1.2, marginBottom: 8 }}>
+                <div style={{ fontSize: 21, fontWeight: 800, color: T.dkText, fontFamily: INTER, lineHeight: 1.2, marginBottom: 16 }}>
                   Questions that force you to think.
                 </div>
-                <p style={{ fontSize: 13, color: T.dkMuted, lineHeight: 1.7, fontFamily: INTER }}>
-                  Upload any complex problem. EurekaAI asks targeted questions that expose exactly where your reasoning breaks down — never just giving the answer.
-                </p>
+                <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 12 }}>
+                  {[
+                    "Upload any complex problem from your coursework.",
+                    "EurekaAI asks targeted questions to test your logic.",
+                    "Exposes exactly where your reasoning breaks down.",
+                    "Never just gives the answer — you have to earn it."
+                  ].map((item, i) => (
+                    <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, fontSize: 13.5, color: T.dkMuted, lineHeight: 1.5, fontFamily: INTER }}>
+                      <div style={{ marginTop: 6, width: 6, height: 6, borderRadius: "50%", background: "#E8610A", flexShrink: 0, opacity: 0.8 }} />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
               {/* GIF placeholder — 16:9 format snapped to bottom */}
               <GifPlaceholder label="Socratic Solver · GIF" aspect="16/9" style={{ width: "100%", marginTop: "auto" }} />
